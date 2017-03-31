@@ -14,6 +14,13 @@ $params=[
 	'action' => 'auth'
 ];
 //echo Context::getContext()->link->getModuleLink('apimodule', 'api',$params);
+$c = Context::getContext()->currency->iso_code;
+/*echo "<pre>";
+print_r($c->iso_code);
+echo "</pre>"*/;
 
-$url = Context::getContext()->link->getModuleLink('apimodule', 'api',$params);
-Tools::redirect($url);
+$number = cal_days_in_month(CAL_GREGORIAN, date('m'), date('Y')); // 31
+echo "Всего {$number} дней в ". date('M'). " " . date('Y'). " года";
+die();
+/*$url = Context::getContext()->link->getModuleLink('apimodule', 'auth',$params);
+Tools::redirect($url);*/
