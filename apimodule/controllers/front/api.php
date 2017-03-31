@@ -100,12 +100,17 @@ class ApimoduleApiModuleFrontController extends ModuleFrontController
 			}
 			$user_id = $this->context->employee->id;
 			$device_token = trim(Tools::getValue('device_token'));
-			$os_type = trim(Tools::getValue('os_type'));
-			$this->getUserDevices($user_id);
-			$this->setUserDeviceToken($user_id, $device_token,$os_type);
+			if(!empty($device_token)){
+				$os_type = empty(trim(Tools::getValue('os_type')))?'android':trim(Tools::getValue('os_type'));
+
+				$udt = $this->getUserDevices($user_id,$device_token);
+				if(!$udt){
+					$this->setUserDeviceToken($user_id, $device_token,$os_type);
+				}
+			}
 
 			$token = $this->getUserToken($user_id);
-			if (!isset($token['token'])) {
+			if (empty($token['token'])) {
 				$token = md5(mt_rand());
 				$this->setUserToken($user_id, $token);
 			}
@@ -120,15 +125,54 @@ class ApimoduleApiModuleFrontController extends ModuleFrontController
 		die(Tools::jsonEncode($return));
 	}
 
-	public function getUserDevices() {
-		$sql = 'SELECT * FROM ' . _DB_PREFIX_ . 'shop';
-		if ( $results = Db::getInstance()->ExecuteS( $sql ) ) {
-			foreach ( $results as $row ):
+	public function getUserDevices($user_id,$device_token) {
 
-			endforeach;
+		$sql = "SELECT device_token,os_type FROM " . _DB_PREFIX_ . "apimodule_user_device 
+		        WHERE user_id = '".$user_id."' and device_token = '".$device_token."'";
+
+		if ($row = Db::getInstance()->getRow($sql)){
+			return $row;
+		}
+		else{
+			return false;
 		}
 	}
-	public function setUserDeviceToken(){}
-	public function getUserToken(){return "asdasdasd";}
-	public function setUserToken(){}
+
+	public function setUserDeviceToken($user_id,$token,$os_type){
+
+		$insert = Db::getInstance()->insert('apimodule_user_device', array(
+			'user_id' => (int)$user_id,
+			'device_token'      => $token,
+			'os_type'      => $os_type
+		));
+		if($insert){
+			return true;
+		}else{
+			$this->errors[] = "Error setUserDeviceToken";
+		}
+	}
+	public function getUserToken($user_id){
+		$sql = "SELECT * FROM " . _DB_PREFIX_ . "apimodule_user_token
+		        WHERE user_id = '".$user_id."'";
+
+		if ($row = Db::getInstance()->getRow($sql)){
+			return $row;
+		}
+		else{
+			return false;
+		}
+	}
+	public function setUserToken($user_id,$token){
+		$insert = Db::getInstance()->insert('apimodule_user_token', array(
+			'user_id' => (int)$user_id,
+			'token'      => $token
+		));
+
+		if($insert){
+			return true;
+		}else{
+			$this->errors[] = "Error setUserToken user_id=".$user_id." token = ".$token;
+			$this->errors[] = $insert;
+		}
+	}
 }
