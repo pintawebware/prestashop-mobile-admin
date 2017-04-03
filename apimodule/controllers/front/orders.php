@@ -40,11 +40,18 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	 */
 	public function initContent() {
 		$this->return['status'] = false;
+		if(isset($_GET['action'])/*&& $this->valid()*/){
 
-		if ( $this->valid() ) {
-			$this->getOrdersList();
+			$action = $_GET['action'];
+			switch ($action){
+				case 'list':$this->getOrdersList();break;
+				case 'products':$this->getOrderProducts();break;
+				case 'history':$this->getOrdersHistory();break;
+				case 'info':$this->getOrdersInfo();break;
+				case 'pad':$this->getPaymentAndDelivery();break;
+			}
 		}
-
+		$this->errors[] = "No action";
 		header( 'Content-Type: application/json' );
 		die( Tools::jsonEncode( $this->return ) );
 	}
@@ -152,11 +159,272 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
 	}
 
+	public function getOrderProducts()
+	{
+		$id = trim( Tools::getValue( 'order_id' ) );
+
+		if (!empty($id)) {
+			$order = new Order($id);
+			$products = $order->getProducts();
+
+			if (count($products) > 0) {
+				$data               = array();
+				$total_discount_sum = 0;
+				$shipping_price        = 0;
+				$total_price        = 0;
+				foreach ( $products as $product ):
+					$array = [];
+					if (!empty($product['image'])) {
+						$image = Image::getCover($product['product_id']);
+						$imagePath = Link::getImageLink($product->link_rewrite, $image['id_image'], 'home_default');
+						$array['image'] = $imagePath;
+					}
+
+					if (!empty($product['product_name'])) {
+						$array['name'] = strip_tags( htmlspecialchars_decode( $product['product_name'] ) );
+					}
+					if (!empty($product['model'])){
+						$array['model'] = $product['model'];
+					}
+					if (!empty($product['quantity'])){
+						$quantity = number_format( $product['quantity'], 2, '.', '' );
+						$array['quantity'] = $quantity;
+					}else{
+						$quantity = 1;
+					}
+					if (!empty($product['price'])){
+						$array['price'] = number_format( $product['price'], 2, '.', '' );
+					}
+					$array['product_id'] = $product['product_id'];
+
+					$array['discount_price'] = $product['product_quantity_discount'];
+					$array['discount']       = $product['quantity_discount'];
+
+					$total_discount_sum += $product['product_quantity_discount'];
+
+					$total_price += $product['price'] * $quantity;
+
+					$shipping_price += $product['additional_shipping_cost'];
+
+					$data['products'][] = $array;
+				endforeach;
+
+				$data['total_order_price'] = array(
+					'total_discount' => $total_discount_sum,
+					'total_price' => $total_price,
+					'shipping_price' => +number_format($shipping_price, 2, '.', ''),
+					'total' => $total_price + $shipping_price
+				);
+
+				$this->return['version'] = $this->API_VERSION;
+				$this->return['response'] = $data;
+				$this->return['status'] = true;
+
+				$this->return['errors'] = $this->errors;
+				header('Content-Type: application/json');
+				die(Tools::jsonEncode($this->return));
+			} else {
+				$this->return['errors'] = 'Can not found any products in order with id = ' . $id;
+				header('Content-Type: application/json');
+				die(Tools::jsonEncode($this->return));
+			}
+		} else {
+
+			$this->return['version'] = $this->API_VERSION;
+			$this->return['status'] = false;
+
+			$this->return['errors'] = 'You have not specified ID';
+			header('Content-Type: application/json');
+			die(Tools::jsonEncode($this->return));
+		}
+
+	}
+
+
+	public function getOrdersHistory(){
+		$id = trim( Tools::getValue( 'order_id' ) );
+		if (!empty($id)) {
+			$order = new Order($id);
+			$history = $order->getHistory();
+			$data = array();
+			$response = [];
+			$statuses = $this->OrderStatusList();
+			$statusArray = [];
+			foreach ($statuses as $one):
+				$statusArray[$one['id_order_state']] = $one['name'];
+			endforeach;
+
+			if (!empty($history)) {
+				foreach ( $history as $item ):
+					$statusId = $item['id_order_state'];
+					$data['name'] = $statusArray[$statusId];
+					$data['order_status_id'] =$statusId;
+					$data['date_added'] = $item['date_add'];
+					$data['comment'] ='';
+					$response['orders'][] = $data;
+				endforeach;
+
+				$response['statuses'] = $statuses;
+
+				$this->return['status'] = true;
+				$this->return['response'] = $response;
+
+			} else {
+
+				$this->return['status']  = false;
+				$this->return['errors']  = 'Can not found any statuses for order with id = ' . $id;
+
+			}
+		} else {
+			$this->return['status']  = false;
+			$this->return['errors']  = 'You have not specified ID';
+		}
+		$this->return['version'] = $this->API_VERSION;
+		header( 'Content-Type: application/json' );
+		die( Tools::jsonEncode( $this->return ) );
+	}
+
+	public function getOrdersInfo(){
+		$id = trim( Tools::getValue( 'order_id' ) );
+		$id = 5;
+		if (!empty($id)) {
+			$order = new Order($id);
+			/*echo "<pre>";
+			print_r($order);
+			echo "</pre>";
+			die();*/
+			$data = array();
+			$statuses = $this->OrderStatusList();
+			$statusArray = [];
+			foreach ($statuses as $one):
+				$statusArray[$one['id_order_state']] = $one['name'];
+			endforeach;
+
+			$customer = new Customer($order->id_customer);
+
+			if ($order) {
+				$data['order_number'] = $order->id_order;
+
+				if (isset($customer->firstname) && isset($customer->lastname)) {
+					$data['fio'] = $customer->firstname . ' ' . $customer->lastname;
+				}
+				if (isset($customer->email)) {
+					$data['email'] = $customer->email;
+				} else {
+					$data['email'] = '';
+				}
+				/*if (isset($customer->telephone)) {
+					$data['telephone'] = $customer->telephone;
+				} else {
+					$data['telephone'] = '';
+				}*/
+				$data['telephone'] = '';
+
+				$data['date_add'] = $order->date_add;
+
+				if (isset($order->total_paid)) {
+					$data['total'] = number_format($order->total_paid, 2, '.', '');;
+				}
+				if (isset($order->current_state)) {
+					$data['status'] = $statusArray[$order->current_state];
+				} else {
+					$data['status'] = '';
+				}
+
+				$data['statuses'] = $statuses;
+				$data['currency_code'] = Context::getContext()->currency->iso_code;;
+
+				$this->return['status']  = false;
+				$this->return['response']  = $data;
+
+			} else {
+				$this->return['status']  = false;
+				$this->return['errors']  = 'Can not found order with id = ' . $id;
+			}
+		} else {
+			$this->return['status']  = false;
+			$this->return['errors']  = 'You have not specified ID';
+		}
+
+		$this->return['version'] = $this->API_VERSION;
+		header( 'Content-Type: application/json' );
+		die( Tools::jsonEncode( $this->return ) );
+	}
+
+	public function getPaymentAndDelivery()
+	{
+		$id = trim( Tools::getValue( 'order_id' ) );
+		$id = 5;
+		if (!empty($id)) {
+			$order = new Order($id);
+			/*echo "<pre>";
+			print_r($order);
+			echo "</pre>";
+			die();*/
+			$data = array();
+			$statuses = $this->OrderStatusList();
+			$statusArray = [];
+			foreach ($statuses as $one):
+				$statusArray[$one['id_order_state']] = $one['name'];
+			endforeach;
+
+			$mode_de_paiement = array();
+
+			$modules_list = Module::getPaymentModules();
+
+			foreach($modules_list as $module)
+			{
+				$module_obj = Module::getInstanceById($module['id_module']);
+				array_push($mode_de_paiement, $module_obj->displayName);
+			}
+			echo "10";
+			p($modules_list);
+			echo "12";
+			die();
+
+			if ($order) {
+
+				$data['shipping_address'] = '';
+
+				if (isset($order[0]['payment_method']) && $order[0]['payment_method'] != '') {
+					$data['payment_method'] = $order[0]['payment_method'];
+				}
+				if (isset($order[0]['shipping_method']) && $order[0]['shipping_method'] != '') {
+					$data['shipping_method'] = $order[0]['shipping_method'];
+				}
+				if (isset($order[0]['shipping_address_1']) && $order[0]['shipping_address_1'] != '') {
+					$data['shipping_address'] .= $order[0]['shipping_address_1'];
+				}
+				if (isset($order[0]['shipping_address_2']) && $order[0]['shipping_address_2'] != '') {
+					$data['shipping_address'] .= ', ' . $order[0]['shipping_address_2'];
+				}
+				if (isset($order[0]['shipping_city']) && $order[0]['shipping_city'] != '') {
+					$data['shipping_address'] .= ', ' . $order[0]['shipping_city'];
+				}
+				if (isset($order[0]['shipping_country']) && $order[0]['shipping_country'] != '') {
+					$data['shipping_address'] .= ', ' . $order[0]['shipping_country'];
+				}
+				if (isset($order[0]['shipping_zone']) && $order[0]['shipping_zone'] != '') {
+					$data['shipping_address'] .= ', ' . $order[0]['shipping_zone'];
+				}
+
+				$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $data, 'status' => true]));
+
+
+			} else {
+
+				$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not found order with id = ' . $id, 'status' => false]));
+			}
+		} else {
+
+			$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified ID', 'status' => false]));
+		}
+	}
+
 	public function OrderStatusList()
 	{
-		$sql = "SELECT * FROM " . _DB_PREFIX . "order_state_lang 
-									WHERE id_lang = 1 ";
-		$results = Db::getInstance()->ExecuteS( $sql );
+		$sql = "SELECT * FROM " . _DB_PREFIX_ . "order_state_lang WHERE id_lang = 1 ";
+				$results = Db::getInstance()->ExecuteS( $sql );
 		return $results;
 	}
 	public function getMaxOrderPrice()
@@ -229,6 +497,5 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
 		return $results;
 	}
-
 
 }
