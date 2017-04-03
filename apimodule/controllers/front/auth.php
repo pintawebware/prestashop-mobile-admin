@@ -53,6 +53,19 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 		header('Content-Type: application/json');
 		die(Tools::jsonEncode($this->return));
 	}
+	private function valid()
+	{
+		$token = trim(Tools::getValue('token'));
+		if (!empty($token)) {
+			$error = 'You need to be logged!';
+		} else {
+			$results = $this->getTokens($token);
+			if ($results) {
+				$error = 'Your token is no longer relevant!';
+			}
+		}
+		return $error;
+	}
 
 	public function login(){
 
@@ -174,6 +187,18 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 		}else{
 			$this->errors[] = "Error setUserToken user_id=".$user_id." token = ".$token;
 			$this->errors[] = $insert;
+		}
+	}
+
+	public function getTokens($token){
+		$sql = "SELECT * FROM " . _DB_PREFIX_ . "apimodule_user_token
+		        WHERE token = '".$token."'";
+
+		if ($row = Db::getInstance()->getRow($sql)){
+			return $row;
+		}
+		else{
+			return false;
 		}
 	}
 }

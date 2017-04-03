@@ -41,13 +41,38 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 	public function initContent() {
 		$this->return['status'] = false;
 		$filter                 = trim( Tools::getValue( 'filter' ) );
-
-		if ( ! empty( $filter ) ) {
-			$this->getStat( $filter );
+		if ( $this->valid() && ! empty( $filter  )) {
+				$this->getStat( $filter );
 		}
-
 		header( 'Content-Type: application/json' );
 		die( Tools::jsonEncode( $this->return ) );
+	}
+
+	private function valid() {
+		$token = trim( Tools::getValue( 'token' ) );
+		if ( ! empty( $token ) ) {
+			$this->errors[] = 'You need to be logged!';
+			return false;
+		} else {
+			$results = $this->getTokens( $token );
+			if ( $results ) {
+				$this->errors = 'Your token is no longer relevant!';
+				return false;
+			}
+		}
+
+		return true;
+	}
+	public function getTokens($token){
+		$sql = "SELECT * FROM " . _DB_PREFIX_ . "apimodule_user_token
+		        WHERE token = '".$token."'";
+
+		if ($row = Db::getInstance()->getRow($sql)){
+			return $row;
+		}
+		else{
+			return false;
+		}
 	}
 
 	public function getStat( $filter ) {
@@ -272,7 +297,7 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 
 	public function getTotalSales( $data = array() ) {
 
-		$sql = "SELECT SUM(total) AS total FROM `" . _DB_PREFIX_ . "orders` as o
+		$sql = "SELECT SUM(total_paid) AS total FROM `" . _DB_PREFIX_ . "orders` as o
 		            INNER JOIN " . _DB_PREFIX_ . "order_history as oh ON o.id_order=oh.id_order 
 		            WHERE oh.id_order_state > '0'";
 
