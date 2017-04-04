@@ -74,7 +74,74 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 			return false;
 		}
 	}
-
+	/**
+	 * @api {get} /index.php?fc=module&module=apimodule&controller=statistic  getDashboardStatistic
+	 * @apiName getDashboardStatistic
+	 * @apiGroup Statistic
+	 *
+	 * @apiParam {String} filter Period for filter(day/week/month/year).
+	 * @apiParam {Token} token your unique token.
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {Array} xAxis Period of the selected filter.
+	 * @apiSuccess {Array} Clients Clients for the selected period.
+	 * @apiSuccess {Array} Orders Orders for the selected period.
+	 * @apiSuccess {String} currency_code  Default currency of the shop.
+	 * @apiSuccess {Number} total_sales  Sum of sales of the shop.
+	 * @apiSuccess {Number} sale_year_total  Sum of sales of the current year.
+	 * @apiSuccess {Number} orders_total  Total orders of the shop.
+	 * @apiSuccess {Number} clients_total  Total clients of the shop.
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *   {
+	 *           "response": {
+	 *               "xAxis": [
+	 *                  1,
+	 *                  2,
+	 *                  3,
+	 *                  4,
+	 *                  5,
+	 *                  6,
+	 *                  7
+	 *              ],
+	 *              "clients": [
+	 *                  0,
+	 *                  0,
+	 *                  0,
+	 *                  0,
+	 *                  0,
+	 *                  0,
+	 *                  0
+	 *              ],
+	 *              "orders": [
+	 *                  1,
+	 *                  0,
+	 *                  0,
+	 *                  0,
+	 *                  0,
+	 *                  0,
+	 *                  0
+	 *              ],
+	 *              "total_sales": "1920.00",
+	 *              "sale_year_total": "305.00",
+	 *              "currency_code": "UAH",
+	 *              "orders_total": "4",
+	 *              "clients_total": "3"
+	 *           },
+	 *           "status": true,
+	 *           "version": 1.0
+	 *  }
+	 *
+	 * @apiErrorExample Error-Response:
+	 *
+	 *     {
+	 *       "error": "Unknown filter set",
+	 *       "version": 1.0,
+	 *       "Status" : false
+	 *     }
+	 *
+	 */
 	public function getStat( $filter ) {
 		$clients = $this->getTotalCustomers( array( 'filter' => $filter ) );
 		$orders  = $this->getTotalOrders( array( 'filter' => $filter ) );

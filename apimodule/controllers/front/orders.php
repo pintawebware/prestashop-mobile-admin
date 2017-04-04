@@ -40,7 +40,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	 */
 	public function initContent() {
 		$this->return['status'] = false;
-		if(isset($_GET['action'])/*&& $this->valid()*/){
+		if(isset($_GET['action']) && $this->valid()){
 
 			$action = $_GET['action'];
 			switch ($action){
@@ -82,6 +82,102 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 			return false;
 		}
 	}
+
+
+	/**
+	 * @api {get} /index.php?action=list&fc=module&module=apimodule&controller=orders  getOrders
+	 * @apiName GetOrders
+	 * @apiGroup Orders
+	 *
+	 * @apiParam {Token} token your unique token.
+	 * @apiParam {Number} page number of the page.
+	 * @apiParam {Number} limit limit of the orders for the page.
+	 * @apiParam {Array} filter array of the filter params.
+	 * @apiParam {String} filter[fio] full name of the client.
+	 * @apiParam {Number} filter[order_status_id] unique id of the order.
+	 * @apiParam {Number} filter[min_price] min price of order.
+	 * @apiParam {Number} filter[max_price] max price of order.
+	 * @apiParam {Date} filter[date_min] min date adding of the order.
+	 * @apiParam {Date} filter[date_max] max date adding of the order.
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {Array} orders  Array of the orders.
+	 * @apiSuccess {Array} statuses  Array of the order statuses.
+	 * @apiSuccess {Number} order_id  ID of the order.
+	 * @apiSuccess {Number} order_number  Number of the order.
+	 * @apiSuccess {String} fio     Client's FIO.
+	 * @apiSuccess {String} status  Status of the order.
+	 * @apiSuccess {String} currency_code  Default currency of the shop.
+	 * @apiSuccess {String} order[currency_code] currency of the order.
+	 * @apiSuccess {Number} total  Total sum of the order.
+	 * @apiSuccess {Date} date_added  Date added of the order.
+	 * @apiSuccess {Date} total_quantity  Total quantity of the orders.
+	 *
+	 *
+	 *
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 * {
+	 *   "Response"
+	 *   {
+	 *      "orders":
+	 *      {
+	 *            {
+	 *             "order_id" : "1",
+	 *             "order_number" : "1",
+	 *             "fio" : "Anton Kiselev",
+	 *             "status" : "Сделка завершена",
+	 *             "total" : "106.00",
+	 *             "date_added" : "2016-12-09 16:17:02",
+	 *             "currency_code": "RUB"
+	 *             },
+	 *            {
+	 *             "order_id" : "2",
+	 *             "order_number" : "2",
+	 *             "fio" : "Vlad Kochergin",
+	 *             "status" : "В обработке",
+	 *             "total" : "506.00",
+	 *             "date_added" : "2016-10-19 16:00:00",
+	 *             "currency_code": "RUB"
+	 *             }
+	 *       },
+	 *       "statuses" :
+	 *                  {
+	 *                         {
+	 *                             "name": "Отменено",
+	 *                             "id_order_state": "7",
+	 *                             "id_lang": "1"
+	 *                         },
+	 *                         {
+	 *                             "name": "Сделка завершена",
+	 *                             "id_order_state": "5",
+	 *                             "id_lang": "1"
+	 *                          },
+	 *                          {
+	 *                              "name": "Ожидание",
+	 *                              "id_order_state": "1",
+	 *                              "id_lang": "1"
+	 *                           }
+	 *                    }
+	 *       "currency_code": "RUB",
+	 *       "total_quantity": 50,
+	 *       "total_sum": "2026.00",
+	 *       "max_price": "1405.00"
+	 *   },
+	 *   "Status" : true,
+	 *   "version": 1.0
+	 * }
+	 * @apiErrorExample Error-Response:
+	 *
+	 * {
+	 *      "version": 1.0,
+	 *      "Status" : false
+	 *
+	 * }
+	 *
+	 *
+	 */
 	public function getOrdersList(){
 		$page = trim( Tools::getValue( 'page' ) );
 		$limit = trim( Tools::getValue( 'limit' ) );
@@ -159,6 +255,73 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
 	}
 
+
+	/**
+	 * @api {get} /index.php?action=products&fc=module&module=apimodule&controller=orders  getOrderProducts
+	 * @apiName getOrderProducts
+	 * @apiGroup Orders
+	 *
+	 * @apiParam {Token} token your unique token.
+	 * @apiParam {ID} order_id unique order id.
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {Url} image  Picture of the product.
+	 * @apiSuccess {Number} quantity  Quantity of the product.
+	 * @apiSuccess {String} name     Name of the product.
+	 * @apiSuccess {String} model  Model of the product.
+	 * @apiSuccess {Number} Price  Price of the product.
+	 * @apiSuccess {Number} total_order_price  Total sum of the order.
+	 * @apiSuccess {Number} total_price  Sum of product's prices.
+	 * @apiSuccess {Number} shipping_price  Cost of the shipping.
+	 * @apiSuccess {Number} total  Total order sum.
+	 * @apiSuccess {Number} product_id  unique product id.
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 * {
+	 *      "response":
+	 *          {
+	 *              "products": [
+	 *              {
+	 *                  "image" : "http://opencart/image/catalog/demo/htc_touch_hd_1.jpg",
+	 *                  "name" : "HTC Touch HD",
+	 *                  "model" : "Product 1",
+	 *                  "quantity" : 3,
+	 *                  "price" : 100.00,
+	 *                  "product_id" : 90
+	 *              },
+	 *              {
+	 *                  "image" : "http://opencart/image/catalog/demo/iphone_1.jpg",
+	 *                  "name" : "iPhone",
+	 *                  "model" : "Product 11",
+	 *                  "quantity" : 1,
+	 *                  "price" : 500.00,
+	 *                  "product_id" : 97
+	 *               }
+	 *            ],
+	 *            "total_order_price":
+	 *              {
+	 *                   "total_discount": 0,
+	 *                   "total_price": 2250,
+	 *                   "shipping_price": 35,
+	 *                   "total": 2285
+	 *               }
+	 *
+	 *         },
+	 *      "status": true,
+	 *      "version": 1.0
+	 * }
+	 *
+	 *
+	 * @apiErrorExample Error-Response:
+	 *
+	 *     {
+	 *          "error": "Can not found any products in order with id = 10",
+	 *          "version": 1.0,
+	 *          "Status" : false
+	 *     }
+	 *
+	 */
 	public function getOrderProducts()
 	{
 		$id = trim( Tools::getValue( 'order_id' ) );
@@ -240,6 +403,77 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
 	}
 
+	/**
+	 * @api {get} /index.php?action=history&fc=module&module=apimodule&controller=orders  getOrderHistory
+	 * @apiName getOrderHistory
+	 * @apiGroup Orders
+	 *
+	 * @apiParam {Number} order_id unique order ID.
+	 * @apiParam {Token} token your unique token.
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {String} name     Status of the order.
+	 * @apiSuccess {Number} order_status_id  ID of the status of the order.
+	 * @apiSuccess {Date} date_added  Date of adding status of the order.
+	 * @apiSuccess {String} comment  Some comment added from manager.
+	 * @apiSuccess {Array} statuses  Statuses list for order.
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *       {
+	 *           "response":
+	 *               {
+	 *                   "orders":
+	 *                      {
+	 *                          {
+	 *                              "name": "Отменено",
+	 *                              "order_status_id": "7",
+	 *                              "date_added": "2016-12-13 08:27:48.",
+	 *                              "comment": "Some text"
+	 *                          },
+	 *                          {
+	 *                              "name": "Сделка завершена",
+	 *                              "order_status_id": "5",
+	 *                              "date_added": "2016-12-25 09:30:10.",
+	 *                              "comment": "Some text"
+	 *                          },
+	 *                          {
+	 *                              "name": "Ожидание",
+	 *                              "order_status_id": "1",
+	 *                              "date_added": "2016-12-01 11:25:18.",
+	 *                              "comment": "Some text"
+	 *                           }
+	 *                       },
+	 *                   "statuses" :
+	 *                  {
+	 *                         {
+	 *                             "name": "Отменено",
+	 *                             "id_order_state": "7",
+	 *                             "id_lang": "1"
+	 *                         },
+	 *                         {
+	 *                             "name": "Сделка завершена",
+	 *                             "id_order_state": "5",
+	 *                             "id_lang": "1"
+	 *                          },
+	 *                          {
+	 *                              "name": "Ожидание",
+	 *                              "id_order_state": "1",
+	 *                              "id_lang": "1"
+	 *                           }
+	 *                    }
+	 *               },
+	 *           "status": true,
+	 *           "version": 1.0
+	 *       }
+	 * @apiErrorExample Error-Response:
+	 *
+	 *     {
+	 *          "error": "Can not found any statuses for order with id = 5",
+	 *          "version": 1.0,
+	 *          "Status" : false
+	 *     }
+	 */
 
 	public function getOrdersHistory(){
 		$id = trim( Tools::getValue( 'order_id' ) );
@@ -284,9 +518,73 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 		die( Tools::jsonEncode( $this->return ) );
 	}
 
+	/**
+	 * @api {get} /index.php?action=info&fc=module&module=apimodule&controller=orders  getOrderInfo
+	 * @apiName getOrderInfo
+	 * @apiGroup Orders
+	 *
+	 * @apiParam {Number} order_id unique order ID.
+	 * @apiParam {Token} token your unique token.
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {Number} order_number  Number of the order.
+	 * @apiSuccess {String} fio     Client's FIO.
+	 * @apiSuccess {String} status  Status of the order.
+	 * @apiSuccess {String} email  Client's email.
+	 * @apiSuccess {Number} phone  Client's phone.
+	 * @apiSuccess {Number} total  Total sum of the order.
+	 * @apiSuccess {currency_code} status  Default currency of the shop.
+	 * @apiSuccess {Date} date_added  Date added of the order.
+	 * @apiSuccess {Array} statuses  Statuses list for order.
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 * {
+	 *      "response" :
+	 *          {
+	 *              "order_number" : "6",
+	 *              "currency_code": "RUB",
+	 *              "fio" : "Anton Kiselev",
+	 *              "email" : "client@mail.ru",
+	 *              "telephone" : "056 000-11-22",
+	 *              "date_added" : "2016-12-24 12:30:46",
+	 *              "total" : "1405.00",
+	 *              "status" : "Сделка завершена",
+	 *              "statuses" :
+	 *                  {
+	 *                         {
+	 *                             "name": "Отменено",
+	 *                             "id_order_state": "7",
+	 *                             "id_lang": "1"
+	 *                         },
+	 *                         {
+	 *                             "name": "Сделка завершена",
+	 *                             "id_order_state": "5",
+	 *                             "id_lang": "1"
+	 *                          },
+	 *                          {
+	 *                              "name": "Ожидание",
+	 *                              "id_order_state": "1",
+	 *                              "id_lang": "1"
+	 *                           }
+	 *                    }
+	 *          },
+	 *      "status" : true,
+	 *      "version": 1.0
+	 * }
+	 *
+	 * @apiErrorExample Error-Response:
+	 *
+	 *     {
+	 *       "error" : "Can not found order with id = 5",
+	 *       "version": 1.0,
+	 *       "Status" : false
+	 *     }
+	 */
 	public function getOrdersInfo(){
 		$id = trim( Tools::getValue( 'order_id' ) );
-		$id = 5;
+
+		$this->return['status']  = false;
 		if (!empty($id)) {
 			$order = new Order($id);
 			/*echo "<pre>";
@@ -334,15 +632,15 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 				$data['statuses'] = $statuses;
 				$data['currency_code'] = Context::getContext()->currency->iso_code;;
 
-				$this->return['status']  = false;
+				$this->return['status']  = true;
 				$this->return['response']  = $data;
 
 			} else {
-				$this->return['status']  = false;
+
 				$this->return['errors']  = 'Can not found order with id = ' . $id;
 			}
 		} else {
-			$this->return['status']  = false;
+
 			$this->return['errors']  = 'You have not specified ID';
 		}
 
@@ -351,16 +649,73 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 		die( Tools::jsonEncode( $this->return ) );
 	}
 
+
+	/**
+	 * @api {get} /index.php?action=pad&fc=module&module=apimodule&controller=orders  getOrderPaymentAndDelivery
+	 * @apiName getOrderPaymentAndDelivery
+	 * @apiGroup Orders
+	 *
+	 * @apiParam {Number} order_id unique order ID.
+	 * @apiParam {Token} token your unique token.
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {String} payment_method     Payment method.
+	 * @apiSuccess {String} shipping_method  Shipping method.
+	 * @apiSuccess {String} shipping_address  Shipping address.
+	 * @apiSuccess {String} shipping_phone  Shipping phone.
+	 * @apiSuccess {String} shipping_phone_mobile  Shipping phone mobile.
+	 * @apiSuccess {String} payment_address  Payment address.
+	 * @apiSuccess {String} payment_phone  Payment phone.
+	 * @apiSuccess {String} payment_phone_mobile  Payment mobile phone.
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 *      {
+	 *          "response":
+	 *              {
+	 *                  "payment_method" : "Оплата при доставке",
+	 *                  "shipping_method" : "Доставка с фиксированной стоимостью доставки",
+	 *                  "shipping_address" : "проспект Карла Маркса 1, Днепропетровск, Днепропетровская область, Украина."
+	 *                  "shipping_phone" : "123-123-123."
+	 *                  "shipping_phone_mobile" : "132-123-123"
+	 *                  "payment_address" : "проспект Карла Маркса 1, Днепропетровск, Днепропетровская область, Украина."
+	 *                  "payment_phone" : "132-123-123"
+	 *                  "payment_phone_mobile" : "132-123-123"
+	 *              },
+	 *          "status": true,
+	 *          "version": 1.0
+	 *      }
+	 * @apiErrorExample Error-Response:
+	 *
+	 *    {
+	 *      "error": "Can not found order with id = 90",
+	 *      "version": 1.0,
+	 *      "Status" : false
+	 *   }
+	 *
+	 */
 	public function getPaymentAndDelivery()
 	{
 		$id = trim( Tools::getValue( 'order_id' ) );
-		$id = 5;
+
+		$this->return['status']  = false;
 		if (!empty($id)) {
 			$order = new Order($id);
-			/*echo "<pre>";
-			print_r($order);
-			echo "</pre>";
-			die();*/
+			$address_delivery = new Address(intval($order->id_address_delivery));
+			$address_payment = new Address(intval($order->id_address_invoice));
+			$id_carrier = $order->id_carrier;
+			$carriers = new Carrier($id_carrier);
+			foreach ($carriers->delay as $one):
+				$shipping_method = $one;
+			endforeach;
+//			echo "<pre>";
+//			print_r($order);
+//			print_r($carriers);
+//			print_r($address_delivery);
+//			print_r($address_payment);
+//			echo "</pre>";
+//			die();
 			$data = array();
 			$statuses = $this->OrderStatusList();
 			$statusArray = [];
@@ -368,62 +723,86 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 				$statusArray[$one['id_order_state']] = $one['name'];
 			endforeach;
 
-			$mode_de_paiement = array();
-
-			$modules_list = Module::getPaymentModules();
-
-			foreach($modules_list as $module)
-			{
-				$module_obj = Module::getInstanceById($module['id_module']);
-				array_push($mode_de_paiement, $module_obj->displayName);
-			}
-			echo "10";
-			p($modules_list);
-			echo "12";
-			die();
 
 			if ($order) {
 
 				$data['shipping_address'] = '';
+				$data['payment_address'] = '';
 
-				if (isset($order[0]['payment_method']) && $order[0]['payment_method'] != '') {
-					$data['payment_method'] = $order[0]['payment_method'];
+				if (!empty($order->payment)) {
+					$data['payment_method'] = $order->payment;
 				}
-				if (isset($order[0]['shipping_method']) && $order[0]['shipping_method'] != '') {
-					$data['shipping_method'] = $order[0]['shipping_method'];
+				if (!empty($shipping_method)) {
+					$data['shipping_method'] = $shipping_method;
 				}
-				if (isset($order[0]['shipping_address_1']) && $order[0]['shipping_address_1'] != '') {
-					$data['shipping_address'] .= $order[0]['shipping_address_1'];
+				if (!empty($address_delivery->country)) {
+					$data['shipping_address'] .= $address_delivery->country." ";
 				}
-				if (isset($order[0]['shipping_address_2']) && $order[0]['shipping_address_2'] != '') {
-					$data['shipping_address'] .= ', ' . $order[0]['shipping_address_2'];
+				if (!empty($address_delivery->alias)) {
+					$data['shipping_address'] .= $address_delivery->alias." ";
 				}
-				if (isset($order[0]['shipping_city']) && $order[0]['shipping_city'] != '') {
-					$data['shipping_address'] .= ', ' . $order[0]['shipping_city'];
+				if (!empty($address_delivery->address1)) {
+					$data['shipping_address'] .= $address_delivery->address1." ";
 				}
-				if (isset($order[0]['shipping_country']) && $order[0]['shipping_country'] != '') {
-					$data['shipping_address'] .= ', ' . $order[0]['shipping_country'];
+				if (!empty($address_delivery->address2)) {
+					$data['shipping_address'] .= $address_delivery->address2." ";
 				}
-				if (isset($order[0]['shipping_zone']) && $order[0]['shipping_zone'] != '') {
-					$data['shipping_address'] .= ', ' . $order[0]['shipping_zone'];
+				if (!empty($address_delivery->postcode)) {
+					$data['shipping_address'] .= $address_delivery->postcode." ";
+				}
+				if (!empty($address_delivery->city)) {
+					$data['shipping_address'] .= $address_delivery->city." ";
+				}
+				if (!empty($address_delivery->phone)) {
+					$data['shipping_phone'] .= $address_delivery->phone;
+				}
+				if (!empty($address_delivery->phone_mobile)) {
+					$data['shipping_phone_mobile'] .= $address_delivery->phone_mobile;
 				}
 
-				$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $data, 'status' => true]));
+				if (!empty($address_payment->country)) {
+					$data['payment_address'] .= $address_payment->country." ";
+				}
+				if (!empty($address_payment->alias)) {
+					$data['payment_address'] .= $address_payment->alias." ";
+				}
+				if (!empty($address_payment->address1)) {
+					$data['payment_address'] .= $address_payment->address1." ";
+				}
+				if (!empty($address_payment->address2)) {
+					$data['payment_address'] .= $address_payment->address2." ";
+				}
+				if (!empty($address_payment->postcode)) {
+					$data['payment_address'] .= $address_payment->postcode." ";
+				}
+				if (!empty($address_payment->city)) {
+					$data['payment_address'] .= $address_payment->city." ";
+				}
+				if (!empty($address_payment->phone)) {
+					$data['payment_phone'] .= $address_payment->phone;
+				}
+				if (!empty($address_payment->phone_mobile)) {
+					$data['payment_phone_mobile'] .= $address_payment->phone_mobile;
+				}
 
+				$this->return['status']  = true;
+				$this->return['response']  = $data;
 
 			} else {
-
-				$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not found order with id = ' . $id, 'status' => false]));
-			}
+				$this->return['errors']  = 'Can not found order with id = ' . $id;
+					}
 		} else {
-
-			$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified ID', 'status' => false]));
+			$this->return['errors']  = 'You have not specified ID';
 		}
+
+		$this->return['version'] = $this->API_VERSION;
+		header( 'Content-Type: application/json' );
+		die( Tools::jsonEncode( $this->return ) );
 	}
 
 	public function OrderStatusList()
 	{
-		$sql = "SELECT * FROM " . _DB_PREFIX_ . "order_state_lang WHERE id_lang = 1 ";
+		$sql = "SELECT id_order_state,id_lang, name FROM " . _DB_PREFIX_ . "order_state_lang WHERE id_lang = 1 ";
 				$results = Db::getInstance()->ExecuteS( $sql );
 		return $results;
 	}

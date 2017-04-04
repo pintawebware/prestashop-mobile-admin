@@ -46,6 +46,8 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 			$action = $_GET['action'];
 			switch ($action){
 				case 'login':$this->login();
+				case 'delete':$this->deleteDeviceToken();
+				case 'update':$this->updateDeviceToken();
 			}
 		}
 		$this->errors[] = Tools::displayError('Email is empty.');
@@ -67,11 +69,46 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 		return $error;
 	}
 
+	/**
+	 *
+	 * @api {post} /index.php?action=login&fc=module&module=apimodule&controller=auth  Login
+	 * @apiName Login
+	 * @apiGroup Auth
+	 *
+	 * @apiParam {String} username User unique username.
+	 * @apiParam {Number} password User's  password.
+	 * @apiParam {String} device_token User's device's token for firebase notifications.
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {String} token  Token.
+	 * @apiSuccess {String} token  Token.
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *   {
+	 *       "response":
+	 *       {
+	 *          "token": "e9cf23a55429aa79c3c1651fe698ed7b",
+	 *          "version": 1.0,
+	 *          "status": true
+	 *       }
+	 *   }
+	 *
+	 * @apiErrorExample Error-Response:
+	 *
+	 *     {
+	 *       "error": "Incorrect username or password",
+	 *       "version": 1.0,
+	 *       "Status" : false
+	 *     }
+	 *
+	 */
+
 	public function login(){
 
 		$this->return = false;
 
-		$passwd = trim(Tools::getValue('passwd'));
+		$passwd = trim(Tools::getValue('password'));
 		$email = trim(Tools::getValue('email'));
 		if (empty($email)) {
 			$this->errors[] = Tools::displayError('Email is empty.');
@@ -139,6 +176,131 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 		die(Tools::jsonEncode($this->return));
 	}
 
+	/**
+	 * @api {post} /index.php?action=delete&fc=module&module=apimodule&controller=auth  deleteUserDeviceToken
+	 * @apiName deleteUserDeviceToken
+	 * @apiGroup Auth
+	 *
+	 * @apiParam {String} old_token User's device's token for firebase notifications.
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {Boolean} status  true.
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *   {
+	 *       "response":
+	 *       {
+	 *          "status": true,
+	 *          "version": 1.0
+	 *       }
+	 *   }
+	 *
+	 * @apiErrorExample Error-Response:
+	 *
+	 *     {
+	 *       "error": "Missing some params",
+	 *       "version": 1.0,
+	 *       "Status" : false
+	 *     }
+	 *
+	 */
+	public function deleteDeviceToken(){
+
+		$this->return['status'] = false;
+
+		$old_token = trim(Tools::getValue('old_token'));
+		if (!empty($old_token)) {
+			$deleted = $this->deleteUserDeviceToken($old_token);
+			if($deleted){
+				$this->return['status'] = true;
+			}else{
+				$this->return['errors'] ='Can not find your token';
+			}
+		}else{
+			$this->return['errors'] ='Missing some params';
+		}
+		$this->return['version'] =$this->API_VERSION;
+		header('Content-Type: application/json');
+		die(Tools::jsonEncode($this->return));
+	}
+
+	/**
+	 * @api {post} /index.php?action=update&fc=module&module=apimodule&controller=auth  updateUserDeviceToken
+	 * @apiName updateUserDeviceToken
+	 * @apiGroup Auth
+	 *
+	 * @apiParam {String} new_token User's device's new token for firebase notifications.
+	 * @apiParam {String} old_token User's device's old token for firebase notifications.
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {Boolean} status  true.
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *   {
+	 *       "response":
+	 *       {
+	 *          "status": true,
+	 *          "version": 1.0
+	 *       }
+	 *   }
+	 *
+	 * @apiErrorExample Error-Response:
+	 *
+	 *     {
+	 *       "error": "Missing some params",
+	 *       "version": 1.0,
+	 *       "Status" : false
+	 *     }
+	 *
+	 */
+	public function updateDeviceToken(){
+
+		$this->return['status'] = false;
+
+		$old_token = trim(Tools::getValue('old_token'));
+		$new_token = trim(Tools::getValue('new_token'));
+		if (!empty($old_token)) {
+			$deleted = $this->updateUserDeviceToken($old_token,$new_token);
+			if($deleted){
+				$this->return['status'] = true;
+			}else{
+				$this->return['errors'] ='Can not find your token';
+			}
+		}else{
+			$this->return['errors'] ='Missing some params';
+		}
+
+		$this->return['version'] =$this->API_VERSION;
+		header('Content-Type: application/json');
+		die(Tools::jsonEncode($this->return));
+	}
+
+	public function deleteUserDeviceToken($old_token) {
+
+		$sql = "DELETE FROM `" . _DB_PREFIX_ . "apimodule_user_device` WHERE device_token = '".$old_token."' ";
+
+		if (Db::getInstance()->query($sql)){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+
+	public function updateUserDeviceToken($old_token,$new_token) {
+
+		$sql = "UPDATE `" . _DB_PREFIX_ . "apimodule_user_device` SET `device_token`=".$new_token." WHERE device_token = '".$old_token."' ";
+
+		if (Db::getInstance()->query($sql)){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+
 	public function getUserDevices($user_id,$device_token) {
 
 		$sql = "SELECT device_token,os_type FROM " . _DB_PREFIX_ . "apimodule_user_device 
@@ -186,7 +348,7 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 			return true;
 		}else{
 			$this->errors[] = "Error setUserToken user_id=".$user_id." token = ".$token;
-			$this->errors[] = $insert;
+			//$this->errors[] = $insert;
 		}
 	}
 
