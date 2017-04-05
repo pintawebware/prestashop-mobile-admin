@@ -57,6 +57,66 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
         die( Tools::jsonEncode( $this->return ) );
     }
 
+    /**
+     * @api {get} index.php?action=products&fc=module&module=apimodule&controller=products  getProductsList
+     * @apiName getProductsList
+     * @apiGroup All
+     *
+     * @apiParam {Token} token your unique token.
+     * @apiParam {Number} page number of the page.
+     * @apiParam {Number} limit limit of the orders for the page.
+     * @apiParam {String} name name of the product for search.
+     *
+     * @apiSuccess {Number} version  Current API version.
+     * @apiSuccess {Number} product_id  ID of the product.
+     * @apiSuccess {String} model     Model of the product.
+     * @apiSuccess {String} name  Name of the product.
+     * @apiSuccess {String} currency_code  Default currency of the shop.
+     * @apiSuccess {Number} price  Price of the product.
+     * @apiSuccess {Number} quantity  Actual quantity of the product.
+     * @apiSuccess {Url} image  Url to the product image.
+     *
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     * {
+     *   "Response":
+     *   {
+     *      "products":
+     *      {
+     *           {
+     *             "product_id" : "1",
+     *             "model" : "Black",
+     *             "name" : "HTC Touch HD",
+     *             "price" : "100.00",
+     *             "currency_code": "UAH",
+     *             "quantity" : "83",
+     *             "image" : "http://site-url/image/catalog/demo/htc_touch_hd_1.jpg"
+     *           },
+     *           {
+     *             "product_id" : "2",
+     *             "model" : "White",
+     *             "name" : "iPhone",
+     *             "price" : "300.00",
+     *             "currency_code": "UAH",
+     *             "quantity" : "30",
+     *             "image" : "http://site-url/image/catalog/demo/iphone_1.jpg"
+     *           }
+     *      }
+     *   },
+     *   "Status" : true,
+     *   "version": 1.0
+     * }
+     * @apiErrorExample Error-Response:
+     * {
+     *      "Error" : "Not one product not found",
+     *      "version": 1.0,
+     *      "Status" : false
+     * }
+     *
+     *
+     */
+
     public function products(){
 
         $return['status'] = false;
@@ -103,13 +163,67 @@ WHERE p.id_product = ".$product['id_product'])['quantity'];
 
         if(!count($return['errors'])){
             $return['status'] = true;
+            $return['response']['products'] = $to_response;
         }
         $return['version'] = $this->API_VERSION;
-        $return['products'] = $to_response;
+
 
         header('Content-Type: application/json');
         die(Tools::jsonEncode($return));
     }
+
+
+    /**
+     * @api {get} index.php?action=getproductbyid&fc=module&module=apimodule&controller=products  getProductInfo
+     * @apiName getProductInfo
+     * @apiGroup All
+     *
+     * @apiParam {Token} token your unique token.
+     * @apiParam {Number} product_id unique product ID.
+     *
+     * @apiSuccess {Number} version  Current API version.
+     * @apiSuccess {Number} product_id  ID of the product.
+     * @apiSuccess {String} model     Model of the product.
+     * @apiSuccess {String} name  Name of the product.
+     * @apiSuccess {Number} price  Price of the product.
+     * @apiSuccess {String} currency_code  Default currency of the shop.
+     * @apiSuccess {Number} quantity  Actual quantity of the product.
+     * @apiSuccess {String} description     Detail description of the product.
+     * @apiSuccess {Array} images  Array of the images of the product.
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     * {
+     *   "Response":
+     *   {
+     *       "product_id" : "1",
+     *       "model" : "Black",
+     *       "name" : "HTC Touch HD",
+     *       "price" : "100.00",
+     *       "currency_code": "UAH"
+     *       "quantity" : "83",
+     *       "main_image" : "http://site-url/image/catalog/demo/htc_iPhone_1.jpg",
+     *       "description" : "Revolutionary multi-touch interface.↵	iPod touch features the same multi-touch screen technology as iPhone.",
+     *       "images" :
+     *       [
+     *           "http://site-url/image/catalog/demo/htc_iPhone_1.jpg",
+     *           "http://site-url/image/catalog/demo/htc_iPhone_2.jpg",
+     *           "http://site-url/image/catalog/demo/htc_iPhone_3.jpg"
+     *       ]
+     *   },
+     *   "Status" : true,
+     *   "version": 1.0
+     * }
+     * @apiErrorExample Error-Response:
+     * {
+     *      "Error" : "Can not found product with id = 10",
+     *      "version": 1.0,
+     *      "Status" : false
+     * }
+     *
+     *
+     */
+
 
     public function getProductById() {
 
@@ -147,9 +261,10 @@ WHERE p.id_product = ".$product->id)['quantity'];
 
         if(!count($return['errors'])){
             $return['status'] = true;
+            $return['response']['product'] = $data;
         }
         $return['version'] = $this->API_VERSION;
-        $return['product'] = $data;
+
 
         header('Content-Type: application/json');
         die(Tools::jsonEncode($return));
