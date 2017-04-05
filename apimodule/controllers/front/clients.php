@@ -66,13 +66,11 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 				return false;
 			}
 		}
-
 		return true;
 	}
 	public function getTokens($token){
 		$sql = "SELECT * FROM " . _DB_PREFIX_ . "apimodule_user_token
 		        WHERE token = '".$token."'";
-
 		if ($row = Db::getInstance()->getRow($sql)){
 			return $row;
 		}
@@ -454,12 +452,14 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 					WHERE c.id_customer = ". $id ." AND oh.id_order_state = 6 group by c.id_customer";
 
 		if(Db::getInstance()->getRow( $completed )){
-			$results = Db::getInstance()->getRow( $completed );
+			$c = Db::getInstance()->getRow( $completed );
+			$results['completed'] =$c['completed'];
 		}else{
 			$results['completed'] =0;
 		}
 		if(Db::getInstance()->getRow( $completed )){
-			$results = Db::getInstance()->getRow( $cancelled );
+			$c = Db::getInstance()->getRow( $cancelled );
+			$results['cancelled'] =$c['cancelled'];
 		}else{
 			$results['cancelled'] =0;
 		}

@@ -49,6 +49,8 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 				case 'history':$this->getOrdersHistory();break;
 				case 'info':$this->getOrdersInfo();break;
 				case 'pad':$this->getPaymentAndDelivery();break;
+				case 'status_update':$this->statusUpdate();break;
+				case 'delivery_update':$this->changeOrderDelivery();break;
 			}
 		}
 		$this->errors[] = "No action";
@@ -791,6 +793,125 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 		$this->return['version'] = $this->API_VERSION;
 		header( 'Content-Type: application/json' );
 		die( Tools::jsonEncode( $this->return ) );
+	}
+
+	/**
+	 * @api {get} index.php?action=status_update&fc=module&module=apimodule&controller=orders  getOrderPaymentAndDelivery
+	 * @apiName getOrderPaymentAndDelivery
+	 * @apiGroup Orders
+	 *
+	 * @apiParam {Number} order_id unique order ID.
+	 * @apiParam {Token} token your unique token.
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {String} status_id    Status id.
+	 * @apiSuccess {String} order_id   Order id.
+	 * @apiSuccess {String} inform    Inform.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 *      {
+	 *          "status": true,
+	 *          "version": 1.0
+	 *      }
+	 * @apiErrorExample Error-Response:
+	 *
+	 *    {
+	 *      "error": "Can not found order with id = 90",
+	 *      "version": 1.0,
+	 *      "Status" : false
+	 *   }
+	 *
+	 */
+	public function statusUpdate()
+	{
+		$statusId = trim( Tools::getValue( 'status_id' ) );
+		$orderId = trim( Tools::getValue( 'order_id' ) );
+		$inform = trim( Tools::getValue( 'inform' ) );
+
+		$this->return['status']  = false;
+		if (!empty($statusId) && !empty($orderId)) {
+
+			$sql = "SELECT id_order_history FROM " . _DB_PREFIX_ . "order_history as oh WHERE oh.order_id = '" . $orderId."'";
+
+			if ($row = Db::getInstance()->getRow($sql)) {
+
+				$insert = Db::getInstance()->insert('order_history', array(
+					'id_employee' => 1,
+					'id_order'      => $orderId,
+					'id_order_state'      => $statusId,
+					'date_add'      => date('Y-m:d H:i:s')
+				));
+				$insert_id = Db::getInstance()->Insert_ID();
+				if ( $inform == true ) {
+					$sql = "SELECT c.email, c.firstname  FROM " . _DB_PREFIX_ . "customer AS c
+				        INNER JOIN " . _DB_PREFIX_ . "orders as o ON c.id_customer = o.id_customer                    
+				        WHERE o.id_order = " . $orderId;
+
+					if($data = Db::getInstance()->getRow($sql)) {
+						$order = new Order($orderId);
+						$order_state = new OrderState($statusId);
+						$history = new OrderHistory($insert_id);
+
+						$templateVars = array();
+
+						$history->sendEmail($order, $templateVars);
+					}
+				}
+				$this->return['status']  = true;
+			}
+			$this->return['errors'][]  = "Can not found order with id = ' . $orderId";
+		}
+		$this->return['errors'][]  = "You have not specified order Id or status Id";
+		$this->return['version'] = $this->API_VERSION;
+		header( 'Content-Type: application/json' );
+		die( Tools::jsonEncode( $this->return ) );
+
+	}
+
+	/**
+	 * @api {get} index.php?action=delivery_update&fc=module&module=apimodule&controller=orders  ChangeOrderDelivery
+	 * @apiName ChangeOrderDelivery
+	 * @apiGroup All
+	 *
+	 * @apiParam {String} address New shipping address.
+	 * @apiParam {String} city New shipping city.
+	 * @apiParam {Number} order_id unique order ID.
+	 * @apiParam {Token} token your unique token.
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {Boolean} response Status of change address.
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *   {
+	 *         "status": true,
+	 *         "version": 1.0
+	 *    }
+	 * @apiErrorExample Error-Response:
+	 *
+	 *     {
+	 *       "error": "Can not change address",
+	 *       "version": 1.0,
+	 *       "Status" : false
+	 *     }
+	 *
+	 */
+	public function changeOrderDelivery()
+	{
+		$order_id = trim( Tools::getValue( 'order_id' ) );
+		$address = trim( Tools::getValue( 'address' ) );
+		$city = trim( Tools::getValue( 'city' ) );
+		$order = new Order($order_id);
+
+		$sql = "UPDATE " . _DB_PREFIX_ . "address SET address1 = '" . $address . "'";
+		if ($city !== false) {
+			$sql .= " , shipping_city = '" . $city . "'";
+		}
+		$sql .= " WHERE id_address = '" . $order->id_address_delivery . "'";
+		Db::getInstance()->ExecuteS( $sql );
+
+		return true;
 	}
 
 	public function OrderStatusList()

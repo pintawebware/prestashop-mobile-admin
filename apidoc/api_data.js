@@ -1,5 +1,242 @@
 define({ "api": [
   {
+    "type": "get",
+    "url": "index.php?action=getproductbyid&fc=module&module=apimodule&controller=products",
+    "title": "getProductInfo",
+    "name": "getProductInfo",
+    "group": "All",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Token",
+            "optional": false,
+            "field": "token",
+            "description": "<p>your unique token.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "product_id",
+            "description": "<p>unique product ID.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "version",
+            "description": "<p>Current API version.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "product_id",
+            "description": "<p>ID of the product.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model of the product.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>Name of the product.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "price",
+            "description": "<p>Price of the product.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "currency_code",
+            "description": "<p>Default currency of the shop.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "quantity",
+            "description": "<p>Actual quantity of the product.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "description",
+            "description": "<p>Detail description of the product.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "images",
+            "description": "<p>Array of the images of the product.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "    HTTP/1.1 200 OK\n{\n  \"Response\":\n  {\n      \"product_id\" : \"1\",\n      \"model\" : \"Black\",\n      \"name\" : \"HTC Touch HD\",\n      \"price\" : \"100.00\",\n      \"currency_code\": \"UAH\"\n      \"quantity\" : \"83\",\n      \"main_image\" : \"http://site-url/image/catalog/demo/htc_iPhone_1.jpg\",\n      \"description\" : \"Revolutionary multi-touch interface.↵\tiPod touch features the same multi-touch screen technology as iPhone.\",\n      \"images\" :\n      [\n          \"http://site-url/image/catalog/demo/htc_iPhone_1.jpg\",\n          \"http://site-url/image/catalog/demo/htc_iPhone_2.jpg\",\n          \"http://site-url/image/catalog/demo/htc_iPhone_3.jpg\"\n      ]\n  },\n  \"Status\" : true,\n  \"version\": 1.0\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "{\n     \"Error\" : \"Can not found product with id = 10\",\n     \"version\": 1.0,\n     \"Status\" : false\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "modules/apimodule/controllers/front/products.php",
+    "groupTitle": "All"
+  },
+  {
+    "type": "get",
+    "url": "index.php?action=products&fc=module&module=apimodule&controller=products",
+    "title": "getProductsList",
+    "name": "getProductsList",
+    "group": "All",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Token",
+            "optional": false,
+            "field": "token",
+            "description": "<p>your unique token.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "page",
+            "description": "<p>number of the page.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "limit",
+            "description": "<p>limit of the orders for the page.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>name of the product for search.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "version",
+            "description": "<p>Current API version.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "product_id",
+            "description": "<p>ID of the product.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model of the product.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>Name of the product.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "currency_code",
+            "description": "<p>Default currency of the shop.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "price",
+            "description": "<p>Price of the product.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "quantity",
+            "description": "<p>Actual quantity of the product.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Url",
+            "optional": false,
+            "field": "image",
+            "description": "<p>Url to the product image.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "    HTTP/1.1 200 OK\n{\n  \"Response\":\n  {\n     \"products\":\n     {\n          {\n            \"product_id\" : \"1\",\n            \"model\" : \"Black\",\n            \"name\" : \"HTC Touch HD\",\n            \"price\" : \"100.00\",\n            \"currency_code\": \"UAH\",\n            \"quantity\" : \"83\",\n            \"image\" : \"http://site-url/image/catalog/demo/htc_touch_hd_1.jpg\"\n          },\n          {\n            \"product_id\" : \"2\",\n            \"model\" : \"White\",\n            \"name\" : \"iPhone\",\n            \"price\" : \"300.00\",\n            \"currency_code\": \"UAH\",\n            \"quantity\" : \"30\",\n            \"image\" : \"http://site-url/image/catalog/demo/iphone_1.jpg\"\n          }\n     }\n  },\n  \"Status\" : true,\n  \"version\": 1.0\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "{\n     \"Error\" : \"Not one product not found\",\n     \"version\": 1.0,\n     \"Status\" : false\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "modules/apimodule/controllers/front/products.php",
+    "groupTitle": "All"
+  },
+  {
     "type": "post",
     "url": "/index.php?action=login&fc=module&module=apimodule&controller=auth",
     "title": "Login",
@@ -537,6 +774,86 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "index.php?action=delivery_update&fc=module&module=apimodule&controller=orders",
+    "title": "ChangeOrderDelivery",
+    "name": "ChangeOrderDelivery",
+    "group": "Orders",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "address",
+            "description": "<p>New shipping address.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "city",
+            "description": "<p>New shipping city.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "order_id",
+            "description": "<p>unique order ID.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Token",
+            "optional": false,
+            "field": "token",
+            "description": "<p>your unique token.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "version",
+            "description": "<p>Current API version.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "response",
+            "description": "<p>Status of change address.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "  HTTP/1.1 200 OK\n{\n      \"status\": true,\n      \"version\": 1.0\n }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "\n{\n  \"error\": \"Can not change address\",\n  \"version\": 1.0,\n  \"Status\" : false\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "modules/apimodule/controllers/front/orders.php",
+    "groupTitle": "Orders"
+  },
+  {
+    "type": "get",
     "url": "/index.php?action=list&fc=module&module=apimodule&controller=orders",
     "title": "getOrders",
     "name": "GetOrders",
@@ -928,6 +1245,86 @@ define({ "api": [
         {
           "title": "Error-Response:",
           "content": "\n{\n  \"error\" : \"Can not found order with id = 5\",\n  \"version\": 1.0,\n  \"Status\" : false\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "modules/apimodule/controllers/front/orders.php",
+    "groupTitle": "Orders"
+  },
+  {
+    "type": "get",
+    "url": "index.php?action=status_update&fc=module&module=apimodule&controller=orders",
+    "title": "getOrderPaymentAndDelivery",
+    "name": "getOrderPaymentAndDelivery",
+    "group": "Orders",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "order_id",
+            "description": "<p>unique order ID.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Token",
+            "optional": false,
+            "field": "token",
+            "description": "<p>your unique token.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "version",
+            "description": "<p>Current API version.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "status_id",
+            "description": "<p>Status id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "order_id",
+            "description": "<p>Order id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "inform",
+            "description": "<p>Inform.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n\n {\n     \"status\": true,\n     \"version\": 1.0\n }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "\n {\n   \"error\": \"Can not found order with id = 90\",\n   \"version\": 1.0,\n   \"Status\" : false\n}",
           "type": "json"
         }
       ]
