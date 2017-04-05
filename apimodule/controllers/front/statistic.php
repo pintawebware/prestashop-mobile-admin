@@ -44,19 +44,21 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 		if ( $this->valid() && ! empty( $filter  )) {
 				$this->getStat( $filter );
 		}
+		$this->errors[] = 'Filter empty!';
+		$this->return['error']    = $this->errors;
 		header( 'Content-Type: application/json' );
 		die( Tools::jsonEncode( $this->return ) );
 	}
 
 	private function valid() {
 		$token = trim( Tools::getValue( 'token' ) );
-		if ( ! empty( $token ) ) {
+		if ( empty( $token ) ) {
 			$this->errors[] = 'You need to be logged!';
 			return false;
 		} else {
 			$results = $this->getTokens( $token );
-			if ( $results ) {
-				$this->errors = 'Your token is no longer relevant!';
+			if ( !$results ) {
+				$this->errors[] = 'Your token is no longer relevant!';
 				return false;
 			}
 		}

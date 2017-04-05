@@ -348,7 +348,6 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 			return true;
 		}else{
 			$this->errors[] = "Error setUserToken user_id=".$user_id." token = ".$token;
-			//$this->errors[] = $insert;
 		}
 	}
 

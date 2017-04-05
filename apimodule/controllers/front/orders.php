@@ -58,12 +58,12 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
 	private function valid() {
 		$token = trim( Tools::getValue( 'token' ) );
-		if ( ! empty( $token ) ) {
+		if ( empty( $token ) ) {
 			$this->errors[] = 'You need to be logged!';
 			return false;
 		} else {
 			$results = $this->getTokens( $token );
-			if ( $results ) {
+			if (!$results ) {
 				$this->errors = 'Your token is no longer relevant!';
 				return false;
 			}
@@ -236,17 +236,17 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
 		}
 
-		$this->return['total_quantity'] = $quantity;
-		$this->return['currency_code'] = Context::getContext()->currency->iso_code;
-		$this->return['total_sum'] = number_format($sum, 2, '.', '');
-		$this->return['orders'] = $orders_to_response;
-		$this->return['max_price'] = $this->getMaxOrderPrice();
+		$this->return['response']['total_quantity'] = $quantity;
+		$this->return['response']['currency_code'] = Context::getContext()->currency->iso_code;
+		$this->return['response']['total_sum'] = number_format($sum, 2, '.', '');
+		$this->return['response']['orders'] = $orders_to_response;
+		$this->return['response']['max_price'] = $this->getMaxOrderPrice();
 		$statuses = $this->OrderStatusList();
-		$this->return['statuses'] = $statuses;
-		$this->return['api_version'] = $this->API_VERSION;
+		$this->return['response']['statuses'] = $statuses;
+		$this->return['response']['api_version'] = $this->API_VERSION;
 
 		$this->return['version'] = $this->API_VERSION;
-		$this->return['response'] = $response;
+
 		$this->return['status'] = true;
 
 		$this->return['errors'] = $this->errors;
@@ -325,7 +325,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	public function getOrderProducts()
 	{
 		$id = trim( Tools::getValue( 'order_id' ) );
-
+		$this->return['status'] = false;
 		if (!empty($id)) {
 			$order = new Order($id);
 			$products = $order->getProducts();
@@ -379,28 +379,21 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					'total' => $total_price + $shipping_price
 				);
 
-				$this->return['version'] = $this->API_VERSION;
 				$this->return['response'] = $data;
 				$this->return['status'] = true;
 
-				$this->return['errors'] = $this->errors;
-				header('Content-Type: application/json');
-				die(Tools::jsonEncode($this->return));
 			} else {
-				$this->return['errors'] = 'Can not found any products in order with id = ' . $id;
-				header('Content-Type: application/json');
-				die(Tools::jsonEncode($this->return));
+				$this->return['errors'][] = 'Can not found any products in order with id = ' . $id;
+
 			}
 		} else {
 
-			$this->return['version'] = $this->API_VERSION;
-			$this->return['status'] = false;
-
-			$this->return['errors'] = 'You have not specified ID';
-			header('Content-Type: application/json');
-			die(Tools::jsonEncode($this->return));
+			$this->return['errors'][] = 'You have not specified ID';
 		}
 
+		$this->return['version'] = $this->API_VERSION;
+		header('Content-Type: application/json');
+		die(Tools::jsonEncode($this->return));
 	}
 
 	/**

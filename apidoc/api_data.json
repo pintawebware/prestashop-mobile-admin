@@ -199,6 +199,344 @@
   },
   {
     "type": "get",
+    "url": "index.php?action=list&fc=module&module=apimodule&controller=clients",
+    "title": "getClients",
+    "name": "GetClients",
+    "group": "Clients",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Token",
+            "optional": false,
+            "field": "token",
+            "description": "<p>your unique token.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "page",
+            "description": "<p>number of the page.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "limit",
+            "description": "<p>limit of the orders for the page.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "fio",
+            "description": "<p>full name of the client.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "sort",
+            "description": "<p>param for sorting clients(sum/quantity/date_add).</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "version",
+            "description": "<p>Current API version.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "client_id",
+            "description": "<p>ID of the client.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "fio",
+            "description": "<p>Client's FIO.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "total",
+            "description": "<p>Total sum of client's orders.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "currency_code",
+            "description": "<p>Default currency of the shop.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "quantity",
+            "description": "<p>Total quantity of client's orders.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "    HTTP/1.1 200 OK\n{\n  \"Response\"\n  {\n    \"clients\"\n     {\n         {\n             \"client_id\" : \"88\",\n             \"fio\" : \"Anton Kiselev\",\n             \"total\" : \"1006.00\",\n             \"currency_code\": \"UAH\",\n             \"quantity\" : \"5\"\n         },\n         {\n             \"client_id\" : \"10\",\n             \"fio\" : \"Vlad Kochergin\",\n             \"currency_code\": \"UAH\",\n             \"total\" : \"555.00\",\n             \"quantity\" : \"1\"\n         }\n     }\n   },\n   \"Status\" : true,\n   \"version\": 1.0\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "{\n     \"Error\" : \"Not one client found\",\n     \"version\": 1.0,\n     \"Status\" : false\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "modules/apimodule/controllers/front/clients.php",
+    "groupTitle": "Clients"
+  },
+  {
+    "type": "get",
+    "url": "index.php?action=info&fc=module&module=apimodule&controller=clients",
+    "title": "getClientInfo",
+    "name": "getClientInfo",
+    "group": "Clients",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Token",
+            "optional": false,
+            "field": "token",
+            "description": "<p>your unique token.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "client_id",
+            "description": "<p>unique client ID.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "version",
+            "description": "<p>Current API version.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "client_id",
+            "description": "<p>ID of the client.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "fio",
+            "description": "<p>Client's FIO.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "total",
+            "description": "<p>Total sum of client's orders.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "quantity",
+            "description": "<p>Total quantity of client's orders.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "email",
+            "description": "<p>Client's email.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "telephone",
+            "description": "<p>Client's telephone.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "cancelled",
+            "description": "<p>Total quantity of cancelled orders.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "completed",
+            "description": "<p>Total quantity of completed orders.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "    HTTP/1.1 200 OK\n{\n  \"Response\"\n  {\n        \"client_id\" : \"88\",\n        \"fio\" : \"Anton Kiselev\",\n        \"total\" : \"1006.00\",\n        \"quantity\" : \"5\",\n        \"cancelled\" : \"1\",\n        \"completed\" : \"2\",\n        \"email\" : \"client@mail.ru\",\n        \"telephone\" : \"13456789\"\n  },\n  \"Status\" : true,\n  \"version\": 1.0\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "{\n     \"Error\" : \"Not one client found\",\n     \"version\": 1.0,\n     \"Status\" : false\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "modules/apimodule/controllers/front/clients.php",
+    "groupTitle": "Clients"
+  },
+  {
+    "type": "get",
+    "url": "index.php?action=orders&fc=module&module=apimodule&controller=clients",
+    "title": "getClientOrders",
+    "name": "getClientOrders",
+    "group": "Clients",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Token",
+            "optional": false,
+            "field": "token",
+            "description": "<p>your unique token.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "client_id",
+            "description": "<p>unique client ID.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "sort",
+            "description": "<p>param for sorting orders(total/date_add/completed/cancelled).</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "version",
+            "description": "<p>Current API version.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "id_order",
+            "description": "<p>ID of the order.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "order_number",
+            "description": "<p>Number of the order.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "status",
+            "description": "<p>Status of the order.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "currency_code",
+            "description": "<p>Default currency of the shop.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "total",
+            "description": "<p>Total sum of the order.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "date_add",
+            "description": "<p>Date added of the order.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "    HTTP/1.1 200 OK\n{\n  \"Response\"\n  {\n      \"orders\":\n         {\n            \"id_order\" : \"1\",\n            \"order_number\" : \"1\",\n            \"status\" : 1,\n            \"currency_code\": \"UAH\",\n            \"total\" : \"106.00\",\n            \"date_add\" : \"2016-12-09 16:17:02\"\n         },\n         {\n            \"id_order\" : \"2\",\n            \"currency_code\": \"UAH\",\n            \"order_number\" : \"2\",\n            \"status\" : 2,\n            \"total\" : \"506.00\",\n            \"date_add\" : \"2016-10-19 16:00:00\"\n         }\n         \"statuses\" :\n                 {\n                        {\n                            \"name\": \"Отменено\",\n                            \"id_order_state\": \"7\",\n                            \"id_lang\": \"1\"\n                        },\n                        {\n                            \"name\": \"Сделка завершена\",\n                            \"id_order_state\": \"5\",\n                            \"id_lang\": \"1\"\n                         },\n                         {\n                             \"name\": \"Ожидание\",\n                             \"id_order_state\": \"1\",\n                             \"id_lang\": \"1\"\n                          }\n                   }\n   },\n   \"Status\" : true,\n   \"version\": 1.0\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "{\n     \"Error\" : \"You have not specified ID\",\n     \"version\": 1.0,\n     \"Status\" : false\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "modules/apimodule/controllers/front/clients.php",
+    "groupTitle": "Clients"
+  },
+  {
+    "type": "get",
     "url": "/index.php?action=list&fc=module&module=apimodule&controller=orders",
     "title": "getOrders",
     "name": "GetOrders",
