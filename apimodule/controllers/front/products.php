@@ -39,11 +39,11 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      */
     public function initContent()
     {
-        $return = ['status'=>false];
+        $this->return['status'] = false;
+        if(isset($_GET['action']) && $this->valid()){
 
-        if(isset($_GET['action'])){
             $action = $_GET['action'];
-            switch ($action){
+            switch ($action) {
                 case 'products':
                     $this->products();
                     break;
@@ -52,16 +52,14 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
                     break;
             }
         }
-
-        header('Content-Type: application/json');
-        die(Tools::jsonEncode($return));
+        $this->errors[] = "No action";
+        header( 'Content-Type: application/json' );
+        die( Tools::jsonEncode( $this->return ) );
     }
 
     public function products(){
 
         $return['status'] = false;
-
-        $token = trim(Tools::getValue('token'));
         $page = trim(Tools::getValue('page'));
         $limit = trim(Tools::getValue('limit'));
         $name = trim(Tools::getValue('name'));
@@ -120,12 +118,9 @@ WHERE p.id_product = ".$product['id_product'])['quantity'];
 
         $id_lang = $this->context->language->id;
         $product = new Product(1,false,$id_lang);
-        $images = $product->getImages();
-        foreach ($images as $image) {
-            $imagesPath[] = _PS_BASE_URL_._THEME_PROD_DIR_.Link::getImageLink($product->link_rewrite, $image['id_image'], 'home_default');
-        }
-        if ($product->id !== null) {
 
+        if ($product->id !== null) {
+                $data['images'] = [];
                 $data['product_id'] = $product->id;
                 $data['model'] = $product->reference;
                 $data['quantity'] =  Db::getInstance()->getRow(" SELECT p.id_product, sa.quantity FROM ps_product p
@@ -133,8 +128,12 @@ WHERE p.id_product = ".$product['id_product'])['quantity'];
 INNER JOIN ps_stock_available sa ON p.id_product = sa.id_product AND id_product_attribute = 0
  
 WHERE p.id_product = ".$product->id)['quantity'];
-
-                $data['images'] = $imagesPath;
+            $images = $product->getImages();
+            if(count($images) > 0){
+                foreach ($images as $image) {
+                    $data['images'][] = Link::getImageLink($product->link_rewrite, $image['id_image'], 'home_default');
+                }
+            }
 
                 $data['price'] = number_format($product->price, 2, '.', '');
                 $data['name'] = $product->name;
@@ -154,5 +153,31 @@ WHERE p.id_product = ".$product->id)['quantity'];
 
         header('Content-Type: application/json');
         die(Tools::jsonEncode($return));
+    }
+    private function valid() {
+        $token = trim( Tools::getValue( 'token' ) );
+        if ( empty( $token ) ) {
+            $this->errors[] = 'You need to be logged!';
+            return false;
+        } else {
+            $results = $this->getTokens( $token );
+            if (!$results ) {
+                $this->errors = 'Your token is no longer relevant!';
+                return false;
+            }
+        }
+
+        return true;
+    }
+    public function getTokens($token){
+        $sql = "SELECT * FROM " . _DB_PREFIX_ . "apimodule_user_token
+		        WHERE token = '".$token."'";
+
+        if ($row = Db::getInstance()->getRow($sql)){
+            return $row;
+        }
+        else{
+            return false;
+        }
     }
 }
