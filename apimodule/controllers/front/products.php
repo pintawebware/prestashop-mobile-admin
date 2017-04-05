@@ -44,7 +44,12 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
         if(isset($_GET['action'])){
             $action = $_GET['action'];
             switch ($action){
-                case 'products':$this->products();
+                case 'products':
+                    $this->products();
+                    break;
+                case 'getproductbyid':
+                    $this->getProductById();
+                    break;
             }
         }
 
@@ -108,54 +113,46 @@ WHERE p.id_product = ".$product['id_product'])['quantity'];
         die(Tools::jsonEncode($return));
     }
 
-    public function getUserDevices($user_id,$device_token) {
+    public function getProductById() {
 
-        $sql = "SELECT device_token,os_type FROM " . _DB_PREFIX_ . "apimodule_user_device 
-		        WHERE user_id = '".$user_id."' and device_token = '".$device_token."'";
+        $return['status'] = false;
+        $product_id = trim(Tools::getValue('product_id'));
 
-        if ($row = Db::getInstance()->getRow($sql)){
-            return $row;
+        $id_lang = $this->context->language->id;
+        $product = new Product(1,false,$id_lang);
+        $images = $product->getImages();
+        foreach ($images as $image) {
+            $imagesPath[] = _PS_BASE_URL_._THEME_PROD_DIR_.Link::getImageLink($product->link_rewrite, $image['id_image'], 'home_default');
         }
-        else{
-            return false;
-        }
-    }
+        if ($product->id !== null) {
 
-    public function setUserDeviceToken($user_id,$token,$os_type){
+                $data['product_id'] = $product->id;
+                $data['model'] = $product->reference;
+                $data['quantity'] =  Db::getInstance()->getRow(" SELECT p.id_product, sa.quantity FROM ps_product p
+ 
+INNER JOIN ps_stock_available sa ON p.id_product = sa.id_product AND id_product_attribute = 0
+ 
+WHERE p.id_product = ".$product->id)['quantity'];
 
-        $insert = Db::getInstance()->insert('apimodule_user_device', array(
-            'user_id' => (int)$user_id,
-            'device_token'      => $token,
-            'os_type'      => $os_type
-        ));
-        if($insert){
-            return true;
+                $data['images'] = $imagesPath;
+
+                $data['price'] = number_format($product->price, 2, '.', '');
+                $data['name'] = $product->name;
+                global $currency;
+                $data['currency_code'] = $currency->iso_code;
+
+
         }else{
-            $this->errors[] = "Error setUserDeviceToken";
+            $return['errors'][] = 'Can non fid product with id = '.$product_id;
         }
-    }
-    public function getUserToken($user_id){
-        $sql = "SELECT * FROM " . _DB_PREFIX_ . "apimodule_user_token
-		        WHERE user_id = '".$user_id."'";
 
-        if ($row = Db::getInstance()->getRow($sql)){
-            return $row;
+        if(!count($return['errors'])){
+            $return['status'] = true;
         }
-        else{
-            return false;
-        }
-    }
-    public function setUserToken($user_id,$token){
-        $insert = Db::getInstance()->insert('apimodule_user_token', array(
-            'user_id' => (int)$user_id,
-            'token'      => $token
-        ));
+        $return['version'] = $this->API_VERSION;
+        $return['product'] = $data;
 
-        if($insert){
-            return true;
-        }else{
-            $this->errors[] = "Error setUserToken user_id=".$user_id." token = ".$token;
-            $this->errors[] = $insert;
-        }
+        header('Content-Type: application/json');
+        die(Tools::jsonEncode($return));
     }
 }
