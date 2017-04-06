@@ -774,86 +774,6 @@
   },
   {
     "type": "get",
-    "url": "index.php?action=delivery_update&fc=module&module=apimodule&controller=orders",
-    "title": "ChangeOrderDelivery",
-    "name": "ChangeOrderDelivery",
-    "group": "Orders",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "address",
-            "description": "<p>New shipping address.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "city",
-            "description": "<p>New shipping city.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "order_id",
-            "description": "<p>unique order ID.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Token",
-            "optional": false,
-            "field": "token",
-            "description": "<p>your unique token.</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "Number",
-            "optional": false,
-            "field": "version",
-            "description": "<p>Current API version.</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "Boolean",
-            "optional": false,
-            "field": "response",
-            "description": "<p>Status of change address.</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "  HTTP/1.1 200 OK\n{\n      \"status\": true,\n      \"version\": 1.0\n }",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "examples": [
-        {
-          "title": "Error-Response:",
-          "content": "\n{\n  \"error\": \"Can not change address\",\n  \"version\": 1.0,\n  \"Status\" : false\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "modules/apimodule/controllers/front/orders.php",
-    "groupTitle": "Orders"
-  },
-  {
-    "type": "get",
     "url": "/index.php?action=list&fc=module&module=apimodule&controller=orders",
     "title": "getOrders",
     "name": "GetOrders",
@@ -1255,86 +1175,6 @@
   },
   {
     "type": "get",
-    "url": "index.php?action=status_update&fc=module&module=apimodule&controller=orders",
-    "title": "getOrderPaymentAndDelivery",
-    "name": "getOrderPaymentAndDelivery",
-    "group": "Orders",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "order_id",
-            "description": "<p>unique order ID.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Token",
-            "optional": false,
-            "field": "token",
-            "description": "<p>your unique token.</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "Number",
-            "optional": false,
-            "field": "version",
-            "description": "<p>Current API version.</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "String",
-            "optional": false,
-            "field": "status_id",
-            "description": "<p>Status id.</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "String",
-            "optional": false,
-            "field": "order_id",
-            "description": "<p>Order id.</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "String",
-            "optional": false,
-            "field": "inform",
-            "description": "<p>Inform.</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n\n {\n     \"status\": true,\n     \"version\": 1.0\n }",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "examples": [
-        {
-          "title": "Error-Response:",
-          "content": "\n {\n   \"error\": \"Can not found order with id = 90\",\n   \"version\": 1.0,\n   \"Status\" : false\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "modules/apimodule/controllers/front/orders.php",
-    "groupTitle": "Orders"
-  },
-  {
-    "type": "get",
     "url": "/index.php?action=pad&fc=module&module=apimodule&controller=orders",
     "title": "getOrderPaymentAndDelivery",
     "name": "getOrderPaymentAndDelivery",
@@ -1569,6 +1409,166 @@
         {
           "title": "Error-Response:",
           "content": "\n{\n     \"error\": \"Can not found any products in order with id = 10\",\n     \"version\": 1.0,\n     \"Status\" : false\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "modules/apimodule/controllers/front/orders.php",
+    "groupTitle": "Orders"
+  },
+  {
+    "type": "get",
+    "url": "index.php?action=delivery_update&fc=module&module=apimodule&controller=orders",
+    "title": "changeOrderDelivery",
+    "name": "update_Order_Delivery",
+    "group": "Orders",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "address",
+            "description": "<p>New shipping address.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "city",
+            "description": "<p>New shipping city.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "order_id",
+            "description": "<p>unique order ID.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Token",
+            "optional": false,
+            "field": "token",
+            "description": "<p>your unique token.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "version",
+            "description": "<p>Current API version.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "response",
+            "description": "<p>Status of change address.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "  HTTP/1.1 200 OK\n{\n      \"status\": true,\n      \"version\": 1.0\n }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "\n{\n  \"error\": \"Can not change address\",\n  \"version\": 1.0,\n  \"Status\" : false\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "modules/apimodule/controllers/front/orders.php",
+    "groupTitle": "Orders"
+  },
+  {
+    "type": "get",
+    "url": "index.php?action=status_update&fc=module&module=apimodule&controller=orders",
+    "title": "statusUpdate",
+    "name": "update_Order_Status",
+    "group": "Orders",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "order_id",
+            "description": "<p>unique order ID.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Token",
+            "optional": false,
+            "field": "token",
+            "description": "<p>your unique token.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "version",
+            "description": "<p>Current API version.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "status_id",
+            "description": "<p>Status id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "order_id",
+            "description": "<p>Order id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "inform",
+            "description": "<p>Inform.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n\n {\n     \"status\": true,\n     \"version\": 1.0\n }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "\n {\n   \"error\": \"Can not found order with id = 90\",\n   \"version\": 1.0,\n   \"Status\" : false\n}",
           "type": "json"
         }
       ]

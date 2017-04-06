@@ -796,8 +796,8 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	}
 
 	/**
-	 * @api {get} index.php?action=status_update&fc=module&module=apimodule&controller=orders  getOrderPaymentAndDelivery
-	 * @apiName getOrderPaymentAndDelivery
+	 * @api {get} index.php?action=status_update&fc=module&module=apimodule&controller=orders  statusUpdate
+	 * @apiName update Order Status
 	 * @apiGroup Orders
 	 *
 	 * @apiParam {Number} order_id unique order ID.
@@ -870,9 +870,9 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	}
 
 	/**
-	 * @api {get} index.php?action=delivery_update&fc=module&module=apimodule&controller=orders  ChangeOrderDelivery
-	 * @apiName ChangeOrderDelivery
-	 * @apiGroup All
+	 * @api {get} index.php?action=delivery_update&fc=module&module=apimodule&controller=orders  changeOrderDelivery
+	 * @apiName update Order Delivery
+	 * @apiGroup Orders
 	 *
 	 * @apiParam {String} address New shipping address.
 	 * @apiParam {String} city New shipping city.

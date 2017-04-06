@@ -40,7 +40,7 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
     public function initContent()
     {
         $this->return['status'] = false;
-        if(isset($_GET['action']) && $this->valid()){
+        if(isset($_GET['action']) /*&& $this->valid()*/){
 
             $action = $_GET['action'];
             switch ($action) {
@@ -132,35 +132,50 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
         }
 
         $id_lang = $this->context->language->id;
-        $productObj = new Product();
-        $products = $productObj -> getProducts($id_lang, $page, $limit, 'id_product', 'DESC' );
-        $to_response = [];
-        if (count($products) > 0) {
-            foreach ($products as $product) {
-                $data['product_id'] = $product['id_product'];
-                $data['model'] = $product['reference'];
-                $data['quantity'] =  Db::getInstance()->getRow(" SELECT p.id_product, sa.quantity FROM ps_product p
- 
-INNER JOIN ps_stock_available sa ON p.id_product = sa.id_product AND id_product_attribute = 0
- 
-WHERE p.id_product = ".$product['id_product'])['quantity'];
+        if(empty($name)) {
+	        $productObj  = new Product();
+	        $products    = $productObj->getProducts( $id_lang, $page, $limit, 'id_product', 'DESC' );
+	        $to_response = [];
+	        if ( count( $products ) > 0 ) {
+		        foreach ( $products as $product ) {
+			        $data['product_id'] = $product['id_product'];
+			        $data['model']      = $product['reference'];
+			        $data['quantity']   = Db::getInstance()->getRow( " SELECT p.id_product, sa.quantity FROM ps_product p
+	INNER JOIN ps_stock_available sa ON p.id_product = sa.id_product AND id_product_attribute = 0	 
+	WHERE p.id_product = " . $product['id_product'] )['quantity'];
 
-                $idImage = Db::getInstance()->getRow("SELECT id_image FROM ps_image WHERE cover = 1 AND id_product =  ".$product['id_product'])['id_image'];
-                $imgPath = '';
-                for ($i = 0; $i < strlen($idImage); $i++) {
-                    $imgPath .= $idImage[$i] . '/';
-                }
-                $imgPath .= $idImage . '.jpg';
-                $data['image'] = _PS_BASE_URL_._THEME_PROD_DIR_.$imgPath;
+			        $idImage = Db::getInstance()->getRow( "SELECT id_image FROM ps_image WHERE cover = 1 AND id_product =  " . $product['id_product'] )['id_image'];
+			        $imgPath = '';
+			        for ( $i = 0; $i < strlen( $idImage ); $i ++ ) {
+				        $imgPath .= $idImage[ $i ] . '/';
+			        }
+			        $imgPath .= $idImage . '.jpg';
+			        $data['image'] = _PS_BASE_URL_ . _THEME_PROD_DIR_ . $imgPath;
 
-                $data['price'] = number_format($product['price'], 2, '.', '');
-                $data['name'] = $product['name'];
-                global $currency;
-                $data['currency_code'] = $currency->iso_code;
-                $to_response[] = $data;
-            }
+			        $data['price'] = number_format( $product['price'], 2, '.', '' );
+			        $data['name']  = $product['name'];
+			        global $currency;
+			        $data['currency_code'] = $currency->iso_code;
+			        $to_response[]         = $data;
+		        }
+	        }
+        }else{
+	        $products = $this->getProductsList($page, $limit, $name);
+	        foreach ( $products as $product ) {
+		        $data['product_id'] = $product['id_product'];
+		        $data['model']      = $product['reference'];
+		        $data['quantity']   = $product['quantity'];
+		        $image = Image::getCover($product['product_id']);
+		        $imagePath = Link::getImageLink($product->link_rewrite, $image['id_image'], 'home_default');
+		        $data['image'] = $imagePath;
+
+		        $data['price'] = number_format( $product['price'], 2, '.', '' );
+		        $data['name']  = $product['name'];
+		        global $currency;
+		        $data['currency_code'] = $currency->iso_code;
+		        $to_response[]         = $data;
+	        }
         }
-
         if(!count($return['errors'])){
             $return['status'] = true;
             $return['response']['products'] = $to_response;
@@ -269,6 +284,23 @@ WHERE p.id_product = ".$product->id)['quantity'];
         header('Content-Type: application/json');
         die(Tools::jsonEncode($return));
     }
+
+	public function getProductsList ($page, $limit, $name = '')
+	{
+		$sql = "SELECT p.id_product, p.reference, p.quantity,  p.price, pl.name
+					FROM " . _DB_PREFIX_ . "product AS p 
+					LEFT JOIN " . _DB_PREFIX_ . "product_lang pl ON p.id_product = pl.id_product 
+					WHERE pl.id_lang = 1 " ;
+		if($name != ''){
+			$sql .= " AND (pl.name LIKE '%" .$name. "%' OR p.reference LIKE '%" .$name. "%')";
+		}
+		$sql .= " LIMIT " . (int)$limit . " OFFSET " . (int)$page;
+
+		$results = Db::getInstance()->ExecuteS( $sql );
+
+		return $results;
+	}
+
     private function valid() {
         $token = trim( Tools::getValue( 'token' ) );
         if ( empty( $token ) ) {
