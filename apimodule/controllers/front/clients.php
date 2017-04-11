@@ -224,6 +224,7 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 	 */
 	public function getClientsInfo()
 	{
+
 		$id = trim( Tools::getValue( 'client_id' ) );
 		$this->return['status'] = false;
 		if (!empty($id)) {
@@ -232,7 +233,8 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 				$data['client_id'] = $client['id_customer'];
 				$data['fio'] = $client['firstname'] . ' ' . $client['lastname'];
 				$data['email'] = $client['email'];
-				$data['telephone'] = $client['telephone'];
+
+				$data['telephone'] = $this->getPhones($id);
 
 				$data['total'] = number_format($client['sum'], 2, '.', '');
 				$data['quantity'] = $client['quantity'];
@@ -255,6 +257,18 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 		die(Tools::jsonEncode($this->return));
 	}
 
+	private function getPhones($id){
+		$id_lang = $this->context->language->id;
+		$customer = new Customer($id);
+		$array = $customer->getAddresses($id_lang);
+		$phones = [];
+		foreach ($array  as $item ) {
+			if(!in_array($item['phone'],$phones)) {
+				$phones[] = $item['phone'];
+			}
+		}
+		return $phones;
+	}
 	/**
 	 * @api {get} index.php?action=orders&fc=module&module=apimodule&controller=clients  getClientOrders
 	 * @apiName getClientOrders

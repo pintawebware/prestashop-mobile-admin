@@ -31,7 +31,7 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 	public $ssl = true;
 	public $display_column_left = false;
 	public $header = false;
-	public $errors = [];
+	public $errors = '';
 	public $API_VERSION = 1.8;
 	public $return = [];
 
@@ -41,7 +41,7 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 	public function initContent() {
 		$this->return['status'] = false;
 		$filter                 = trim( Tools::getValue( 'filter' ) );
-		if ( $this->valid() && ! empty( $filter  )) {
+		if ( /*$this->valid() &&*/ ! empty( $filter  )) {
 				$this->getStat( $filter );
 		}
 		$this->errors[] = 'Filter empty!';
@@ -62,7 +62,6 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 				return false;
 			}
 		}
-
 		return true;
 	}
 	public function getTokens($token){
@@ -148,7 +147,7 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 		$clients = $this->getTotalCustomers( array( 'filter' => $filter ) );
 		$orders  = $this->getTotalOrders( array( 'filter' => $filter ) );
 
-		if ( $clients === false && $orders === false ) {
+		if ( $clients === false /*&& $orders === false*/ ) {
 
 			$this->return['error']  = 'Unknown filter set';
 			$this->return['status'] = false;
@@ -161,7 +160,7 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 			$orders_for_time  = [];
 			if ( $filter == 'month' ) {
 				$days  = cal_days_in_month( CAL_GREGORIAN, date( 'm' ), date( 'Y' ) );
-				$hours = $days;
+				$hours = range( 1, $days );
 				for ( $i = 1; $i <= $days; $i ++ ) {
 					$b = 0;
 					$o = 0;
@@ -299,9 +298,9 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 
 		$data['sale_year_total'] = number_format( $sale_year_total, 2, '.', '' );
 		$orders_total            = $this->getTotalOrders();
-		$data['orders_total']    = $orders_total[0]['COUNT(*)'];
+		$data['orders_total']    = $orders_total['cnt'];
 		$clients_total           = $this->getTotalCustomers();
-		$data['clients_total']   = $clients_total[0]['COUNT(*)'];
+		$data['clients_total']   = $clients_total['cnt'];
 		$data['currency_code']   = Context::getContext()->currency->iso_code;
 
 		$this->return['error']    = $this->errors;
@@ -314,9 +313,10 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 
 	public function getTotalOrders( $data = array() ) {
 
-		$sql = "SELECT date_add FROM `" . _DB_PREFIX_ . "orders` as o
+		$sql = "SELECT  count(*) as cnt  FROM `" . _DB_PREFIX_ . "orders` as o
 		            INNER JOIN " . _DB_PREFIX_ . "order_history as oh ON o.id_order=oh.id_order 
 		            WHERE oh.id_order_state > '0'";
+
 		if ( isset( $data['filter'] ) ) {
 			if ( $data['filter'] == 'day' ) {
 				$sql .= " AND DATE(o.date_add) = DATE(NOW())";
@@ -333,8 +333,8 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 				return false;
 			}
 		}
-		//echo $sql;
-		$results = Db::getInstance()->ExecuteS( $sql );
+
+		$results = Db::getInstance()->getRow( $sql );
 
 		return $results;
 	}
@@ -342,7 +342,7 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 	public function getTotalCustomers( $data = array() ) {
 
 		if ( isset( $data['filter'] ) ) {
-			$sql = "SELECT date_add FROM `" . _DB_PREFIX_ . "customer` ";
+			$sql = "SELECT count(*) as cnt FROM `" . _DB_PREFIX_ . "customer` ";
 			if ( $data['filter'] == 'day' ) {
 				$sql .= " WHERE DATE(date_add) = DATE(NOW())";
 			} elseif ( $data['filter'] == 'week' ) {
@@ -356,10 +356,10 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 				return false;
 			}
 		} else {
-			$sql = "SELECT COUNT(*) FROM `" . _DB_PREFIX_ . "customer` ";
+			$sql = "SELECT COUNT(*) as cnt FROM `" . _DB_PREFIX_ . "customer` ";
 		}
 		//echo $sql;
-		$results = Db::getInstance()->ExecuteS( $sql );
+		$results = Db::getInstance()->getRow( $sql );
 
 		return $results;
 	}

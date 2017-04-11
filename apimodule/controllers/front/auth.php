@@ -78,9 +78,9 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 	 * @apiParam {String} username User unique username.
 	 * @apiParam {Number} password User's  password.
 	 * @apiParam {String} device_token User's device's token for firebase notifications.
+	 * @apiParam {String} os_type android|ios
 	 *
 	 * @apiSuccess {Number} version  Current API version.
-	 * @apiSuccess {String} token  Token.
 	 * @apiSuccess {String} token  Token.
 	 *
 	 * @apiSuccessExample Success-Response:
@@ -107,7 +107,7 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 	public function login(){
 
 		$this->return = false;
-
+$this->return['errors'] = [];
 		$passwd = trim(Tools::getValue('password'));
 		$email = trim(Tools::getValue('email'));
 		if (empty($email)) {
@@ -169,9 +169,11 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 			$this->return['version'] = $this->API_VERSION;
 			$this->return['response'] = ['token' => $token];
 			$this->return['status'] = true;
+		}else{
+			$this->return['errors'] = $this->errors;
 		}
 
-		$this->return['errors'] = $this->errors;
+		
 		header('Content-Type: application/json');
 		die(Tools::jsonEncode($this->return));
 	}
@@ -332,7 +334,7 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 		        WHERE user_id = '".$user_id."'";
 
 		if ($row = Db::getInstance()->getRow($sql)){
-			return $row;
+			return $row['token'];
 		}
 		else{
 			return false;
