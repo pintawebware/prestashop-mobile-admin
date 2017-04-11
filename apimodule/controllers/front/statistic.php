@@ -147,7 +147,7 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 		$clients = $this->getTotalCustomers( array( 'filter' => $filter ) );
 		$orders  = $this->getTotalOrders( array( 'filter' => $filter ) );
 
-		if ( $clients === false /*&& $orders === false*/ ) {
+		if ( $clients === false && $orders === false ) {
 
 			$this->return['error']  = 'Unknown filter set';
 			$this->return['status'] = false;

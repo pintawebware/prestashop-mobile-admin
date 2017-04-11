@@ -40,7 +40,7 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
     public function initContent()
     {
         $this->return['status'] = false;
-        if(isset($_GET['action']) /*&& $this->valid()*/){
+        if(isset($_GET['action']) && $this->valid()){
 
             $action = $_GET['action'];
             switch ($action) {

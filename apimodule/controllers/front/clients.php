@@ -262,9 +262,11 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 		$customer = new Customer($id);
 		$array = $customer->getAddresses($id_lang);
 		$phones = [];
+		//var_dump($array);
 		foreach ($array  as $item ) {
 			if(!in_array($item['phone'],$phones)) {
-				$phones[] = $item['phone'];
+				$trim = trim($item['phone']);
+				$phones[] = str_replace(' ','-',$trim);
 			}
 		}
 		return $phones;
@@ -432,8 +434,8 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 		}
 		$sql .= " group by c.id_customer";
 
-		if(isset($data['order']) && $data['order'] != ''){
-			$sql .= " ORDER BY ". $data['order'] ." DESC";
+		if(isset($data['sort']) && $data['sort'] != ''){
+			$sql .= " ORDER BY ". $data['sort'] ." DESC";
 		}
 
 		$sql .= " LIMIT " . (int)$data['limit'] . " OFFSET " . (int)$data['page'];

@@ -616,7 +616,9 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					$data['email'] = '';
 				}
 				if (!empty($oad->phone)) {
-					$data['telephone'] = $oad->phone;
+					$trim = trim($oad->phone);
+					$phone = str_replace(' ','-',$trim);
+					$data['telephone'] = $phone;
 				} else {
 					$data['telephone'] = '';
 				}
