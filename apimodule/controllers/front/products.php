@@ -33,7 +33,7 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
     public $display_column_left = false;
     public $header = false;
     public $errors =[];
-    public $API_VERSION = 1.8;
+    public $API_VERSION = 1.0;
     /**
      * @see FrontController::initContent()
      */
@@ -52,7 +52,7 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
                     break;
             }
         }
-        $this->errors[] = "No action";
+        $this->return['error'] = "No action";
         header( 'Content-Type: application/json' );
         die( Tools::jsonEncode( $this->return ) );
     }
@@ -130,12 +130,12 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
             $page = 0;
             $limit = 10;
         }
-
+ $to_response = [];
         $id_lang = $this->context->language->id;
         if(empty($name)) {
 	        $productObj  = new Product();
 	        $products    = $productObj->getProducts( $id_lang, $page, $limit, 'id_product', 'DESC' );
-	        $to_response = [];
+	       
 	        if ( count( $products ) > 0 ) {
 		        foreach ( $products as $product ) {
 			        $data['product_id'] = $product['id_product'];
@@ -165,8 +165,12 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
 		        $data['product_id'] = $product['id_product'];
 		        $data['model']      = $product['reference'];
 		        $data['quantity']   = $product['quantity'];
-		        $image = Image::getCover($product['product_id']);
-		        $imagePath = Link::getImageLink($product->link_rewrite, $image['id_image'], 'home_default');
+		     
+		        $p = new Product($product['id_product']);
+		        $image = Image::getCover( $p->id );
+
+		        $imagePath = Link::getImageLink($p->link_rewrite, $image['id_image'], 'home_default');
+
                 $protocol = Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://'; 
 		        $data['image'] = $protocol.$imagePath;
 
@@ -275,10 +279,10 @@ WHERE p.id_product = ".$product->id)['quantity'];
 
 
         }else{
-            $return['errors'][] = 'Can non fid product with id = '.$product_id;
+            $return['error'] = 'Can non fid product with id = '.$product_id;
         }
 
-        if(!count($return['errors'])){
+        if(!count($return['error'])){
             $return['status'] = true;
             $return['response'] = $data;
         }

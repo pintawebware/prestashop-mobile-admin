@@ -31,8 +31,8 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	public $ssl = true;
 	public $display_column_left = false;
 	public $header = false;
-	public $errors = [];
-	public $API_VERSION = 1.8;
+	public $errors = '';
+	public $API_VERSION = 1.0;
 	public $return = [];
 
 	/**
@@ -53,7 +53,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 				case 'delivery_update':$this->changeOrderDelivery();break;
 			}
 		}
-		$this->errors[] = "No action";
+		$this->errors = "No action";
 		header( 'Content-Type: application/json' );
 		die( Tools::jsonEncode( $this->return ) );
 	}
@@ -61,7 +61,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	private function valid() {
 		$token = trim( Tools::getValue( 'token' ) );
 		if ( empty( $token ) ) {
-			$this->errors[] = 'You need to be logged!';
+			$this->errors = 'You need to be logged!';
 			return false;
 		} else {
 			$results = $this->getTokens( $token );
@@ -251,7 +251,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
 		$this->return['status'] = true;
 
-		$this->return['errors'] = $this->errors;
+		$this->return['error'] = $this->errors;
 		header('Content-Type: application/json');
 		die(Tools::jsonEncode($this->return));
 
@@ -387,19 +387,20 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					'total_discount' => $total_discount_sum,
 					'total_price' => $total_price,
 					'shipping_price' => +number_format($shipping_price, 2, '.', ''),
-					'total' => $total_price + $shipping_price
+					'total' => $total_price + $shipping_price,
+					'currency_code' => Context::getContext()->currency->iso_code
 				);
 
 				$this->return['response'] = $data;
 				$this->return['status'] = true;
 
 			} else {
-				$this->return['errors'][] = 'Can not found any products in order with id = ' . $id;
+				$this->return['error'] = 'Can not found any products in order with id = ' . $id;
 
 			}
 		} else {
 
-			$this->return['errors'][] = 'You have not specified ID';
+			$this->return['error'] = 'You have not specified ID';
 		}
 
 		$this->return['version'] = $this->API_VERSION;
@@ -510,12 +511,12 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 			} else {
 
 				$this->return['status']  = false;
-				$this->return['errors']  = 'Can not found any statuses for order with id = ' . $id;
+				$this->return['error']  = 'Can not found any statuses for order with id = ' . $id;
 
 			}
 		} else {
 			$this->return['status']  = false;
-			$this->return['errors']  = 'You have not specified ID';
+			$this->return['error']  = 'You have not specified ID';
 		}
 		$this->return['version'] = $this->API_VERSION;
 		header( 'Content-Type: application/json' );
@@ -643,11 +644,11 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
 			} else {
 
-				$this->return['errors']  = 'Can not found order with id = ' . $id;
+				$this->return['error']  = 'Can not found order with id = ' . $id;
 			}
 		} else {
 
-			$this->return['errors']  = 'You have not specified ID';
+			$this->return['error']  = 'You have not specified ID';
 		}
 
 		$this->return['version'] = $this->API_VERSION;
@@ -795,10 +796,10 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 				$this->return['response']  = $data;
 
 			} else {
-				$this->return['errors']  = 'Can not found order with id = ' . $id;
+				$this->return['error']  = 'Can not found order with id = ' . $id;
 					}
 		} else {
-			$this->return['errors']  = 'You have not specified ID';
+			$this->return['error']  = 'You have not specified ID';
 		}
 
 		$this->return['version'] = $this->API_VERSION;
@@ -871,11 +872,11 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 				}
 				$this->return['status']  = true;
 			}else{
-				$this->return['errors'][]  = "Can not found order with id = ' . $orderId";
+				$this->return['error']  = "Can not found order with id = ' . $orderId";
 			}
 			
 		}else{
-			$this->return['errors'][]  = "You have not specified order Id or status Id";
+			$this->return['error']  = "You have not specified order Id or status Id";
 		}
 		
 		$this->return['version'] = $this->API_VERSION;

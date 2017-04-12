@@ -32,7 +32,7 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 	public $display_column_left = false;
 	public $header = false;
 	public $errors = '';
-	public $API_VERSION = 1.8;
+	public $API_VERSION = 1.0;
 	public $return = [];
 
 	/**

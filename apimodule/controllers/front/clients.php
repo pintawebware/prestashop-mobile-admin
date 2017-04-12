@@ -32,7 +32,7 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 	public $display_column_left = false;
 	public $header = false;
 	public $errors = [];
-	public $API_VERSION = 1.8;
+	public $API_VERSION = 1.0;
 	public $return = [];
 
 	/**
@@ -171,7 +171,8 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 			$this->return['status'] = true;
 			$this->return['response'] = $response;
 		} else {
-			$this->return['errors'] = 'No clients';
+			$this->return['status'] = true;
+			$this->return['response']['clients'] = [];
 		}
 		$this->return['version'] = $this->API_VERSION;
 		header('Content-Type: application/json');
@@ -241,16 +242,16 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 
 				$data['completed'] = $client['completed'];
 				$data['cancelled'] = $client['cancelled'];
-
+				$data['currency_code'] = Context::getContext()->currency->iso_code;
 				$this->return['status'] = true;
 				$this->return['response'] = $data;
 
 			} else {
 
-				$this->return['errors'][] = 'Can not found client with id = ' . $id;
+				$this->return['error'] = 'Can not found client with id = ' . $id;
 			}
 		} else {
-			$this->return['errors'][] = 'You have not specified ID';
+			$this->return['error'] = 'You have not specified ID';
 		}
 		$this->return['version'] = $this->API_VERSION;
 		header('Content-Type: application/json');
@@ -266,7 +267,9 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 		foreach ($array  as $item ) {
 			if(!in_array($item['phone'],$phones)) {
 				$trim = trim($item['phone']);
-				$phones[] = str_replace(' ','-',$trim);
+				if(!empty($trim)){
+					$phones[] = str_replace(' ','-',$trim);
+				}
 			}
 		}
 		return $phones;
@@ -295,7 +298,7 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 	 *   {
 	 *       "orders":
 	 *          {
-	 *             "id_order" : "1",
+	 *             "order_id" : "1",
 	 *             "order_number" : "1",
 	 *             "status" : 1,
 	 *             "currency_code": "UAH",
@@ -303,7 +306,7 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 	 *             "date_add" : "2016-12-09 16:17:02"
 	 *          },
 	 *          {
-	 *             "id_order" : "2",
+	 *             "order_id" : "2",
 	 *             "currency_code": "UAH",
 	 *             "order_number" : "2",
 	 *             "status" : 2,
@@ -373,7 +376,7 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 
 			if ($orders) {
 				foreach ($orders as $order) {
-					$data['id_order'] = $order['id_order'];
+					$data['order_id'] = $order['id_order'];
 					$data['order_number'] = $order['id_order'];
 					$data['total'] = number_format($order['total_paid'], 2, '.', '');
 					$data['date_add'] = $order['date_add'];
@@ -396,7 +399,7 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 				$this->return['response'] = ['orders' => []];
 							}
 		} else {
-			$this->return['errors'][] = 'You have not specified ID';
+			$this->return['error'] = 'You have not specified ID';
 		}
 
 		$this->return['version'] = $this->API_VERSION;
