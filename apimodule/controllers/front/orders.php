@@ -338,6 +338,10 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 				$shipping_price        = 0;
 				$total_price        = 0;
 				foreach ( $products as $product ):
+					echo '<pre>';
+						print_r($product);
+					echo '</pre>';
+
 					$array = [];
 					if (!empty($product['image'])) {
 						$image = Image::getCover($product['product_id']);
@@ -358,14 +362,14 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					}else{
 						$array['model'] = '';
 					}
-					if (!empty($product['quantity'])){
-						$quantity = number_format( $product['quantity'], 2, '.', '' );
-						$array['quantity'] = $quantity;
+					if (!empty($product['quantity'])&& $product['quantity']!=0){
+
+						$array['quantity'] = $product['quantity'];
 					}else{
-						$array['quantity'] = 0;
+						$array['quantity'] = $product['product_quantity'];
 					}
-					if (!empty($product['price'])){
-						$array['price'] = number_format( $product['price'], 2, '.', '' );
+					if (!empty($product['total_price_tax_incl'])){
+						$array['price'] = number_format( $product['total_price_tax_incl'], 2, '.', '' );
 					}else{
 						$array['price'] = 0;
 					}
@@ -375,8 +379,6 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					$array['discount']       = $product['quantity_discount'];
 
 					$total_discount_sum += $product['product_quantity_discount'];
-					$quantity = $quantity==0?1:$quantity;
-					$total_price += $product['price'] * $quantity;
 
 					$shipping_price += $product['additional_shipping_cost'];
 
