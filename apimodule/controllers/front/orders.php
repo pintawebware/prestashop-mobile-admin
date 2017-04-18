@@ -338,9 +338,9 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 				$shipping_price        = 0;
 				$total_price        = 0;
 				foreach ( $products as $product ):
-					echo '<pre>';
+					/*echo '<pre>';
 						print_r($product);
-					echo '</pre>';
+					echo '</pre>';*/
 
 					$array = [];
 					if (!empty($product['image'])) {
@@ -362,11 +362,11 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					}else{
 						$array['model'] = '';
 					}
-					if (!empty($product['quantity'])&& $product['quantity']!=0){
+					if (!empty($product['product_quantity'])&& $product['product_quantity']!=0){
 
-						$array['quantity'] = $product['quantity'];
+						$array['quantity'] = (int)$product['product_quantity'];
 					}else{
-						$array['quantity'] = $product['product_quantity'];
+						$array['quantity'] = (int)$product['minimal_quantity'];
 					}
 					if (!empty($product['total_price_tax_incl'])){
 						$array['price'] = number_format( $product['total_price_tax_incl'], 2, '.', '' );
