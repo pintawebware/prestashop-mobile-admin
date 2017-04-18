@@ -31,8 +31,8 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	public $ssl = true;
 	public $display_column_left = false;
 	public $header = false;
-	public $errors = [];
-	public $API_VERSION = 1.8;
+	public $errors = '';
+	public $API_VERSION = 1.0;
 	public $return = [];
 
 	/**
@@ -40,7 +40,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	 */
 	public function initContent() {
 		$this->return['status'] = false;
-		if(isset($_GET['action']) && $this->valid()){
+		if(isset($_GET['action'])/* && $this->valid()*/){
 
 			$action = $_GET['action'];
 			switch ($action){
@@ -53,7 +53,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 				case 'delivery_update':$this->changeOrderDelivery();break;
 			}
 		}
-		$this->errors[] = "No action";
+		$this->errors = "No action";
 		header( 'Content-Type: application/json' );
 		die( Tools::jsonEncode( $this->return ) );
 	}
@@ -61,7 +61,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	private function valid() {
 		$token = trim( Tools::getValue( 'token' ) );
 		if ( empty( $token ) ) {
-			$this->errors[] = 'You need to be logged!';
+			$this->errors = 'You need to be logged!';
 			return false;
 		} else {
 			$results = $this->getTokens( $token );
@@ -251,7 +251,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
 		$this->return['status'] = true;
 
-		$this->return['errors'] = $this->errors;
+		$this->return['error'] = $this->errors;
 		header('Content-Type: application/json');
 		die(Tools::jsonEncode($this->return));
 
@@ -342,23 +342,32 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					if (!empty($product['image'])) {
 						$image = Image::getCover($product['product_id']);
 						$imagePath = Link::getImageLink($product->link_rewrite, $image['id_image'], 'home_default');
-						$array['image'] = $imagePath;
+						 $protocol = Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://'; 
+						$array['image'] = $protocol.$imagePath;
+					}else{
+						$array['image'] = '';
 					}
 
 					if (!empty($product['product_name'])) {
 						$array['name'] = strip_tags( htmlspecialchars_decode( $product['product_name'] ) );
+					}else{
+						$array['name'] = '';
 					}
 					if (!empty($product['model'])){
 						$array['model'] = $product['model'];
+					}else{
+						$array['model'] = '';
 					}
 					if (!empty($product['quantity'])){
 						$quantity = number_format( $product['quantity'], 2, '.', '' );
 						$array['quantity'] = $quantity;
 					}else{
-						$quantity = 1;
+						$array['quantity'] = 0;
 					}
 					if (!empty($product['price'])){
 						$array['price'] = number_format( $product['price'], 2, '.', '' );
+					}else{
+						$array['price'] = 0;
 					}
 					$array['product_id'] = $product['product_id'];
 
@@ -366,7 +375,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					$array['discount']       = $product['quantity_discount'];
 
 					$total_discount_sum += $product['product_quantity_discount'];
-
+					$quantity = $quantity==0?1:$quantity;
 					$total_price += $product['price'] * $quantity;
 
 					$shipping_price += $product['additional_shipping_cost'];
@@ -374,23 +383,25 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					$data['products'][] = $array;
 				endforeach;
 
+				$tp = number_format($total_price, 2, '.', '');
 				$data['total_order_price'] = array(
 					'total_discount' => $total_discount_sum,
-					'total_price' => $total_price,
-					'shipping_price' => +number_format($shipping_price, 2, '.', ''),
-					'total' => $total_price + $shipping_price
+					'total_price' => $tp,
+					'shipping_price' => +number_format($order->total_shipping, 2, '.', ''),
+					'total' => $tp + $order->total_shipping,
+					'currency_code' => Context::getContext()->currency->iso_code
 				);
 
 				$this->return['response'] = $data;
 				$this->return['status'] = true;
 
 			} else {
-				$this->return['errors'][] = 'Can not found any products in order with id = ' . $id;
+				$this->return['error'] = 'Can not found any products in order with id = ' . $id;
 
 			}
 		} else {
 
-			$this->return['errors'][] = 'You have not specified ID';
+			$this->return['error'] = 'You have not specified ID';
 		}
 
 		$this->return['version'] = $this->API_VERSION;
@@ -501,12 +512,12 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 			} else {
 
 				$this->return['status']  = false;
-				$this->return['errors']  = 'Can not found any statuses for order with id = ' . $id;
+				$this->return['error']  = 'Can not found any statuses for order with id = ' . $id;
 
 			}
 		} else {
 			$this->return['status']  = false;
-			$this->return['errors']  = 'You have not specified ID';
+			$this->return['error']  = 'You have not specified ID';
 		}
 		$this->return['version'] = $this->API_VERSION;
 		header( 'Content-Type: application/json' );
@@ -582,10 +593,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 		$this->return['status']  = false;
 		if (!empty($id)) {
 			$order = new Order($id);
-			/*echo "<pre>";
-			print_r($order);
-			echo "</pre>";
-			die();*/
+
 			$data = array();
 			$statuses = $this->OrderStatusList();
 			$statusArray = [];
@@ -593,10 +601,13 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 				$statusArray[$one['id_order_state']] = $one['name'];
 			endforeach;
 
-			$customer = new Customer($order->id_customer);
+			$idc = $order->id_customer;
+			$customer = new Customer($idc);
+			$id_address = $order->id_address_delivery;
+			$oad = new Address($id_address);
 
 			if ($order) {
-				$data['order_number'] = $order->id_order;
+				$data['order_number'] = $order->id;
 
 				if (isset($customer->firstname) && isset($customer->lastname)) {
 					$data['fio'] = $customer->firstname . ' ' . $customer->lastname;
@@ -606,12 +617,16 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 				} else {
 					$data['email'] = '';
 				}
-				/*if (isset($customer->telephone)) {
-					$data['telephone'] = $customer->telephone;
+				if (!empty($oad->phone)) {
+					$trim = trim($oad->phone);
+					$phone = str_replace(' ','-',$trim);
+					$data['telephone'] = $phone;
+					$data['address1'] = trim($oad->address1);
+					$data['city'] = trim($oad->city);
 				} else {
 					$data['telephone'] = '';
-				}*/
-				$data['telephone'] = '';
+				}
+
 
 				$data['date_add'] = $order->date_add;
 
@@ -632,11 +647,11 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
 			} else {
 
-				$this->return['errors']  = 'Can not found order with id = ' . $id;
+				$this->return['error']  = 'Can not found order with id = ' . $id;
 			}
 		} else {
 
-			$this->return['errors']  = 'You have not specified ID';
+			$this->return['error']  = 'You have not specified ID';
 		}
 
 		$this->return['version'] = $this->API_VERSION;
@@ -730,21 +745,21 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 				if (!empty($shipping_method)) {
 					$data['shipping_method'] = $shipping_method;
 				}
-				if (!empty($address_delivery->country)) {
+				/*if (!empty($address_delivery->country)) {
 					$data['shipping_address'] .= $address_delivery->country." ";
 				}
 				if (!empty($address_delivery->alias)) {
 					$data['shipping_address'] .= $address_delivery->alias." ";
-				}
+				}*/
 				if (!empty($address_delivery->address1)) {
 					$data['shipping_address'] .= $address_delivery->address1." ";
 				}
-				if (!empty($address_delivery->address2)) {
+				/*if (!empty($address_delivery->address2)) {
 					$data['shipping_address'] .= $address_delivery->address2." ";
 				}
 				if (!empty($address_delivery->postcode)) {
 					$data['shipping_address'] .= $address_delivery->postcode." ";
-				}
+				}*/
 				if (!empty($address_delivery->city)) {
 					$data['shipping_address'] .= $address_delivery->city." ";
 				}
@@ -755,21 +770,21 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					$data['shipping_phone_mobile'] .= $address_delivery->phone_mobile;
 				}
 
-				if (!empty($address_payment->country)) {
+			/*	if (!empty($address_payment->country)) {
 					$data['payment_address'] .= $address_payment->country." ";
 				}
 				if (!empty($address_payment->alias)) {
 					$data['payment_address'] .= $address_payment->alias." ";
-				}
+				}*/
 				if (!empty($address_payment->address1)) {
 					$data['payment_address'] .= $address_payment->address1." ";
 				}
-				if (!empty($address_payment->address2)) {
+				/*if (!empty($address_payment->address2)) {
 					$data['payment_address'] .= $address_payment->address2." ";
 				}
 				if (!empty($address_payment->postcode)) {
 					$data['payment_address'] .= $address_payment->postcode." ";
-				}
+				}*/
 				if (!empty($address_payment->city)) {
 					$data['payment_address'] .= $address_payment->city." ";
 				}
@@ -784,10 +799,10 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 				$this->return['response']  = $data;
 
 			} else {
-				$this->return['errors']  = 'Can not found order with id = ' . $id;
+				$this->return['error']  = 'Can not found order with id = ' . $id;
 					}
 		} else {
-			$this->return['errors']  = 'You have not specified ID';
+			$this->return['error']  = 'You have not specified ID';
 		}
 
 		$this->return['version'] = $this->API_VERSION;
@@ -832,7 +847,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 		$this->return['status']  = false;
 		if (!empty($statusId) && !empty($orderId)) {
 
-			$sql = "SELECT id_order_history FROM " . _DB_PREFIX_ . "order_history as oh WHERE oh.order_id = '" . $orderId."'";
+			$sql = "SELECT id_order_history FROM " . _DB_PREFIX_ . "order_history as oh WHERE oh.id_order = '" . $orderId."'";
 
 			if ($row = Db::getInstance()->getRow($sql)) {
 
@@ -843,6 +858,10 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					'date_add'      => date('Y-m:d H:i:s')
 				));
 				$insert_id = Db::getInstance()->Insert_ID();
+				$sql = "UPDATE " . _DB_PREFIX_ . "orders SET current_state = '" . $statusId . "' 
+						WHERE id_order = '" . $orderId . "'";
+
+				Db::getInstance()->query( $sql );
 				if ( $inform == true ) {
 					$sql = "SELECT c.email, c.firstname  FROM " . _DB_PREFIX_ . "customer AS c
 				        INNER JOIN " . _DB_PREFIX_ . "orders as o ON c.id_customer = o.id_customer                    
@@ -850,19 +869,20 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
 					if($data = Db::getInstance()->getRow($sql)) {
 						$order = new Order($orderId);
-						$order_state = new OrderState($statusId);
 						$history = new OrderHistory($insert_id);
-
 						$templateVars = array();
-
 						$history->sendEmail($order, $templateVars);
 					}
 				}
 				$this->return['status']  = true;
+			}else{
+				$this->return['error']  = "Can not found order with id = ' . $orderId";
 			}
-			$this->return['errors'][]  = "Can not found order with id = ' . $orderId";
+			
+		}else{
+			$this->return['error']  = "You have not specified order Id or status Id";
 		}
-		$this->return['errors'][]  = "You have not specified order Id or status Id";
+		
 		$this->return['version'] = $this->API_VERSION;
 		header( 'Content-Type: application/json' );
 		die( Tools::jsonEncode( $this->return ) );
@@ -905,13 +925,17 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 		$order = new Order($order_id);
 
 		$sql = "UPDATE " . _DB_PREFIX_ . "address SET address1 = '" . $address . "'";
-		if ($city !== false) {
-			$sql .= " , shipping_city = '" . $city . "'";
+		if (!empty($city)) {
+			$sql .= " , city = '" . $city . "'";
 		}
 		$sql .= " WHERE id_address = '" . $order->id_address_delivery . "'";
-		Db::getInstance()->ExecuteS( $sql );
 
-		return true;
+		Db::getInstance()->query( $sql );
+
+		$this->return['status'] = true;
+		$this->return['version'] = $this->API_VERSION;
+		header( 'Content-Type: application/json' );
+		die( Tools::jsonEncode( $this->return ) );
 	}
 
 	public function OrderStatusList()

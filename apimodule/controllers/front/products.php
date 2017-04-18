@@ -33,14 +33,14 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
     public $display_column_left = false;
     public $header = false;
     public $errors =[];
-    public $API_VERSION = 1.8;
+    public $API_VERSION = 1.0;
     /**
      * @see FrontController::initContent()
      */
     public function initContent()
     {
         $this->return['status'] = false;
-        if(isset($_GET['action']) /*&& $this->valid()*/){
+        if(isset($_GET['action']) && $this->valid()){
 
             $action = $_GET['action'];
             switch ($action) {
@@ -52,7 +52,7 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
                     break;
             }
         }
-        $this->errors[] = "No action";
+        $this->return['error'] = "No action";
         header( 'Content-Type: application/json' );
         die( Tools::jsonEncode( $this->return ) );
     }
@@ -130,12 +130,12 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
             $page = 0;
             $limit = 10;
         }
-
+ $to_response = [];
         $id_lang = $this->context->language->id;
         if(empty($name)) {
 	        $productObj  = new Product();
 	        $products    = $productObj->getProducts( $id_lang, $page, $limit, 'id_product', 'DESC' );
-	        $to_response = [];
+	       
 	        if ( count( $products ) > 0 ) {
 		        foreach ( $products as $product ) {
 			        $data['product_id'] = $product['id_product'];
@@ -165,9 +165,14 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
 		        $data['product_id'] = $product['id_product'];
 		        $data['model']      = $product['reference'];
 		        $data['quantity']   = $product['quantity'];
-		        $image = Image::getCover($product['product_id']);
-		        $imagePath = Link::getImageLink($product->link_rewrite, $image['id_image'], 'home_default');
-		        $data['image'] = $imagePath;
+		     
+		        $p = new Product($product['id_product']);
+		        $image = Image::getCover( $p->id );
+
+		        $imagePath = Link::getImageLink($p->link_rewrite, $image['id_image'], 'home_default');
+
+                $protocol = Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://'; 
+		        $data['image'] = $protocol.$imagePath;
 
 		        $data['price'] = number_format( $product['price'], 2, '.', '' );
 		        $data['name']  = $product['name'];
@@ -246,12 +251,13 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
         $product_id = trim(Tools::getValue('product_id'));
 
         $id_lang = $this->context->language->id;
-        $product = new Product(1,false,$id_lang);
+        $product = new Product($product_id,false, $id_lang);
 
         if ($product->id !== null) {
                 $data['images'] = [];
-                $data['product_id'] = $product->id;
+                $data['product_id'] = (int)$product->id;
                 $data['model'] = $product->reference;
+                 $data['description'] = strip_tags($product->description);
                 $data['quantity'] =  Db::getInstance()->getRow(" SELECT p.id_product, sa.quantity FROM ps_product p
  
 INNER JOIN ps_stock_available sa ON p.id_product = sa.id_product AND id_product_attribute = 0
@@ -260,7 +266,9 @@ WHERE p.id_product = ".$product->id)['quantity'];
             $images = $product->getImages();
             if(count($images) > 0){
                 foreach ($images as $image) {
-                    $data['images'][] = Link::getImageLink($product->link_rewrite, $image['id_image'], 'home_default');
+                    $protocol = Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://'; 
+                        $image = Link::getImageLink($product->link_rewrite, $image['id_image'], 'home_default');
+                    $data['images'][] = $protocol.$image;
                 }
             }
 
@@ -271,12 +279,12 @@ WHERE p.id_product = ".$product->id)['quantity'];
 
 
         }else{
-            $return['errors'][] = 'Can non fid product with id = '.$product_id;
+            $return['error'] = 'Can non fid product with id = '.$product_id;
         }
 
-        if(!count($return['errors'])){
+        if(!count($return['error'])){
             $return['status'] = true;
-            $return['response']['product'] = $data;
+            $return['response'] = $data;
         }
         $return['version'] = $this->API_VERSION;
 

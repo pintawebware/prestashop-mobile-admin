@@ -265,6 +265,13 @@
             "optional": false,
             "field": "device_token",
             "description": "<p>User's device's token for firebase notifications.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "os_type",
+            "description": "<p>android|ios</p>"
           }
         ]
       }

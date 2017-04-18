@@ -32,8 +32,8 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 	public $ssl = true;
 	public $display_column_left = false;
 	public $header = false;
-    public $errors =[];
-	public $API_VERSION = 1.8;
+    public $errors ='';
+	public $API_VERSION = 1.0;
 	public $return = [];
 	/**
 	 * @see FrontController::initContent()
@@ -50,8 +50,8 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 				case 'update':$this->updateDeviceToken();
 			}
 		}
-		$this->errors[] = Tools::displayError('Email is empty.');
-		$this->return['errors'] = $this->errors;
+		$this->errors = Tools::displayError('Email is empty.');
+		$this->return['error'] = $this->errors;
 		header('Content-Type: application/json');
 		die(Tools::jsonEncode($this->return));
 	}
@@ -78,9 +78,9 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 	 * @apiParam {String} username User unique username.
 	 * @apiParam {Number} password User's  password.
 	 * @apiParam {String} device_token User's device's token for firebase notifications.
+	 * @apiParam {String} os_type android|ios
 	 *
 	 * @apiSuccess {Number} version  Current API version.
-	 * @apiSuccess {String} token  Token.
 	 * @apiSuccess {String} token  Token.
 	 *
 	 * @apiSuccessExample Success-Response:
@@ -107,35 +107,36 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 	public function login(){
 
 		$this->return = false;
-
+		$this->return['error'] = '';
 		$passwd = trim(Tools::getValue('password'));
 		$email = trim(Tools::getValue('email'));
 		if (empty($email)) {
-			$this->errors[] = Tools::displayError('Email is empty.');
+			$this->errors = Tools::displayError('Email is empty.');
 		} elseif (!Validate::isEmail($email)) {
-			$this->errors[] = Tools::displayError('Invalid email address.');
+			$this->errors = Tools::displayError('Invalid email address.');
 		}
 
 		if (empty($passwd)) {
-			$this->errors[] = Tools::displayError('The password field is blank.');
+			$this->errors = Tools::displayError('The password field is blank.');
 		} elseif (!Validate::isPasswd($passwd)) {
-			$this->errors[] = Tools::displayError('Invalid password.');
+			$this->errors = Tools::displayError('Invalid password.');
 		}
 
-		if (!count($this->errors)) {
+
+		if (empty($this->errors)) {
+			// var_dump($this->errors);
 			// Find employee
 			$this->context->employee = new Employee();
 			$is_employee_loaded = $this->context->employee->getByEmail($email, $passwd);
 			$employee_associated_shop = $this->context->employee->getAssociatedShops();
 			if (!$is_employee_loaded) {
-				$this->errors[] = Tools::displayError('The Employee does not exist, or the password provided is incorrect.');
+				$this->errors = Tools::displayError('The Employee does not exist, or the password provided is incorrect.');
 				$this->context->employee->logout();
 			} elseif (empty($employee_associated_shop) && !$this->context->employee->isSuperAdmin()) {
-				$this->errors[] = Tools::displayError('This employee does not manage the shop anymore (Either the shop has been deleted or permissions have been revoked).');
+				$this->errors = Tools::displayError('This employee does not manage the shop anymore (Either the shop has been deleted or permissions have been revoked).');
 				$this->context->employee->logout();
 			} else {
-	//			PrestaShopLogger::addLog(sprintf($this->l('Back Office connection from %s', 'AdminTab', false, false), Tools::getRemoteAddr()), 1, null, '', 0, true, (int)$this->context->employee->id);
-
+	
 				$this->context->employee->remote_addr = (int)ip2long(Tools::getRemoteAddr());
 				// Update cookie
 				$cookie = Context::getContext()->cookie;
@@ -150,28 +151,35 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 				}
 				$cookie->write();
 			}
-			$user_id = $this->context->employee->id;
-			$device_token = trim(Tools::getValue('device_token'));
-			if(!empty($device_token)){
-				$os_type = empty(trim(Tools::getValue('os_type')))?'android':trim(Tools::getValue('os_type'));
+			if($this->context->employee->id){
+				$user_id = $this->context->employee->id;
+				$device_token = trim(Tools::getValue('device_token'));
+				if(!empty($device_token)){
+					$os_type = empty(trim(Tools::getValue('os_type')))?'android':trim(Tools::getValue('os_type'));
 
-				$udt = $this->getUserDevices($user_id,$device_token);
-				if(!$udt){
-					$this->setUserDeviceToken($user_id, $device_token,$os_type);
+					$udt = $this->getUserDevices($user_id,$device_token);
+					if(!$udt){
+						$this->setUserDeviceToken($user_id, $device_token,$os_type);
+					}
 				}
-			}
 
-			$token = $this->getUserToken($user_id);
-			if (empty($token['token'])) {
-				$token = md5(mt_rand());
-				$this->setUserToken($user_id, $token);
+				$token = $this->getUserToken($user_id);
+				if (empty($token['token'])) {
+					$token = md5(mt_rand());
+					$this->setUserToken($user_id, $token);
+				}
+				$this->return['version'] = $this->API_VERSION;
+				$this->return['response'] = ['token' => $token];
+				$this->return['status'] = true;
+			}else{
+				$this->return['error'] = "Invalid email or password";
+				$this->return['status'] = false;
 			}
-			$this->return['version'] = $this->API_VERSION;
-			$this->return['response'] = ['token' => $token];
-			$this->return['status'] = true;
+		}else{
+			$this->return['error'] = $this->errors;
 		}
 
-		$this->return['errors'] = $this->errors;
+		
 		header('Content-Type: application/json');
 		die(Tools::jsonEncode($this->return));
 	}
@@ -215,10 +223,10 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 			if($deleted){
 				$this->return['status'] = true;
 			}else{
-				$this->return['errors'] ='Can not find your token';
+				$this->return['error'] ='Can not find your token';
 			}
 		}else{
-			$this->return['errors'] ='Missing some params';
+			$this->return['error'] ='Missing some params';
 		}
 		$this->return['version'] =$this->API_VERSION;
 		header('Content-Type: application/json');
@@ -266,10 +274,10 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 			if($deleted){
 				$this->return['status'] = true;
 			}else{
-				$this->return['errors'] ='Can not find your token';
+				$this->return['error'] ='Can not find your token';
 			}
 		}else{
-			$this->return['errors'] ='Missing some params';
+			$this->return['error'] ='Missing some params';
 		}
 
 		$this->return['version'] =$this->API_VERSION;
@@ -324,7 +332,7 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 		if($insert){
 			return true;
 		}else{
-			$this->errors[] = "Error setUserDeviceToken";
+			$this->errors = "Error setUserDeviceToken";
 		}
 	}
 	public function getUserToken($user_id){
@@ -332,7 +340,7 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 		        WHERE user_id = '".$user_id."'";
 
 		if ($row = Db::getInstance()->getRow($sql)){
-			return $row;
+			return $row['token'];
 		}
 		else{
 			return false;
@@ -347,7 +355,7 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 		if($insert){
 			return true;
 		}else{
-			$this->errors[] = "Error setUserToken user_id=".$user_id." token = ".$token;
+			$this->errors = "Error setUserToken user_id=".$user_id." token = ".$token;
 		}
 	}
 
