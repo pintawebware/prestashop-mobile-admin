@@ -383,12 +383,15 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					$data['products'][] = $array;
 				endforeach;
 
-				$tp = number_format($total_price, 2, '.', '');
+				$total_price = $order->total_paid;
+				$total_shipping = $order->total_shipping;
+				$total = $total_price + $total_shipping;
+
 				$data['total_order_price'] = array(
 					'total_discount' => $total_discount_sum,
-					'total_price' => $tp,
+					'total_price' => number_format($total_price, 2, '.', ''),
 					'shipping_price' => +number_format($order->total_shipping, 2, '.', ''),
-					'total' => $tp + $order->total_shipping,
+					'total' => number_format($total, 2, '.', ''),
 					'currency_code' => Context::getContext()->currency->iso_code
 				);
 
