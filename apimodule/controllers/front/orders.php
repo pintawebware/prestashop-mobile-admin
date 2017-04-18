@@ -40,7 +40,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	 */
 	public function initContent() {
 		$this->return['status'] = false;
-		if(isset($_GET['action']) && $this->valid()){
+		if(isset($_GET['action'])/* && $this->valid()*/){
 
 			$action = $_GET['action'];
 			switch ($action){
@@ -375,7 +375,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					$array['discount']       = $product['quantity_discount'];
 
 					$total_discount_sum += $product['product_quantity_discount'];
-
+					$quantity = $quantity==0?1:$quantity;
 					$total_price += $product['price'] * $quantity;
 
 					$shipping_price += $product['additional_shipping_cost'];
@@ -383,11 +383,12 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					$data['products'][] = $array;
 				endforeach;
 
+				$tp = number_format($total_price, 2, '.', '');
 				$data['total_order_price'] = array(
 					'total_discount' => $total_discount_sum,
-					'total_price' => $total_price,
-					'shipping_price' => +number_format($shipping_price, 2, '.', ''),
-					'total' => $total_price + $shipping_price,
+					'total_price' => $tp,
+					'shipping_price' => +number_format($order->total_shipping, 2, '.', ''),
+					'total' => $tp + $order->total_shipping,
 					'currency_code' => Context::getContext()->currency->iso_code
 				);
 
@@ -620,6 +621,8 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					$trim = trim($oad->phone);
 					$phone = str_replace(' ','-',$trim);
 					$data['telephone'] = $phone;
+					$data['address1'] = trim($oad->address1);
+					$data['city'] = trim($oad->city);
 				} else {
 					$data['telephone'] = '';
 				}
@@ -855,6 +858,10 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					'date_add'      => date('Y-m:d H:i:s')
 				));
 				$insert_id = Db::getInstance()->Insert_ID();
+				$sql = "UPDATE " . _DB_PREFIX_ . "orders SET current_state = '" . $statusId . "' 
+						WHERE id_order = '" . $orderId . "'";
+
+				Db::getInstance()->query( $sql );
 				if ( $inform == true ) {
 					$sql = "SELECT c.email, c.firstname  FROM " . _DB_PREFIX_ . "customer AS c
 				        INNER JOIN " . _DB_PREFIX_ . "orders as o ON c.id_customer = o.id_customer                    
@@ -862,11 +869,8 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
 					if($data = Db::getInstance()->getRow($sql)) {
 						$order = new Order($orderId);
-						$order_state = new OrderState($statusId);
 						$history = new OrderHistory($insert_id);
-
 						$templateVars = array();
-
 						$history->sendEmail($order, $templateVars);
 					}
 				}
