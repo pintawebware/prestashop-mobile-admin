@@ -626,8 +626,8 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					$trim = trim($oad->phone);
 					$phone = str_replace(' ','-',$trim);
 					$data['telephone'] = $phone;
-					$data['address1'] = trim($oad->address1);
-					$data['city'] = trim($oad->city);
+					/*$data['address1'] = trim($oad->address1);
+					$data['city'] = trim($oad->city);*/
 				} else {
 					$data['telephone'] = '';
 				}
@@ -872,13 +872,26 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 				        INNER JOIN " . _DB_PREFIX_ . "orders as o ON c.id_customer = o.id_customer                    
 				        WHERE o.id_order = " . $orderId;
 
-					if($data = Db::getInstance()->getRow($sql)) {
+					if($d = Db::getInstance()->getRow($sql)) {
 						$order = new Order($orderId);
 						$history = new OrderHistory($insert_id);
 						$templateVars = array();
 						$history->sendEmail($order, $templateVars);
 					}
+
 				}
+				$sql = "SELECT os.name,oh.date_add FROM " . _DB_PREFIX_ . "order_history as oh
+							INNER JOIN " . _DB_PREFIX_ . "order_state_lang as os ON oh.id_order_state = os.id_order_state 
+				
+				            WHERE os.id_lang = 1 and oh.id_order = '" . $orderId."' ORDER BY oh.date_add DESC";
+				$data = [];
+				if ($row = Db::getInstance()->getRow($sql)) {
+					$data = [
+						'name' =>$row['name'],
+							'date_added'=>$row['date_add']
+				];
+				}
+				$this->return['response'] = $data;
 				$this->return['status']  = true;
 			}else{
 				$this->return['error']  = "Can not found order with id = ' . $orderId";

@@ -75,7 +75,7 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 	 * @apiName Login
 	 * @apiGroup Auth
 	 *
-	 * @apiParam {String} username User unique username.
+	 * @apiParam {String} email User unique email.
 	 * @apiParam {Number} password User's  password.
 	 * @apiParam {String} device_token User's device's token for firebase notifications.
 	 * @apiParam {String} os_type android|ios

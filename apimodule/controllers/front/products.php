@@ -257,7 +257,7 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
                 $data['images'] = [];
                 $data['product_id'] = (int)$product->id;
                 $data['model'] = $product->reference;
-                 $data['description'] = strip_tags($product->description);
+                $data['description'] = strip_tags($product->description);
                 $data['quantity'] =  Db::getInstance()->getRow(" SELECT p.id_product, sa.quantity FROM ps_product p
  
 INNER JOIN ps_stock_available sa ON p.id_product = sa.id_product AND id_product_attribute = 0
@@ -321,7 +321,6 @@ WHERE p.id_product = ".$product->id)['quantity'];
                 return false;
             }
         }
-
         return true;
     }
     public function getTokens($token){
