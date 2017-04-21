@@ -41,7 +41,7 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 	public function initContent() {
 		$this->return['status'] = false;
 		$filter                 = trim( Tools::getValue( 'filter' ) );
-		if ( /*$this->valid() &&*/ ! empty( $filter  )) {
+		if ( /*$this->valid() &&*/ !empty( $filter  )) {
 				$this->getStat( $filter );
 		}
 		$this->errors[] = 'Filter empty!';
@@ -144,6 +144,7 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 	 *
 	 */
 	public function getStat( $filter ) {
+
 		$clients = $this->getTotalCustomers( array( 'filter' => $filter ) );
 		$orders  = $this->getTotalOrders( array( 'filter' => $filter ) );
 
@@ -313,11 +314,10 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 
 	public function getTotalOrders( $data = array() ) {
 
-		$sql = "SELECT  count(*) as cnt  FROM `" . _DB_PREFIX_ . "orders` as o
+		if ( isset( $data['filter'] ) ) {
+			$sql = "SELECT  o.date_add FROM `" . _DB_PREFIX_ . "orders` as o
 		            INNER JOIN " . _DB_PREFIX_ . "order_history as oh ON o.id_order=oh.id_order 
 		            WHERE oh.id_order_state > '0'";
-
-		if ( isset( $data['filter'] ) ) {
 			if ( $data['filter'] == 'day' ) {
 				$sql .= " AND DATE(o.date_add) = DATE(NOW())";
 			} elseif ( $data['filter'] == 'week' ) {
@@ -329,9 +329,15 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 
 			} elseif ( $data['filter'] == 'year' ) {
 				$sql .= "AND YEAR(o.date_add) = YEAR(NOW())";
-			} else {
-				return false;
 			}
+			$results = Db::getInstance()->ExecuteS( $sql );
+
+			if(!$results){
+				$results = [];
+			}
+			return $results;
+		}else {
+			$sql = "SELECT COUNT(*) as cnt FROM `" . _DB_PREFIX_ . "customer` ";
 		}
 
 		$results = Db::getInstance()->getRow( $sql );
@@ -342,7 +348,7 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 	public function getTotalCustomers( $data = array() ) {
 
 		if ( isset( $data['filter'] ) ) {
-			$sql = "SELECT count(*) as cnt FROM `" . _DB_PREFIX_ . "customer` ";
+			$sql = "SELECT date_add FROM `" . _DB_PREFIX_ . "customer` ";
 			if ( $data['filter'] == 'day' ) {
 				$sql .= " WHERE DATE(date_add) = DATE(NOW())";
 			} elseif ( $data['filter'] == 'week' ) {
@@ -353,12 +359,19 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 			} elseif ( $data['filter'] == 'year' ) {
 				$sql .= "WHERE YEAR(date_add) = YEAR(NOW()) ";
 			} else {
+
 				return false;
 			}
+
+			$results = Db::getInstance()->ExecuteS( $sql );
+			if(!$results){
+				$results = [];
+			}
+			return $results;
 		} else {
 			$sql = "SELECT COUNT(*) as cnt FROM `" . _DB_PREFIX_ . "customer` ";
 		}
-		//echo $sql;
+
 		$results = Db::getInstance()->getRow( $sql );
 
 		return $results;
@@ -366,7 +379,7 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 
 	public function getTotalSales( $data = array() ) {
 
-		$sql = "SELECT SUM(total_paid) AS total FROM `" . _DB_PREFIX_ . "orders` as o
+		$sql = "SELECT SUM(o.total_paid) AS total FROM `" . _DB_PREFIX_ . "orders` as o
 		            INNER JOIN " . _DB_PREFIX_ . "order_history as oh ON o.id_order=oh.id_order 
 		            WHERE oh.id_order_state > '0'";
 
@@ -374,7 +387,7 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 			$sql .= " AND DATE_FORMAT(o.date_add,'%Y') = DATE_FORMAT(NOW(),'%Y')";
 		}
 
-		$results = Db::getInstance()->ExecuteS( $sql );
+		$results = Db::getInstance()->getRow( $sql );
 
 		return $results['total'];
 

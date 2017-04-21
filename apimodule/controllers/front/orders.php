@@ -200,16 +200,16 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 			$limit = 9999;
 		}
 
-		if (isset($filter)) {
-			$orders = $this->getOrders(array('filter' => $filter, 'page' => $page, 'limit' => $limit));
-		} elseif (!empty($platform) && $platform == 'android') {
+		if (!empty($order_status_id)||!empty($fio)||
+		    !empty($min_price)||!empty($max_price)||
+		    !empty($date_min)||!empty($date_max)) {
 			$filter = [];
 			$filter['order_status_id'] = !empty($order_status_id)?$order_status_id:'';
 			$filter['fio'] = !empty($fio)?$fio:'';
 			$filter['min_price'] = !empty($min_price)?$min_price:1;
 			$filter['max_price'] = !empty($max_price)?$max_price:$this->getMaxOrderPrice();
-			$filter['date_min'] = !empty($date_min)?$date_min:1;
-			$filter['date_max'] = !empty($date_max)?$date_max:1;
+			$filter['date_min'] = !empty($date_min)?$date_min:'';
+			$filter['date_max'] = !empty($date_max)?$date_max:'';
 
 			$orders = $this->getOrders(array('filter' => $filter, 'page' => $page, 'limit' => $limit));
 
@@ -221,7 +221,12 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
 		$sum = 0;
 		$quantity = 0;
+		$statuses = $this->OrderStatusList();
 
+		$statusArray = [];
+		foreach ($statuses as $one):
+			$statusArray[$one['id_order_state']] = $one['name'];
+		endforeach;
 		foreach ($orders as $order) {
 			$sum = $sum + $order['total_paid'];
 			$quantity++;
@@ -229,10 +234,10 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 			$data['order_id'] = $order['id_order'];
 			$data['fio'] = $order['firstname'] . ' ' . $order['lastname'];
 
-			$data['status'] = $order['id_order_state'];
+			$data['status'] = $statusArray[$order['id_order_state']];
 
 			$data['total'] = number_format($order['total_paid'], 2, '.', '');
-			$data['date_added'] = $order['date_add'];
+			$data['date_add'] = $order['date_add'];
 			$data['currency_code'] = Context::getContext()->currency->iso_code;
 			$orders_to_response[] = $data;
 
@@ -243,7 +248,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 		$this->return['response']['total_sum'] = number_format($sum, 2, '.', '');
 		$this->return['response']['orders'] = $orders_to_response;
 		$this->return['response']['max_price'] = $this->getMaxOrderPrice();
-		$statuses = $this->OrderStatusList();
+
 		$this->return['response']['statuses'] = $statuses;
 		$this->return['response']['api_version'] = $this->API_VERSION;
 
@@ -504,7 +509,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					$statusId = $item['id_order_state'];
 					$data['name'] = $statusArray[$statusId];
 					$data['order_status_id'] =$statusId;
-					$data['date_added'] = $item['date_add'];
+					$data['date_add'] = $item['date_add'];
 					$data['comment'] ='';
 					$response['orders'][] = $data;
 				endforeach;
@@ -888,7 +893,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 				if ($row = Db::getInstance()->getRow($sql)) {
 					$data = [
 						'name' =>$row['name'],
-							'date_added'=>$row['date_add']
+							'date_add'=>$row['date_add']
 				];
 				}
 				$this->return['response'] = $data;
@@ -973,6 +978,8 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 		}
 		return $total;
 	}
+
+
 	public function getOrders( $data = array() ) {
 
 		$sql = "SELECT o.id_order,o.date_add,o.total_paid, oh.id_order_state, c.firstname, c.lastname FROM " . _DB_PREFIX_ . "orders AS o 
@@ -998,24 +1005,25 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					}
 				}
 
-				$sql .= " AND ( c.firstname LIKE '%" . $params[0] . "%' OR o.lastname LIKE '%" . $params[0] . "%'";
+				$sql .= " AND ( c.firstname LIKE '%" . $params[0] . "%' OR c.lastname LIKE '%" . $params[0] . "%'";
 
 				foreach ($params as $param) {
 					if ($param != $params[0]) {
-						$sql .= " OR o.firstname LIKE '%" . $params[0] . "%' 
-									OR o.lastname LIKE '%" . $param . "%'";
+						$sql .= " OR c.firstname LIKE '%" . $params[0] . "%' 
+									OR c.lastname LIKE '%" . $param . "%'";
 					};
 				}
 				$sql .= " ) ";
 			}
-			if (isset($data['filter']['min_price']) && isset($data['filter']['max_price']) && $data['filter']['max_price'] != ''  && $data['filter']['min_price'] != 0) {
-				$sql .= " AND o.total > " . $data['filter']['min_price'] . " AND o.total <= " . $data['filter']['max_price'];
+			if (!empty($data['filter']['min_price']) && !empty($data['filter']['max_price'])
+			    && $data['filter']['max_price'] != 0  && $data['filter']['min_price'] != 0) {
+				$sql .= " AND o.total_paid > " . $data['filter']['min_price'] . " AND o.total_paid <= " . $data['filter']['max_price'];
 			}
-			if (isset($data['filter']['date_min']) && $data['filter']['date_min'] != '') {
+			if (!empty($data['filter']['date_min'])) {
 				$date_min = date('y-m-d', strtotime($data['filter']['date_min']));
 				$sql .= " AND DATE_FORMAT(o.date_add,'%y-%m-%d') > '" . $date_min . "'";
 			}
-			if (isset($data['filter']['date_max']) && $data['filter']['date_max'] != '') {
+			if (!empty($data['filter']['date_max'])) {
 				$date_max = date('y-m-d', strtotime($data['filter']['date_max']));
 				$sql .= " AND DATE_FORMAT(o.date_add,'%y-%m-%d') < '" . $date_max . "'";
 			}
@@ -1027,7 +1035,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 		$sql .= " GROUP BY o.id_order ORDER BY o.id_order DESC";
 
 		$sql .= " LIMIT " . (int)$data['limit'] . " OFFSET " . (int)$data['page'];
-
+//echo $sql;
 		$results = Db::getInstance()->ExecuteS( $sql );
 
 		return $results;
