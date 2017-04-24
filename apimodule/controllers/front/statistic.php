@@ -330,6 +330,9 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 			} elseif ( $data['filter'] == 'year' ) {
 				$sql .= "AND YEAR(o.date_add) = YEAR(NOW())";
 			}
+
+			$sql .= " GROUP BY o.id_order ";
+
 			$results = Db::getInstance()->ExecuteS( $sql );
 
 			if(!$results){
@@ -337,7 +340,7 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 			}
 			return $results;
 		}else {
-			$sql = "SELECT COUNT(*) as cnt FROM `" . _DB_PREFIX_ . "customer` ";
+			$sql = "SELECT COUNT(*) as cnt FROM `" . _DB_PREFIX_ . "orders` as o";
 		}
 
 		$results = Db::getInstance()->getRow( $sql );
