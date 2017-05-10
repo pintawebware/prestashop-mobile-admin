@@ -107,6 +107,7 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 	public function login(){
 
 		$this->return = false;
+		$this->return['status'] = false;
 		$this->return['error'] = '';
 		$passwd = trim(Tools::getValue('password'));
 		$email = trim(Tools::getValue('email'));
