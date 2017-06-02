@@ -56,6 +56,18 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
                 case 'updateproduct':
                     $this->updateProduct();
                     break;
+                case 'mainimage':
+                    $this->mainImage();
+                    break;
+                case 'deleteimage':
+                    $this->deleteImage();
+                    break;
+                case 'getcategories':
+                    $this->getCategoriesList();
+                    break;
+                case 'createproduct':
+                    $this->createProduct();
+                    break;
             }
         }
         $this->return['error'] = "No action";
@@ -160,6 +172,9 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
 
 			        $data['price'] = number_format( $product['price'], 2, '.', '' );
 			        $data['name']  = $product['name'];
+                    $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
+                    $data['category_name'] = $category->name;
+
 			        global $currency;
 			        $data['currency_code'] = $currency->iso_code;
 			        $to_response[]         = $data;
@@ -177,11 +192,14 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
 
 		        $imagePath = Link::getImageLink($p->link_rewrite, $image['id_image'], 'home_default');
 
-                $protocol = Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://'; 
+                $protocol = Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://';
 		        $data['image'] = $protocol.$imagePath;
 
 		        $data['price'] = number_format( $product['price'], 2, '.', '' );
 		        $data['name']  = $product['name'];
+                $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
+                $data['category_name'] = $category->name;
+
 		        global $currency;
 		        $data['currency_code'] = $currency->iso_code;
 		        $to_response[]         = $data;
@@ -210,6 +228,8 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {Number} product_id  ID of the product.
      * @apiSuccess {String} model     Model of the product.
+     * @apiSuccess {Boolean} status      Status of the product.
+     * @apiSuccess {String} category_name   Product category
      * @apiSuccess {String} name  Name of the product.
      * @apiSuccess {Number} price  Price of the product.
      * @apiSuccess {String} currency_code  Default currency of the shop.
@@ -226,6 +246,8 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      *       "model" : "Black",
      *       "name" : "HTC Touch HD",
      *       "price" : "100.00",
+     *       "status : true,
+     *       "category_name" : "Summer Dresses"
      *       "currency_code": "UAH"
      *       "quantity" : "83",
      *       "main_image" : "http://site-url/image/catalog/demo/htc_iPhone_1.jpg",
@@ -263,7 +285,10 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
                 $data['images'] = [];
                 $data['product_id'] = (int)$product->id;
                 $data['model'] = $product->reference;
-                $data['status'] = $product->condition;
+//                $data['status'] = $product->condition;
+                $data['status'] = (boolean)$product->active;
+                $category = new Category((int)$product->id_category_default, (int)$this->context->language->id);
+                $data['category_name'] = $category->name;
                 $data['subtract_stock'] = $product->available_now;
                 $data['description'] = strip_tags($product->description);
                 $data['quantity'] =  Db::getInstance()->getRow(" SELECT p.id_product, sa.quantity FROM ps_product p
@@ -274,9 +299,21 @@ WHERE p.id_product = ".$product->id)['quantity'];
             $images = $product->getImages();
             if(count($images) > 0){
                 foreach ($images as $image) {
+                    $tmp = [];
                     $protocol = Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://'; 
-                        $image = Link::getImageLink($product->link_rewrite, $image['id_image'], 'home_default');
-                    $data['images'][] = $protocol.$image;
+                        $link = Link::getImageLink($product->link_rewrite, $image['id_image'], 'home_default');
+                    $tmp['image'] = $protocol.$link;
+                    if ($image['cover']) {
+                        $tmp['id'] = -1;
+                    } else {
+                        $tmp['id'] = $image['id_image'];
+                    }
+                    if ($image['cover']) {
+                        array_unshift($data['images'], $tmp);
+                    } else {
+                        $data['images'][] = $tmp;
+                    }
+
                 }
             }
 
@@ -406,18 +443,20 @@ WHERE p.id_product = ".$product->id)['quantity'];
     }
 
     /**
-     * @api {get} index.php?action=updateproduct&fc=module&module=apimodule&controller=products  updateProduct
+     * @api {post} index.php?action=updateproduct&fc=module&module=apimodule&controller=products  updateProduct
      * @apiName updateProduct
      * @apiGroup All
      *
      * @apiParam {Token} token your unique token.
-     * @apiParam {Number} product_id unique product ID.
      * @apiParam {Number} product_id  ID of the product.
      * @apiParam {String} model     Model of the product.
      * @apiParam {String} name  Name of the product.
      * @apiParam {Number} quantity  Actual quantity of the product.
+     * @apiParam {Number} price  Price of the product.
      * @apiParam {String} description     Detail description of the product.
      * @apiParam {String} description_short     Short description of the product.
+     * @apiParam {Number} category_id  Category id of the product.
+     * @apiParam {Number} status  Status of the product.
      * @apiParam {Array} images  Array of the images of the product.
      *
      * @apiSuccess {Number} version  Current API version.
@@ -449,50 +488,19 @@ WHERE p.id_product = ".$product->id)['quantity'];
         $productId = trim(Tools::getValue('product_id'));
         $quantity = trim(Tools::getValue('quantity'));
         $name = trim(Tools::getValue('name'));
+        $price = trim(Tools::getValue('price'));
         $desc = trim(Tools::getValue('description'));
         $descShort = trim(Tools::getValue('description_short'));
         $reference = trim(Tools::getValue('model'));
+        $categoryId = trim(Tools::getValue('category_id'));
+        $status = filter_var(trim(Tools::getValue('status')), FILTER_VALIDATE_BOOLEAN);
         $images = Tools::getValue('images');
 
         $id_lang = $this->context->language->id;
 
         $product = new Product($productId, false, $id_lang);
         if ($product->id !== null) {
-            if (count($images) >= 0) {
-//                if (isset($images['new']))
-//                    $newImages = $images['new'];
-                if (isset($images['remove']))
-                    $toRemove = $images['remove'];
-                if (isset($images['main']))
-                    $mainImage = $images['main'];
 
-                $productImages = Image::getImages($id_lang, $productId);
-                if ($toRemove) {
-                    foreach ($productImages as $item) {
-                        $id = $item['id_image'];
-                        if (in_array($id, $toRemove)) {
-                            $image = new Image($id);
-                            $image->delete();
-//                            $image->save();
-                        }
-                    }
-                }
-
-                if ($mainImage) {
-                    $cover =  Image::getCover($productId);
-                    if ($cover) {
-                        $image = new Image($cover['id_image']);
-                        $image->cover = null;
-                        $image->save();
-                    }
-                    $product->setCoverWs($mainImage);
-                    $res = $product->save();
-
-
-                    $image = new Image($mainImage);
-                    $image->cover = 1;
-                    $res = $image->save();
-                }
                 if (isset($_FILES)) {
                     $files = $_FILES;
                     foreach ($files as $file) {
@@ -519,7 +527,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
 
                     }
                 }
-            }
+//            }
 
             $product->reference = $reference;
 //            $product->quantity = (int)$quantity;
@@ -530,13 +538,333 @@ WHERE p.id_product = ".$product->id)['quantity'];
             'id_product = '.(int)$productId
             );
             $product->name = $name;
+            $product->price = $price;
             $product->description = $desc;
             $product->description_short = $descShort;
+            $product->id_category_default = $categoryId;
+            $product->active = $status;
             $product->save();
 
             $return['version'] = $this->API_VERSION;
             $return['status'] = true;
             $return['response']['product_id'] = $productId;
+        }
+        header('Content-Type: application/json');
+        die(Tools::jsonEncode($return));
+    }
+
+    /**
+     * @api {post} index.php?action=createproduct&fc=module&module=apimodule&controller=products  createProduct
+     * @apiName createProduct
+     * @apiGroup All
+     *
+     * @apiParam {Token} token your unique token.
+     * @apiParam {String} model     Model of the product.
+     * @apiParam {String} name  Name of the product.
+     * @apiParam {Number} quantity  Actual quantity of the product.
+     * @apiParam {Number} price  Price of the product.
+     * @apiParam {String} description     Detail description of the product.
+     * @apiParam {String} description_short     Short description of the product.
+     * @apiParam {Number} category_id  Category id of the product.
+     * @apiParam {Number} status  Status of the product.
+     * @apiParam {Array} images  Array of the images of the product.
+     *
+     * @apiSuccess {Number} version  Current API version.
+     * @apiSuccess {Number} product_id  ID of the product.
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     * {
+     *   "Response":
+     *   {
+     *       "product_id" : "1",
+     *   },
+     *   "Status" : true,
+     *   "version": 1.0
+     * }
+     * @apiErrorExample Error-Response:
+     * {
+     *      "Error" : "Can not create product",
+     *      "version": 1.0,
+     *      "Status" : false
+     * }
+     *
+     *
+     */
+
+    public function createProduct()
+    {
+        $return['status'] = false;
+        $quantity = trim(Tools::getValue('quantity'));
+        $name = trim(Tools::getValue('name'));
+        $price = trim(Tools::getValue('price'));
+        $desc = trim(Tools::getValue('description'));
+        $descShort = trim(Tools::getValue('description_short'));
+        $reference = trim(Tools::getValue('model'));
+        $categoryId = trim(Tools::getValue('category_id'));
+        $status = filter_var(trim(Tools::getValue('status')), FILTER_VALIDATE_BOOLEAN);
+
+        $id_lang = $this->context->language->id;
+
+        $product = new Product(null, false, $id_lang);
+        $languages=Language::getLanguages();
+        foreach($languages as $lang){
+            $product->name[$lang['id_lang']] = $name;
+            $product->link_rewrite[$lang['id_lang']] = Tools::link_rewrite($name);
+            $product->description[$lang['id_lang']] = $desc;
+            $product->description_short[$lang['id_lang']] = $descShort;
+        }
+        $product->reference = $reference;
+        $product->quantity = $quantity;
+        $product->id_category_default = $categoryId;
+        $product->id_category[] = $product->id_category_default;
+        $product->price = $price;
+        $product->id_tax_rules_group = 1;
+        $product->indexed = 0;
+        $product->active = $status;
+
+        try{
+            $product->save();
+        } catch (PrestaShopException $e){
+            $return['error'] = 'Could not create product';
+            $return['version'] = $this->API_VERSION;
+            $return['status'] = false;
+            header('Content-Type: application/json');
+            die(Tools::jsonEncode($return));
+        }
+
+        Db::getInstance()->update('stock_available', [
+            'quantity' => (int)$quantity
+        ],
+            'id_product = '.(int)$product->id
+        );
+        $product->updateCategories(array_map('intval', $product->id_category));
+//        StockAvailable::setQuantity($product->id,'',$quantity);
+
+        if ($product->id !== null) {
+
+            if (isset($_FILES)) {
+                $files = $_FILES;
+                foreach ($files as $file) {
+                    $path = 'upload/' . $file['name'];
+                    $imageUrl = $file['tmp_name'];
+                    $type = exif_imagetype($imageUrl);
+                    $validTypes = [1, 2, 3];
+                    if (!in_array($type, $validTypes)) {
+//                            $return['error'] = "Image " . $file['name'] . " format not recognized, allowed formats are: .gif, .jpg, .png";
+                        break;
+                    }
+                    $image = new Image();
+                    $image->id_product = $product->id;
+                    $image->position = Image::getHighestPosition($product->id) + 1;
+                    if (($image->validateFields(false, true)) === true && ($image->validateFieldsLang(false, true)) === true && $image->add())
+                    {
+
+                        $copy = self::copyImg($product->id, $image->id, $imageUrl, 'products', true);
+                        if (!$copy)
+                        {
+                            $image->delete();
+                        }
+                    }
+
+                }
+            }
+
+            $return['version'] = $this->API_VERSION;
+            $return['status'] = true;
+            $return['response']['product_id'] = $product->id;
+        }
+        header('Content-Type: application/json');
+        die(Tools::jsonEncode($return));
+    }
+
+    /**
+     * @api {post} index.php?action=mainimage&fc=module&module=apimodule&controller=products  mainImage
+     * @apiName mainImage
+     * @apiGroup All
+     *
+     * @apiParam {Token} token your unique token.
+     * @apiParam {Number} image_id main image ID.
+     *
+     * @apiSuccess {Number} version  Current API version.
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     * {
+     *   "Status" : true,
+     *   "version": 1.0
+     * }
+     * @apiErrorExample Error-Response:
+     * {
+     *      "Error" : "Could not found image with id = 10",
+     *      "version": 1.0,
+     *      "Status" : false
+     * }
+     *
+     *
+     */
+
+    public function mainImage()
+    {
+        $return['status'] = false;
+//        $productId = trim(Tools::getValue('product_id'));
+
+        $imageId = trim(Tools::getValue('image_id'));
+        if ($imageId) {
+
+            $image = new Image($imageId);
+            $productId = $image->id_product;
+            if ($productId) {
+                $id_lang = $this->context->language->id;
+                $product = new Product($productId, false, $id_lang);
+            }
+            if ($image->id !== null) {
+                $cover =  Image::getCover($productId);
+                if ($cover) {
+                    $oldImage = new Image($cover['id_image']);
+                    $oldImage->cover = null;
+                    $oldImage->save();
+                }
+                $image->cover = 1;
+                $image->save();
+                $product->setCoverWs($imageId);
+                $product->save();
+
+
+                $return['status'] = true;
+                $return['version'] = $this->API_VERSION;
+            } else {
+                $return['error'] = 'Could not find image with id = '.$imageId;
+            }
+
+        }
+        header('Content-Type: application/json');
+        die(Tools::jsonEncode($return));
+    }
+
+    /**
+     * @api {post} index.php?action=deleteimage&fc=module&module=apimodule&controller=products  deleteImage
+     * @apiName deleteImage
+     * @apiGroup All
+     *
+     * @apiParam {Token} token your unique token.
+     * @apiParam {Number} image_id image ID.
+     *
+     * @apiSuccess {Number} version  Current API version.
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     * {
+     *   "Status" : true,
+     *   "version": 1.0
+     * }
+     * @apiErrorExample Error-Response:
+     * {
+     *      "Error" : "Can not found image with id = 10",
+     *      "version": 1.0,
+     *      "Status" : false
+     * }
+     *
+     *
+     */
+
+    public function deleteImage()
+    {
+        $return['status'] = false;
+        $imageId = trim(Tools::getValue('image_id'));
+        $image = new Image($imageId);
+        if ($image->id !== null) {
+            $image->delete();
+            $return['status'] = true;
+            $return['version'] = $this->API_VERSION;
+        } else {
+            $return['error'] = 'Could not find with image id = ' . $imageId;
+        }
+
+        header('Content-Type: application/json');
+        die(Tools::jsonEncode($return));
+    }
+
+    /**
+     * @api {get} index.php?action=getcategories&fc=module&module=apimodule&controller=products  getCategoriesList
+     * @apiName getCategoriesList
+     * @apiGroup All
+     *
+     * @apiParam {Token} token your unique token.
+     *
+     * @apiSuccess {Number} version  Current API version.
+     * @apiSuccess {Number} category_id  ID of the category.
+     * @apiSuccess {String} name  Name of the category.
+     * @apiSuccess {Boolean} parent  Specifies whether this category has child categories.
+     *
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     * {
+     *   "Response":
+     *   {
+     *      "categories":
+     *      {
+     *          "3" : {
+     *             "category_id" : "1",
+     *             "name" : "Computers",
+     *             "parent" : "true",
+     *           },
+     *          "4" : {
+     *             "category_id" : "1",
+     *             "name" : "Notebooks",
+     *             "parent" : "false"
+     *           }
+     *      }
+     *   },
+     *   "Status" : true,
+     *   "version": 1.0
+     * }
+     * @apiErrorExample Error-Response:
+     * {
+     *      "Error" : "Not one category not found",
+     *      "version": 1.0,
+     *      "Status" : false
+     * }
+     *
+     *
+     */
+
+    public function getCategoriesList()
+    {
+        $return['status'] = false;
+
+        $sql = "SELECT a.`id_category`, `name`, `description`, 
+                sa.`position` AS `position`, `id_parent`, 
+                `active` , sa.position position 
+                FROM `ps_category` a 
+                LEFT JOIN `ps_category_lang` b 
+                ON (b.`id_category` = a.`id_category` AND b.`id_lang` = 2 AND b.`id_shop` = 1) 
+                LEFT JOIN `ps_category_shop` sa 
+                ON (a.`id_category` = sa.`id_category` AND sa.id_shop = 1) 
+                ORDER BY sa.`position`";
+
+        $results = Db::getInstance()->ExecuteS( $sql );
+        if (count($results)) {
+            $output = [];
+            foreach ($results as $result) {
+                if ($result['id_category'] == 1 || $result['id_category'] == 2) continue;
+                $tmp = [];
+                $tmp['id'] = $result['id_category'];
+                $tmp['name'] = $result['name'];
+                $tmp['parent'] = false;
+                $output[$tmp['id']] = $tmp;
+                if ($result['id_parent']) {
+                    if ($result['id_parent'] != 1 && $result['id_parent'] != 2) {
+                        $output[$result['id_parent']]['parent'] = true;
+                    }
+                }
+            }
+            $return['status'] = true;
+            $return['version'] = $this->API_VERSION;
+            $return['response']['categories'] = $output;
+        } else {
+            $return['error'] = 'No items found';
         }
         header('Content-Type: application/json');
         die(Tools::jsonEncode($return));
