@@ -156,7 +156,7 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 				$user_id = $this->context->employee->id;
 				$device_token = trim(Tools::getValue('device_token'));
 				if(!empty($device_token)){
-					$os_type = empty(trim(Tools::getValue('os_type')))?'android':trim(Tools::getValue('os_type'));
+					$os_type = trim(Tools::getValue('os_type'))?'android':trim(Tools::getValue('os_type'));
 
 					$udt = $this->getUserDevices($user_id,$device_token);
 					if(!$udt){
