@@ -178,8 +178,8 @@ define({ "api": [
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "article",
-            "description": "<p>Article of the product.</p>"
+            "field": "vendor_code",
+            "description": "<p>Vendor code of the product.</p>"
           },
           {
             "group": "Success 200",
@@ -242,7 +242,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "    HTTP/1.1 200 OK\n{\n  \"Response\":\n  {\n      \"product_id\" : \"1\",\n      \"article\" : \"Black\",\n      \"name\" : \"HTC Touch HD\",\n      \"price\" : \"100.00\",\n      \"status : true,\n      \"categories\" : [\n             {\n                 \"id_category\":\"7\",\n                  \"name\":\"Blouses\"\n             },\n             {\n                  \"id_category\":\"5\",\n                  \"name\":\"T-shirts\"\n             }\n        ]\n      \"currency_code\": \"UAH\"\n      \"quantity\" : \"83\",\n      \"main_image\" : \"http://site-url/image/catalog/demo/htc_iPhone_1.jpg\",\n      \"description\" : \"Revolutionary multi-touch interface.↵\tiPod touch features the same multi-touch screen technology as iPhone.\",\n      \"images\" :\n      [\n          \"http://site-url/image/catalog/demo/htc_iPhone_1.jpg\",\n          \"http://site-url/image/catalog/demo/htc_iPhone_2.jpg\",\n          \"http://site-url/image/catalog/demo/htc_iPhone_3.jpg\"\n      ]\n  },\n  \"Status\" : true,\n  \"version\": 1.0\n}",
+          "content": "    HTTP/1.1 200 OK\n{\n  \"Response\":\n  {\n      \"product_id\" : \"1\",\n      \"vendor_code\" : \"Black\",\n      \"name\" : \"HTC Touch HD\",\n      \"price\" : \"100.00\",\n      \"status : true,\n      \"categories\" : [\n             {\n                 \"id_category\":\"7\",\n                  \"name\":\"Blouses\"\n             },\n             {\n                  \"id_category\":\"5\",\n                  \"name\":\"T-shirts\"\n             }\n        ]\n      \"currency_code\": \"UAH\"\n      \"quantity\" : \"83\",\n      \"main_image\" : \"http://site-url/image/catalog/demo/htc_iPhone_1.jpg\",\n      \"description\" : \"Revolutionary multi-touch interface.↵ iPod touch features the same multi-touch screen technology as iPhone.\",\n      \"images\" :\n      [\n          \"http://site-url/image/catalog/demo/htc_iPhone_1.jpg\",\n          \"http://site-url/image/catalog/demo/htc_iPhone_2.jpg\",\n          \"http://site-url/image/catalog/demo/htc_iPhone_3.jpg\"\n      ]\n  },\n  \"Status\" : true,\n  \"version\": 1.0\n}",
           "type": "json"
         }
       ]
@@ -321,8 +321,8 @@ define({ "api": [
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "model",
-            "description": "<p>Model of the product.</p>"
+            "field": "vendor_code",
+            "description": "<p>Vendor code of the product.</p>"
           },
           {
             "group": "Success 200",
@@ -364,7 +364,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "    HTTP/1.1 200 OK\n{\n  \"Response\":\n  {\n     \"products\":\n     {\n          {\n            \"product_id\" : \"1\",\n            \"model\" : \"Black\",\n            \"name\" : \"HTC Touch HD\",\n            \"price\" : \"100.00\",\n            \"currency_code\": \"UAH\",\n            \"quantity\" : \"83\",\n            \"image\" : \"http://site-url/image/catalog/demo/htc_touch_hd_1.jpg\"\n          },\n          {\n            \"product_id\" : \"2\",\n            \"model\" : \"White\",\n            \"name\" : \"iPhone\",\n            \"price\" : \"300.00\",\n            \"currency_code\": \"UAH\",\n            \"quantity\" : \"30\",\n            \"image\" : \"http://site-url/image/catalog/demo/iphone_1.jpg\"\n          }\n     }\n  },\n  \"Status\" : true,\n  \"version\": 1.0\n}",
+          "content": "    HTTP/1.1 200 OK\n{\n  \"Response\":\n  {\n     \"products\":\n     {\n          {\n            \"product_id\" : \"1\",\n            \"vendor_code\" : \"12423\",\n            \"name\" : \"HTC Touch HD\",\n            \"price\" : \"100.00\",\n            \"currency_code\": \"UAH\",\n            \"quantity\" : \"83\",\n            \"image\" : \"http://site-url/image/catalog/demo/htc_touch_hd_1.jpg\"\n          },\n          {\n            \"product_id\" : \"2\",\n            \"vendor_code\" : \"45632\",\n            \"name\" : \"iPhone\",\n            \"price\" : \"300.00\",\n            \"currency_code\": \"UAH\",\n            \"quantity\" : \"30\",\n            \"image\" : \"http://site-url/image/catalog/demo/iphone_1.jpg\"\n          }\n     }\n  },\n  \"Status\" : true,\n  \"version\": 1.0\n}",
           "type": "json"
         }
       ]
