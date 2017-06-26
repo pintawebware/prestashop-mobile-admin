@@ -172,11 +172,8 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
 
                     $data['price'] = number_format( $product['price'], 2, '.', '' );
                     $data['name']  = $product['name'];
-//                    $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
-//                    $data['categories'] = $category->name;
-                    $categories = $this->getCategoriesByProduct($product['id_product']);
-//                $data['categories'] = $category->name;
-                    $data['categories'] = $categories;
+                    $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
+                    $data['category'] = $category->name;
 
                     global $currency;
                     $data['currency_code'] = $currency->iso_code;
@@ -200,11 +197,8 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
 
                 $data['price'] = number_format( $product['price'], 2, '.', '' );
                 $data['name']  = $product['name'];
-//                $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
-//                $data['categories'] = $category->name;
-                $categories = $this->getCategoriesByProduct($product['id_product']);
-//                $data['categories'] = $category->name;
-                $data['categories'] = $categories;
+                $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
+                $data['category'] = $category->name;
 
                 global $currency;
                 $data['currency_code'] = $currency->iso_code;
@@ -301,7 +295,7 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
                 $data['product_id'] = (int)$product->id;
                 $data['vendor_code'] = $product->reference;
 //                $data['status'] = $product->condition;
-                $data['status'] = (boolean)$product->active;
+                $data['status'] = ($product->active) ? "enabled" : "disabled";
 //                $category = new Category((int)$product->id_category_default, (int)$this->context->language->id);
                 $categories = $this->getCategoriesByProduct($product_id);
 //                $data['categories'] = $category->name;
@@ -372,7 +366,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
 
     public function getProductsList ($page, $limit, $name = '')
     {
-        $sql = "SELECT p.id_product, p.reference, p.quantity,  p.price, pl.name
+        $sql = "SELECT p.id_product, p.reference, p.quantity,  p.price, pl.name, p.id_category_default 
                     FROM " . _DB_PREFIX_ . "product AS p 
                     LEFT JOIN " . _DB_PREFIX_ . "product_lang pl ON p.id_product = pl.id_product 
                     WHERE pl.id_lang = 1 " ;
