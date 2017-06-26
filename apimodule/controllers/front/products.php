@@ -246,7 +246,7 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      *       "vendor_code" : "Black",
      *       "name" : "HTC Touch HD",
      *       "price" : "100.00",
-     *       "status : true,
+     *       "status_name" : "enabled",
      *       "categories" : [
      *              {
      *                  "id_category":"7",
@@ -295,7 +295,7 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
                 $data['product_id'] = (int)$product->id;
                 $data['vendor_code'] = $product->reference;
 //                $data['status'] = $product->condition;
-                $data['status'] = ($product->active) ? "enabled" : "disabled";
+                $data['status_name'] = ($product->active) ? "enabled" : "disabled";
 //                $category = new Category((int)$product->id_category_default, (int)$this->context->language->id);
                 $categories = $this->getCategoriesByProduct($product_id);
 //                $data['categories'] = $category->name;
