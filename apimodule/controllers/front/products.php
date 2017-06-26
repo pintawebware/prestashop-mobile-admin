@@ -172,8 +172,8 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
 
                     $data['price'] = number_format( $product['price'], 2, '.', '' );
                     $data['name']  = $product['name'];
-                    $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
-                    $data['category'] = $category->name;
+//                    $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
+                    $data['category'] = $product['id_category_default'];
 
                     global $currency;
                     $data['currency_code'] = $currency->iso_code;
@@ -197,8 +197,8 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
 
                 $data['price'] = number_format( $product['price'], 2, '.', '' );
                 $data['name']  = $product['name'];
-                $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
-                $data['category'] = $category->name;
+//                $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
+                $data['category'] = $product['id_category_default'];
 
                 global $currency;
                 $data['currency_code'] = $currency->iso_code;
@@ -228,7 +228,7 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {Number} product_id  ID of the product.
      * @apiSuccess {String} vendor_code     Vendor code of the product.
-     * @apiSuccess {Boolean} status      Status of the product.
+     * @apiSuccess {Boolean} status_name      Status of the product.
      * @apiSuccess {String} categories   Product categories
      * @apiSuccess {String} name  Name of the product.
      * @apiSuccess {Number} price  Price of the product.
