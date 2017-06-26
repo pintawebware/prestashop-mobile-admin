@@ -178,8 +178,8 @@ define({ "api": [
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "model",
-            "description": "<p>Model of the product.</p>"
+            "field": "article",
+            "description": "<p>Article of the product.</p>"
           },
           {
             "group": "Success 200",
@@ -192,8 +192,8 @@ define({ "api": [
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "category_name",
-            "description": "<p>Product category</p>"
+            "field": "categories",
+            "description": "<p>Product categories</p>"
           },
           {
             "group": "Success 200",
@@ -242,7 +242,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "    HTTP/1.1 200 OK\n{\n  \"Response\":\n  {\n      \"product_id\" : \"1\",\n      \"model\" : \"Black\",\n      \"name\" : \"HTC Touch HD\",\n      \"price\" : \"100.00\",\n      \"status : true,\n      \"category_name\" : \"Summer Dresses\"\n      \"currency_code\": \"UAH\"\n      \"quantity\" : \"83\",\n      \"main_image\" : \"http://site-url/image/catalog/demo/htc_iPhone_1.jpg\",\n      \"description\" : \"Revolutionary multi-touch interface.↵ iPod touch features the same multi-touch screen technology as iPhone.\",\n      \"images\" :\n      [\n          \"http://site-url/image/catalog/demo/htc_iPhone_1.jpg\",\n          \"http://site-url/image/catalog/demo/htc_iPhone_2.jpg\",\n          \"http://site-url/image/catalog/demo/htc_iPhone_3.jpg\"\n      ]\n  },\n  \"Status\" : true,\n  \"version\": 1.0\n}",
+          "content": "    HTTP/1.1 200 OK\n{\n  \"Response\":\n  {\n      \"product_id\" : \"1\",\n      \"article\" : \"Black\",\n      \"name\" : \"HTC Touch HD\",\n      \"price\" : \"100.00\",\n      \"status : true,\n      \"categories\" : [\n             {\n                 \"id_category\":\"7\",\n                  \"name\":\"Blouses\"\n             },\n             {\n                  \"id_category\":\"5\",\n                  \"name\":\"T-shirts\"\n             }\n        ]\n      \"currency_code\": \"UAH\"\n      \"quantity\" : \"83\",\n      \"main_image\" : \"http://site-url/image/catalog/demo/htc_iPhone_1.jpg\",\n      \"description\" : \"Revolutionary multi-touch interface.↵\tiPod touch features the same multi-touch screen technology as iPhone.\",\n      \"images\" :\n      [\n          \"http://site-url/image/catalog/demo/htc_iPhone_1.jpg\",\n          \"http://site-url/image/catalog/demo/htc_iPhone_2.jpg\",\n          \"http://site-url/image/catalog/demo/htc_iPhone_3.jpg\"\n      ]\n  },\n  \"Status\" : true,\n  \"version\": 1.0\n}",
           "type": "json"
         }
       ]

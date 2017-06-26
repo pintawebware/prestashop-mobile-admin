@@ -227,9 +227,9 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      *
      * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {Number} product_id  ID of the product.
-     * @apiSuccess {String} model     Model of the product.
+     * @apiSuccess {String} article     Article of the product.
      * @apiSuccess {Boolean} status      Status of the product.
-     * @apiSuccess {String} categories   Product category
+     * @apiSuccess {String} categories   Product categories
      * @apiSuccess {String} name  Name of the product.
      * @apiSuccess {Number} price  Price of the product.
      * @apiSuccess {String} currency_code  Default currency of the shop.
@@ -243,11 +243,20 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      *   "Response":
      *   {
      *       "product_id" : "1",
-     *       "model" : "Black",
+     *       "article" : "Black",
      *       "name" : "HTC Touch HD",
      *       "price" : "100.00",
      *       "status : true,
-     *       "categories" : "Summer Dresses"
+     *       "categories" : [
+     *              {
+     *                  "id_category":"7",
+     *                   "name":"Blouses"
+     *              },
+     *              {
+     *                   "id_category":"5",
+     *                   "name":"T-shirts"
+     *              }
+     *         ]
      *       "currency_code": "UAH"
      *       "quantity" : "83",
      *       "main_image" : "http://site-url/image/catalog/demo/htc_iPhone_1.jpg",
@@ -284,12 +293,14 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
         if ($product->id !== null) {
                 $data['images'] = [];
                 $data['product_id'] = (int)$product->id;
-                $data['model'] = $product->reference;
+                $data['article'] = $product->reference;
 //                $data['status'] = $product->condition;
                 $data['status'] = (boolean)$product->active;
-                $category = new Category((int)$product->id_category_default, (int)$this->context->language->id);
-                $data['categories'] = $category->name;
-                $data['subtract_stock'] = $product->available_now;
+//                $category = new Category((int)$product->id_category_default, (int)$this->context->language->id);
+                $categories = $this->getCategoriesByProduct($product_id);
+//                $data['categories'] = $category->name;
+                $data['categories'] = $categories;
+//                $data['subtract_stock'] = $product->available_now;
                 $data['description'] = strip_tags($product->description);
                 $data['quantity'] =  Db::getInstance()->getRow(" SELECT p.id_product, sa.quantity FROM ps_product p
  
@@ -336,6 +347,21 @@ WHERE p.id_product = ".$product->id)['quantity'];
 
         header('Content-Type: application/json');
         die(Tools::jsonEncode($return));
+    }
+
+    private function getCategoriesByProduct($id)
+    {
+        $product = (int)$id;
+        $sql = "SELECT c.id_category, cl.name 
+					FROM " . _DB_PREFIX_ . "category_product AS cp 
+					INNER JOIN " . _DB_PREFIX_ . "category c ON cp.id_category = c.id_category 
+					INNER JOIN " . _DB_PREFIX_ . "category_lang cl ON c.id_category = cl.id_category 
+					WHERE cp.id_product =  $product 
+					AND id_lang = 1 
+					AND cp.id_category <> 1 
+					AND cp.id_category <> 2" ;
+        $results = Db::getInstance()->ExecuteS($sql);
+        return $results;
     }
 
 	public function getProductsList ($page, $limit, $name = '')
