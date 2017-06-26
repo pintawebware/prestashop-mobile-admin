@@ -713,10 +713,10 @@ WHERE p.id_product = ".$product->id)['quantity'];
             foreach ($results as $result) {
                 if ($result['id_category'] == 1 || $result['id_category'] == 2) continue;
                 $tmp = [];
-                $tmp['id'] = $result['id_category'];
+                $tmp['category_id'] = $result['id_category'];
                 $tmp['name'] = $result['name'];
                 $tmp['parent'] = false;
-                $output[$tmp['id']] = $tmp;
+                $output[$tmp['category_id']] = $tmp;
                 if ($result['id_parent']) {
                     if ($result['id_parent'] != 1 && $result['id_parent'] != 2) {
                         $output[$result['id_parent']]['parent'] = true;
@@ -725,7 +725,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
             }
             $return['status'] = true;
             $return['version'] = $this->API_VERSION;
-            $return['response']['categories'] = $output;
+            $return['response']['categories'] = array_values($output);
         } else {
             $return['error'] = 'No items found';
         }
