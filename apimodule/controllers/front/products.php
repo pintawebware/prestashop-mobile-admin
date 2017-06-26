@@ -172,8 +172,8 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
 
                     $data['price'] = number_format( $product['price'], 2, '.', '' );
                     $data['name']  = $product['name'];
-//                    $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
-                    $data['category'] = $product['id_category_default'];
+                    $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
+                    $data['category'] = $category->name;
 
                     global $currency;
                     $data['currency_code'] = $currency->iso_code;
@@ -197,8 +197,8 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
 
                 $data['price'] = number_format( $product['price'], 2, '.', '' );
                 $data['name']  = $product['name'];
-//                $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
-                $data['category'] = $product['id_category_default'];
+                $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
+                $data['category'] = $category->name;
 
                 global $currency;
                 $data['currency_code'] = $currency->iso_code;
@@ -246,7 +246,7 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      *       "vendor_code" : "Black",
      *       "name" : "HTC Touch HD",
      *       "price" : "100.00",
-     *       "status_name" : "enabled",
+     *       "status_name" : "Enabled",
      *       "categories" : [
      *              {
      *                  "id_category":"7",
@@ -295,7 +295,7 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
                 $data['product_id'] = (int)$product->id;
                 $data['vendor_code'] = $product->reference;
 //                $data['status'] = $product->condition;
-                $data['status_name'] = ($product->active) ? "enabled" : "disabled";
+                $data['status_name'] = ($product->active) ? "Enabled" : "Disabled";
 //                $category = new Category((int)$product->id_category_default, (int)$this->context->language->id);
                 $categories = $this->getCategoriesByProduct($product_id);
 //                $data['categories'] = $category->name;
@@ -352,7 +352,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
     private function getCategoriesByProduct($id)
     {
         $product = (int)$id;
-        $sql = "SELECT c.id_category, cl.name 
+        $sql = "SELECT c.id_category AS category_id, cl.name 
                     FROM " . _DB_PREFIX_ . "category_product AS cp 
                     INNER JOIN " . _DB_PREFIX_ . "category c ON cp.id_category = c.id_category 
                     INNER JOIN " . _DB_PREFIX_ . "category_lang cl ON c.id_category = cl.id_category 
