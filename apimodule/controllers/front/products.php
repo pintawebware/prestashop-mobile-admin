@@ -426,6 +426,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
      *
      * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {Number} product_id  ID of the product.
+     * @apiSuccess {Array} images Product images.
      *
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
@@ -433,6 +434,20 @@ WHERE p.id_product = ".$product->id)['quantity'];
      *   "Response":
      *   {
      *       "product_id" : "1",
+     *       "images": [
+     *               {
+     *                   "image": "http://site-url/image/catalog/demo/htc_iPhone_1.jpg",
+     *                   "image_id": -1
+     *               },
+     *               {
+     *                   "image": "http://site-url/image/catalog/demo/htc_iPhone_1.jp",
+     *                   "image_id": "5"
+     *               },
+     *               {
+     *                   "image": "http://site-url/image/catalog/demo/htc_iPhone_1.jp",
+     *                   "image_id": "6"
+     *               }
+     *          ]
      *   },
      *   "Status" : true,
      *   "version": 1.0
@@ -531,10 +546,31 @@ WHERE p.id_product = ".$product->id)['quantity'];
 
                 }
             }
+            $data = [];
+            $images = $product->getImages();
+            if(count($images) > 0){
+                foreach ($images as $image) {
+                    $tmp = [];
+                    $protocol = Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://';
+                    $link = Link::getImageLink($product->link_rewrite, $image['id_image'], 'home_default');
+                    $tmp['image'] = $protocol.$link;
+                    if ($image['cover']) {
+                        $tmp['image_id'] = -1;
+                    } else {
+                        $tmp['image_id'] = $image['id_image'];
+                    }
+                    if ($image['cover']) {
+                        array_unshift($data['images'], $tmp);
+                    } else {
+                        $data['images'][] = $tmp;
+                    }
+                }
+            }
 
             $return['version'] = $this->API_VERSION;
             $return['status'] = true;
             $return['response']['product_id'] = $product->id;
+            $return['response']['images'] = $data['images'];
         }
         header('Content-Type: application/json');
         die(Tools::jsonEncode($return));
