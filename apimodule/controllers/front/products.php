@@ -151,59 +151,59 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
  $to_response = [];
         $id_lang = $this->context->language->id;
         if(empty($name)) {
-            $productObj  = new Product();
-            $products    = $productObj->getProducts( $id_lang, $page, $limit, 'id_product', 'DESC' );
-           
-            if ( count( $products ) > 0 ) {
-                foreach ( $products as $product ) {
-                    $data['product_id'] = $product['id_product'];
-                    $data['vendor_code']      = $product['reference'];
-                    $data['quantity']   = Db::getInstance()->getRow( " SELECT p.id_product, sa.quantity FROM ps_product p
-    INNER JOIN ps_stock_available sa ON p.id_product = sa.id_product AND id_product_attribute = 0    
-    WHERE p.id_product = " . $product['id_product'] )['quantity'];
+	        $productObj  = new Product();
+	        $products    = $productObj->getProducts( $id_lang, $page, $limit, 'id_product', 'DESC' );
+	       
+	        if ( count( $products ) > 0 ) {
+		        foreach ( $products as $product ) {
+			        $data['product_id'] = $product['id_product'];
+			        $data['vendor_code']      = $product['reference'];
+			        $data['quantity']   = Db::getInstance()->getRow( " SELECT p.id_product, sa.quantity FROM ps_product p
+	INNER JOIN ps_stock_available sa ON p.id_product = sa.id_product AND id_product_attribute = 0	 
+	WHERE p.id_product = " . $product['id_product'] )['quantity'];
 
-                    $idImage = Db::getInstance()->getRow( "SELECT id_image FROM ps_image WHERE cover = 1 AND id_product =  " . $product['id_product'] )['id_image'];
-                    $imgPath = '';
-                    for ( $i = 0; $i < strlen( $idImage ); $i ++ ) {
-                        $imgPath .= $idImage[ $i ] . '/';
-                    }
-                    $imgPath .= $idImage . '.jpg';
-                    $data['image'] = _PS_BASE_URL_ . _THEME_PROD_DIR_ . $imgPath;
+			        $idImage = Db::getInstance()->getRow( "SELECT id_image FROM ps_image WHERE cover = 1 AND id_product =  " . $product['id_product'] )['id_image'];
+			        $imgPath = '';
+			        for ( $i = 0; $i < strlen( $idImage ); $i ++ ) {
+				        $imgPath .= $idImage[ $i ] . '/';
+			        }
+			        $imgPath .= $idImage . '.jpg';
+			        $data['image'] = _PS_BASE_URL_ . _THEME_PROD_DIR_ . $imgPath;
 
-                    $data['price'] = number_format( $product['price'], 2, '.', '' );
-                    $data['name']  = $product['name'];
+			        $data['price'] = number_format( $product['price'], 2, '.', '' );
+			        $data['name']  = $product['name'];
                     $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
                     $data['category'] = $category->name;
 
-                    global $currency;
-                    $data['currency_code'] = $currency->iso_code;
-                    $to_response[]         = $data;
-                }
-            }
+			        global $currency;
+			        $data['currency_code'] = $currency->iso_code;
+			        $to_response[]         = $data;
+		        }
+	        }
         }else{
-            $products = $this->getProductsList($page, $limit, $name);
-            foreach ( $products as $product ) {
-                $data['product_id'] = $product['id_product'];
-                $data['vendor_code']      = $product['reference'];
-                $data['quantity']   = $product['quantity'];
-             
-                $p = new Product($product['id_product']);
-                $image = Image::getCover( $p->id );
+	        $products = $this->getProductsList($page, $limit, $name);
+	        foreach ( $products as $product ) {
+		        $data['product_id'] = $product['id_product'];
+		        $data['vendor_code']      = $product['reference'];
+		        $data['quantity']   = $product['quantity'];
+		     
+		        $p = new Product($product['id_product']);
+		        $image = Image::getCover( $p->id );
 
-                $imagePath = Link::getImageLink($p->link_rewrite, $image['id_image'], 'home_default');
+		        $imagePath = Link::getImageLink($p->link_rewrite, $image['id_image'], 'home_default');
 
                 $protocol = Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://';
-                $data['image'] = $protocol.$imagePath;
+		        $data['image'] = $protocol.$imagePath;
 
-                $data['price'] = number_format( $product['price'], 2, '.', '' );
-                $data['name']  = $product['name'];
+		        $data['price'] = number_format( $product['price'], 2, '.', '' );
+		        $data['name']  = $product['name'];
                 $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
                 $data['category'] = $category->name;
 
-                global $currency;
-                $data['currency_code'] = $currency->iso_code;
-                $to_response[]         = $data;
-            }
+		        global $currency;
+		        $data['currency_code'] = $currency->iso_code;
+		        $to_response[]         = $data;
+	        }
         }
         if(!count($return['errors'])){
             $return['status'] = true;
@@ -260,7 +260,7 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      *       "currency_code": "UAH"
      *       "quantity" : "83",
      *       "main_image" : "http://site-url/image/catalog/demo/htc_iPhone_1.jpg",
-     *       "description" : "Revolutionary multi-touch interface.↵ iPod touch features the same multi-touch screen technology as iPhone.",
+     *       "description" : "Revolutionary multi-touch interface.↵	iPod touch features the same multi-touch screen technology as iPhone.",
      *       "images" :
      *       [
      *           "http://site-url/image/catalog/demo/htc_iPhone_1.jpg",
@@ -353,32 +353,32 @@ WHERE p.id_product = ".$product->id)['quantity'];
     {
         $product = (int)$id;
         $sql = "SELECT c.id_category AS category_id, cl.name 
-                    FROM " . _DB_PREFIX_ . "category_product AS cp 
-                    INNER JOIN " . _DB_PREFIX_ . "category c ON cp.id_category = c.id_category 
-                    INNER JOIN " . _DB_PREFIX_ . "category_lang cl ON c.id_category = cl.id_category 
-                    WHERE cp.id_product =  $product 
-                    AND id_lang = 1 
-                    AND cp.id_category <> 1 
-                    AND cp.id_category <> 2" ;
+					FROM " . _DB_PREFIX_ . "category_product AS cp 
+					INNER JOIN " . _DB_PREFIX_ . "category c ON cp.id_category = c.id_category 
+					INNER JOIN " . _DB_PREFIX_ . "category_lang cl ON c.id_category = cl.id_category 
+					WHERE cp.id_product =  $product 
+					AND id_lang = 1 
+					AND cp.id_category <> 1 
+					AND cp.id_category <> 2" ;
         $results = Db::getInstance()->ExecuteS($sql);
         return $results;
     }
 
-    public function getProductsList ($page, $limit, $name = '')
-    {
-        $sql = "SELECT p.id_product, p.reference, p.quantity,  p.price, pl.name, p.id_category_default 
-                    FROM " . _DB_PREFIX_ . "product AS p 
-                    LEFT JOIN " . _DB_PREFIX_ . "product_lang pl ON p.id_product = pl.id_product 
-                    WHERE pl.id_lang = 1 " ;
-        if($name != ''){
-            $sql .= " AND (pl.name LIKE '%" .$name. "%' OR p.reference LIKE '%" .$name. "%')";
-        }
-        $sql .= " LIMIT " . (int)$limit . " OFFSET " . (int)$page;
+	public function getProductsList ($page, $limit, $name = '')
+	{
+		$sql = "SELECT p.id_product, p.reference, p.quantity,  p.price, pl.name, p.id_category_default 
+					FROM " . _DB_PREFIX_ . "product AS p 
+					LEFT JOIN " . _DB_PREFIX_ . "product_lang pl ON p.id_product = pl.id_product 
+					WHERE pl.id_lang = 1 " ;
+		if($name != ''){
+			$sql .= " AND (pl.name LIKE '%" .$name. "%' OR p.reference LIKE '%" .$name. "%')";
+		}
+		$sql .= " LIMIT " . (int)$limit . " OFFSET " . (int)$page;
 
-        $results = Db::getInstance()->ExecuteS( $sql );
+		$results = Db::getInstance()->ExecuteS( $sql );
 
-        return $results;
-    }
+		return $results;
+	}
 
     private function valid() {
         $token = trim( Tools::getValue( 'token' ) );
@@ -396,7 +396,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
     }
     public function getTokens($token){
         $sql = "SELECT * FROM " . _DB_PREFIX_ . "apimodule_user_token
-                WHERE token = '".$token."'";
+		        WHERE token = '".$token."'";
 
         if ($row = Db::getInstance()->getRow($sql)){
             return $row;
@@ -420,7 +420,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
      * @apiParam {Number} price  Price of the product.
      * @apiParam {String} description     Detail description of the product.
      * @apiParam {String} description_short     Short description of the product.
-     * @apiParam {Number} category_id  Category id of the product.
+     * @apiParam {Number} categories  Array of categories of the product.
      * @apiParam {Number} status  Status of the product.
      * @apiParam {Array} images  Array of the images of the product.
      *
@@ -472,7 +472,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
         $desc = trim(Tools::getValue('description'));
         $descShort = trim(Tools::getValue('description_short'));
         $reference = trim(Tools::getValue('model'));
-        $categoryId = trim(Tools::getValue('category_id'));
+        $categories = isset($_REQUEST['categories']) ? $_REQUEST['categories'] : null;
         $status = filter_var(trim(Tools::getValue('status')), FILTER_VALIDATE_BOOLEAN);
         $images = Tools::getValue('images');
 
@@ -503,7 +503,8 @@ WHERE p.id_product = ".$product->id)['quantity'];
             $product->price = $price;
             $product->description = $desc;
             $product->description_short = $descShort;
-            $product->id_category_default = $categoryId;
+            $this->updateProductCategories($productId, $categories);
+//            $product->id_category_default = $categoryId;
             $product->active = $status;
             try{
                 $product->save();
@@ -574,6 +575,33 @@ WHERE p.id_product = ".$product->id)['quantity'];
         }
         header('Content-Type: application/json');
         die(Tools::jsonEncode($return));
+    }
+
+    public function updateProductCategories($productId, $categories)
+    {
+        if ($productId) {
+            $id = (int) $productId;
+            if (is_array($categories)) {
+
+                $delete = "DELETE FROM `ps_category_product` "
+                    . "WHERE id_product = $id "
+                    . "AND id_category <> 2 "
+                    . "AND id_category <> 1";
+                $results = Db::getInstance()->ExecuteS($delete);
+                $pos = Db::getInstance()->ExecuteS("SELECT MAX(position) AS pos from ps_category_product WHERE id_product = $id");
+                $pos = $pos[0]['pos'];
+                foreach ($categories as $category) {
+                    $pos++;
+                    $category = (int)$category;
+                    $ins = Db::getInstance()->insert('category_product', [
+                        'id_category' => $category,
+                        'id_product' => $id,
+                        'position' => $pos
+                    ]);
+                }
+
+            }
+        }
     }
 
 
