@@ -718,6 +718,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
      * @apiGroup All
      *
      * @apiParam {Token} token your unique token.
+     * @apiParam {Number} category_id unique category ID.
      *
      * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {Number} category_id  ID of the category.
@@ -760,18 +761,13 @@ WHERE p.id_product = ".$product->id)['quantity'];
     public function getCategoriesList()
     {
         $return['status'] = false;
+        $id = trim(Tools::getValue('category_id'));
+        if ($id == -1) {
+            $results = $this->getAllCategories();
+        } else {
+            $results = $this->getChildCategories($id);
+        }
 
-        $sql = "SELECT a.`id_category`, `name`, `description`, 
-                sa.`position` AS `position`, `id_parent`, 
-                `active` , sa.position position 
-                FROM `ps_category` a 
-                LEFT JOIN `ps_category_lang` b 
-                ON (b.`id_category` = a.`id_category` AND b.`id_lang` = 2 AND b.`id_shop` = 1) 
-                LEFT JOIN `ps_category_shop` sa 
-                ON (a.`id_category` = sa.`id_category` AND sa.id_shop = 1) 
-                ORDER BY sa.`position`";
-
-        $results = Db::getInstance()->ExecuteS( $sql );
         if (count($results)) {
             $output = [];
             foreach ($results as $result) {
@@ -779,11 +775,14 @@ WHERE p.id_product = ".$product->id)['quantity'];
                 $tmp = [];
                 $tmp['category_id'] = $result['id_category'];
                 $tmp['name'] = $result['name'];
-                $tmp['parent'] = false;
+                if ($id == -1)
+                    $tmp['parent'] = false;
                 $output[$tmp['category_id']] = $tmp;
-                if ($result['id_parent']) {
-                    if ($result['id_parent'] != 1 && $result['id_parent'] != 2) {
-                        $output[$result['id_parent']]['parent'] = true;
+                if ($id == -1) {
+                    if ($result['id_parent']) {
+                        if ($result['id_parent'] != 1 && $result['id_parent'] != 2) {
+                            $output[$result['id_parent']]['parent'] = true;
+                        }
                     }
                 }
             }
@@ -795,6 +794,38 @@ WHERE p.id_product = ".$product->id)['quantity'];
         }
         header('Content-Type: application/json');
         die(Tools::jsonEncode($return));
+    }
+
+    private function getAllCategories()
+    {
+        $sql = "SELECT a.`id_category`, `name`, `description`, 
+                sa.`position` AS `position`, `id_parent`, 
+                `active` , sa.position position 
+                FROM `ps_category` a 
+                LEFT JOIN `ps_category_lang` b 
+                ON (b.`id_category` = a.`id_category` AND b.`id_lang` = 2 AND b.`id_shop` = 1) 
+                LEFT JOIN `ps_category_shop` sa 
+                ON (a.`id_category` = sa.`id_category` AND sa.id_shop = 1) 
+                ORDER BY sa.`position`";
+
+        $results = Db::getInstance()->ExecuteS( $sql );
+        return $results;
+    }
+
+    private function getChildCategories($category)
+    {
+        $sql = "SELECT a.`id_category`, `name`, `description`, 
+                sa.`position` AS `position`, `id_parent`, 
+                `active` , sa.position position 
+                FROM `ps_category` a 
+                LEFT JOIN `ps_category_lang` b 
+                ON (b.`id_category` = a.`id_category` AND b.`id_lang` = 2 AND b.`id_shop` = 1) 
+                LEFT JOIN `ps_category_shop` sa 
+                ON (a.`id_category` = sa.`id_category` AND sa.id_shop = 1) 
+                WHERE a.`id_parent` = $category 
+                ORDER BY sa.`position`";
+        $results = Db::getInstance()->ExecuteS( $sql );
+        return $results;
     }
 
     /**
