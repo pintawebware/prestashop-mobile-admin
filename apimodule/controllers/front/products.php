@@ -532,10 +532,10 @@ WHERE p.id_product = ".$product->id)['quantity'];
             );
 
             if (isset($_FILES)) {
-                $files = $_FILES;
-                foreach ($files as $file) {
-                    $path = 'upload/' . $file['name'];
-                    $imageUrl = $file['tmp_name'];
+                $files = $_FILES['image'];
+                foreach ($_FILES['image']['name'] as $key => $name) {
+                    $path = 'upload/' . $name;
+                    $imageUrl = $_FILES['image']["tmp_name"][$key];
                     $type = exif_imagetype($imageUrl);
                     $validTypes = [1, 2, 3];
                     if (!in_array($type, $validTypes)) {
