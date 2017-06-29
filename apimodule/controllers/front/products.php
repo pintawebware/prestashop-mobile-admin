@@ -414,7 +414,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
      *
      * @apiParam {Token} token your unique token.
      * @apiParam {Number} product_id  ID of the product.
-     * @apiParam {String} model     Model of the product.
+     * @apiParam {String} vendor_code     Vendor code of the product.
      * @apiParam {String} name  Name of the product.
      * @apiParam {Number} quantity  Actual quantity of the product.
      * @apiParam {Number} price  Price of the product.
@@ -467,11 +467,14 @@ WHERE p.id_product = ".$product->id)['quantity'];
         $return['status'] = false;
         $productId = trim(Tools::getValue('product_id'));
         $quantity = trim(Tools::getValue('quantity'));
+        $quantity = $quantity ? $quantity : 0;
         $name = trim(Tools::getValue('name'));
         $price = trim(Tools::getValue('price'));
+        $price = $price ? $price : 0;
+        $price = floatval($price);
         $desc = trim(Tools::getValue('description'));
         $descShort = trim(Tools::getValue('description_short'));
-        $reference = trim(Tools::getValue('model'));
+        $reference = trim(Tools::getValue('vendor_code'));
         $categories = isset($_REQUEST['categories']) ? $_REQUEST['categories'] : null;
         $status = filter_var(trim(Tools::getValue('status')), FILTER_VALIDATE_BOOLEAN);
         $images = Tools::getValue('images');
@@ -498,11 +501,17 @@ WHERE p.id_product = ".$product->id)['quantity'];
             $product->reference = $reference;
 //            $product->quantity = (int)$quantity;
 //            StockAvailable::setQuantity($product->id, null, (int)$quantity);
-
-            $product->name = $name;
+            if ($name) {
+                $product->name = $name;
+            }
             $product->price = $price;
-            $product->description = $desc;
-            $product->description_short = $descShort;
+            if ($desc) {
+                $product->description = $desc;
+            }
+            if ($descShort) {
+                $product->description_short = $descShort;
+            }
+
             $this->updateProductCategories($productId, $categories);
 //            $product->id_category_default = $categoryId;
             $product->active = $status;
@@ -550,6 +559,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
             $data = [];
             $images = $product->getImages();
             if(count($images) > 0){
+                $data['images'] = [];
                 foreach ($images as $image) {
                     $tmp = [];
                     $protocol = Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://';
