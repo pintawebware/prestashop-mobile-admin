@@ -512,7 +512,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
                 $product->description_short = $descShort;
             }
 
-            $this->updateProductCategories($productId, $categories);
+
 //            $product->id_category_default = $categoryId;
             $product->active = $status;
             try{
@@ -524,6 +524,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
                 header('Content-Type: application/json');
                 die(Tools::jsonEncode($return));
             }
+            $this->updateProductCategories($product->id, $categories);
             Db::getInstance()->update('stock_available', [
                 'quantity' => (int)$quantity
             ],
