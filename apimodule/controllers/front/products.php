@@ -558,8 +558,8 @@ WHERE p.id_product = ".$product->id)['quantity'];
             }
             $data = [];
             $images = $product->getImages();
+            $data['images'] = [];
             if(count($images) > 0){
-                $data['images'] = [];
                 foreach ($images as $image) {
                     $tmp = [];
                     $protocol = Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://';
