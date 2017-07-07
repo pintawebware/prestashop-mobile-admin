@@ -610,6 +610,18 @@ WHERE p.id_product = ".$product->id)['quantity'];
                         $data['images'][] = $tmp;
                     }
                 }
+                $cover =  Image::getCover($product->id);
+                if (!$cover) {
+                    $tmp = [];
+                    $tmp['image_id'] = -1;
+                    $tmp['image'] = '';
+                    array_unshift($data['images'], $tmp);
+                }
+            } else {
+                $tmp = [];
+                $tmp['image_id'] = -1;
+                $tmp['image'] = "";
+                $data['images'][] = $tmp;
             }
 
             $return['version'] = $this->API_VERSION;
