@@ -338,6 +338,13 @@ WHERE p.id_product = ".$product->id)['quantity'];
                         $data['images'][] = $tmp;
                     }
                 }
+                $cover =  Image::getCover($product_id);
+                if (!$cover) {
+                    $tmp = [];
+                    $tmp['image_id'] = -1;
+                    $tmp['image'] = '';
+                    $data['images'][] = $tmp;
+                }
             } else {
                 $tmp = [];
                 $tmp['image_id'] = -1;
