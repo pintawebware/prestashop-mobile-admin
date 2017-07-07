@@ -686,6 +686,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
      * @apiGroup All
      *
      * @apiParam {Token} token your unique token.
+     * @apiParam {Number} product_id product ID.
      * @apiParam {Number} image_id image ID.
      *
      * @apiSuccess {Number} version  Current API version.
@@ -715,6 +716,18 @@ WHERE p.id_product = ".$product->id)['quantity'];
             $image->delete();
             $return['status'] = true;
             $return['version'] = $this->API_VERSION;
+        } else if ($imageId == -1) {
+            $product_id = trim(Tools::getValue('product_id'));
+            $cover =  Image::getCover($product_id);
+            if ($cover) {
+                $oldImage = new Image($cover['id_image']);
+                $oldImage->cover = null;
+                $oldImage->delete();
+                $return['status'] = true;
+                $return['version'] = $this->API_VERSION;
+            } else {
+                $return['error'] = 'Could not find with image id = ' . $imageId;
+            }
         } else {
             $return['error'] = 'Could not find with image id = ' . $imageId;
         }

@@ -19,6 +19,13 @@ define({ "api": [
             "group": "Parameter",
             "type": "Number",
             "optional": false,
+            "field": "product_id",
+            "description": "<p>product ID.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
             "field": "image_id",
             "description": "<p>image ID.</p>"
           }
@@ -73,6 +80,13 @@ define({ "api": [
             "optional": false,
             "field": "token",
             "description": "<p>your unique token.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "category_id",
+            "description": "<p>unique category ID.</p>"
           }
         ]
       }
@@ -468,8 +482,8 @@ define({ "api": [
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "model",
-            "description": "<p>Model of the product.</p>"
+            "field": "vendor_code",
+            "description": "<p>Vendor code of the product.</p>"
           },
           {
             "group": "Parameter",
@@ -510,8 +524,8 @@ define({ "api": [
             "group": "Parameter",
             "type": "Number",
             "optional": false,
-            "field": "category_id",
-            "description": "<p>Category id of the product.</p>"
+            "field": "categories",
+            "description": "<p>Array of categories of the product.</p>"
           },
           {
             "group": "Parameter",
