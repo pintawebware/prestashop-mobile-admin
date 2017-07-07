@@ -324,8 +324,12 @@ WHERE p.id_product = ".$product->id)['quantity'];
                     } else {
                         $data['images'][] = $tmp;
                     }
-
                 }
+            } else {
+                $tmp = [];
+                $tmp['image_id'] = -1;
+                $tmp['image'] = "";
+                $data['images'][] = $tmp;
             }
 
             $data['price'] = number_format($product->price, 2, '.', '');
