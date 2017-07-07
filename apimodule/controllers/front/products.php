@@ -730,7 +730,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
                 $return['status'] = true;
                 $return['version'] = $this->API_VERSION;
             } else {
-                $return['error'] = 'Could not find with image id = ' . $imageId;
+                $return['error'] = 'Could not delete empty image';
             }
         } else {
             $return['error'] = 'Could not find with image id = ' . $imageId;
