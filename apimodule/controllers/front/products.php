@@ -167,13 +167,26 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
                     for ( $i = 0; $i < strlen( $idImage ); $i ++ ) {
                         $imgPath .= $idImage[ $i ] . '/';
                     }
-                    $imgPath .= $idImage . '.jpg';
-                    $data['image'] = _PS_BASE_URL_ . _THEME_PROD_DIR_ . $imgPath;
+                    if ($idImage) {
+                        $imgPath .= $idImage . '.jpg';
+                        $data['image'] = _PS_BASE_URL_ . _THEME_PROD_DIR_ . $imgPath;
+                    } else {
+                        $data['image'] = '';
+                    }
 
                     $data['price'] = number_format( $product['price'], 2, '.', '' );
                     $data['name']  = $product['name'];
                     $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
-                    $data['category'] = $category->name;
+                    if ($category->name) {
+                        $data['category'] = $category->name;
+                    } else {
+                        $categories = $this->getCategoriesByProduct($product['id_product']);
+                        if (!empty($categories)) {
+                            $data['category'] = $categories[0]['name'];
+                        } else {
+                            $data['category'] = '';
+                        }
+                    }
 
                     global $currency;
                     $data['currency_code'] = $currency->iso_code;
