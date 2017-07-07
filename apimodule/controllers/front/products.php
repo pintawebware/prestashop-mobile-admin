@@ -556,6 +556,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
             );
 
             if (isset($_FILES)) {
+                $imagesCounter = 0;
                 $files = $_FILES['image'];
                 foreach ($_FILES['image']['name'] as $key => $name) {
                     $path = 'upload/' . $name;
@@ -569,6 +570,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
                     $image = new Image();
                     $image->id_product = $product->id;
                     $image->position = Image::getHighestPosition($product->id) + 1;
+
                     if (($image->validateFields(false, true)) === true && ($image->validateFieldsLang(false, true)) === true && $image->add())
                     {
 
@@ -577,6 +579,13 @@ WHERE p.id_product = ".$product->id)['quantity'];
                         {
                             $image->delete();
                         }
+                    }
+                    if (!$productId && !$imagesCounter) {
+                        $image->cover = 1;
+                        $image->save();
+                        $product->setCoverWs($image->id);
+                        $product->save();
+                        $imagesCounter = 1;
                     }
 
                 }
