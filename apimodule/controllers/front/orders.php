@@ -212,9 +212,16 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 			$filter['date_max'] = !empty($date_max)?$date_max:'';
 
 			$orders = $this->getOrders(array('filter' => $filter, 'page' => $page, 'limit' => $limit));
+			$total = $this->getOrders([
+			    'filter' => $filter,
+                'total' => true
+            ]);
 
 		} else {
 			$orders = $this->getOrders(array('page' => $page, 'limit' => $limit));
+            $total = $this->getOrders([
+                'total' => true
+            ]);
 		}
 		$response = [];
 		$orders_to_response = [];
@@ -242,10 +249,16 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 			$orders_to_response[] = $data;
 
 		}
+		$totalQty = 0;
+		$totalSum = 0;
+		foreach ($total as $order) {
+            $totalQty++;
+            $totalSum += $order['total_paid'];
+        }
 
-		$this->return['response']['total_quantity'] = $quantity;
+		$this->return['response']['total_quantity'] = $totalQty;
 		$this->return['response']['currency_code'] = Context::getContext()->currency->iso_code;
-		$this->return['response']['total_sum'] = number_format($sum, 2, '.', '');
+		$this->return['response']['total_sum'] = number_format($totalSum, 2, '.', '');
 		$this->return['response']['orders'] = $orders_to_response;
 		$this->return['response']['max_price'] = $this->getMaxOrderPrice();
 
@@ -1033,8 +1046,10 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 			$sql .= " WHERE oh.id_order_state != 0 ";
 		}
 		$sql .= " GROUP BY o.id_order ORDER BY o.id_order DESC";
+        if (!isset($data['total'])) {
+            $sql .= " LIMIT " . (int)$data['limit'] . " OFFSET " . (int)$data['page'];
+        }
 
-		$sql .= " LIMIT " . (int)$data['limit'] . " OFFSET " . (int)$data['page'];
 //echo $sql;
 		$results = Db::getInstance()->ExecuteS( $sql );
 
