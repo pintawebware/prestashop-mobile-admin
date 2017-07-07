@@ -343,7 +343,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
                     $tmp = [];
                     $tmp['image_id'] = -1;
                     $tmp['image'] = '';
-                    $data['images'][] = $tmp;
+                    array_unshift($data['images'], $tmp);
                 }
             } else {
                 $tmp = [];
