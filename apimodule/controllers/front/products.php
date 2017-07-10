@@ -305,7 +305,7 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
 
         if ($product->id !== null) {
             $data['images'] = [];
-            $data['product_id'] = (int)$product->id;
+            $data['product_id'] = strval($product->id);
             $data['vendor_code'] = $product->reference;
 //                $data['status'] = $product->condition;
             $data['status_name'] = ($product->active) ? "Enabled" : "Disabled";
