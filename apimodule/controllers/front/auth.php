@@ -33,7 +33,7 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 	public $display_column_left = false;
 	public $header = false;
     public $errors ='';
-	public $API_VERSION = 1.0;
+	public $API_VERSION = 2.0;
 	public $return = [];
 	/**
 	 * @see FrontController::initContent()

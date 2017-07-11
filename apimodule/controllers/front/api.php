@@ -33,7 +33,7 @@ class ApimoduleApiModuleFrontController extends ModuleFrontController
 	public $display_column_left = false;
 	public $header = false;
     public $errors =[];
-	public $API_VERSION = 1.8;
+	public $API_VERSION = 2.0;
 	/**
 	 * @see FrontController::initContent()
 	 */
