@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <module>
 	<name>apimodule</name>
-	<displayName><![CDATA[ApiModule]]></displayName>
-	<version><![CDATA[1.0]]></version>
-	<description><![CDATA[api]]></description>
+	<displayName><![CDATA[Prestashop mobile admin API]]></displayName>
+	<version><![CDATA[2.0]]></version>
+	<description><![CDATA[Prestashop mobile admin API]]></description>
 	<author><![CDATA[Pinta]]></author>
 	<tab><![CDATA[administration]]></tab>
 	<is_configurable>1</is_configurable>
