@@ -3,7 +3,7 @@
 	<name>apimodule</name>
 	<displayName><![CDATA[Prestashop mobile admin API]]></displayName>
 	<version><![CDATA[2.0]]></version>
-	<description><![CDATA[api module]]></description>
+	<description><![CDATA[Prestashop mobile admin API]]></description>
 	<author><![CDATA[Pinta]]></author>
 	<tab><![CDATA[administration]]></tab>
 	<is_configurable>1</is_configurable>
