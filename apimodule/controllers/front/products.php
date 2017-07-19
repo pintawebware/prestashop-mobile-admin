@@ -643,7 +643,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
                     . "WHERE id_product = $id "
                     . "AND id_category <> 2 "
                     . "AND id_category <> 1";
-                $results = Db::getInstance()->ExecuteS($delete);
+                $results = Db::getInstance()->execute($delete);
                 $pos = Db::getInstance()->ExecuteS("SELECT MAX(position) AS pos from ps_category_product WHERE id_product = $id");
                 $pos = $pos[0]['pos'];
                 foreach ($categories as $category) {

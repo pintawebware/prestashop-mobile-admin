@@ -153,6 +153,9 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 		if (empty($fio)) {
 			$fio = '';
 		}
+		if ($sort == 'total') {
+		    $sort = 'total_paid';
+        }
 		$this->return['status'] = false;
 		$clients = $this->getClients(array('page' => $page, 'limit' => $limit, 'sort' => $sort, 'fio' => $fio));
 		$response = [];
