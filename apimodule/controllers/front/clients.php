@@ -507,17 +507,15 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 		}elseif($sort == 'cancelled'){
 			$sql = "SELECT o.id_order, o.total_paid, o.date_add, 
 					(SELECT id_order_state FROM ps_order_history as oh 
- 						 WHERE o.id_order=oh.id_order ORDER BY id_order DESC LIMIT 0,1) as name FROM " . _DB_PREFIX_ . "order AS o 
+ 						 WHERE o.id_order=oh.id_order ORDER BY id_order DESC LIMIT 0,1) as name FROM " . _DB_PREFIX_ . "orders AS o 
 					
-					WHERE o.customer_id = " . $id . " AND  oh.id_order_state != 6
+					WHERE o.id_customer = " . $id . " AND  oh.id_order_state != 6
 					GROUP BY o.id_order ORDER BY o.date_add DESC";
 
-			$sql2 = "SELECT o.id_order, o.total_paid, o.date_add, 
-(SELECT id_order_state FROM ps_order_history as oh 
- 						 WHERE o.id_order=oh.id_order ORDER BY id_order DESC LIMIT 0,1) as name
- 						 FROM " . _DB_PREFIX_ . "order AS o 
-								
-								 WHERE o.customer_id = " . $id . " AND   oh.id_order_state = 6 
+			$sql2 = "SELECT o.id_order, o.total_paid, o.date_add, oh.id_order_state
+ 						 FROM " . _DB_PREFIX_ . "orders AS o 
+                         INNER JOIN ps_order_history AS oh ON oh.id_order = o.id_order 
+								 WHERE o.id_customer = " . $id . " AND   oh.id_order_state = 6 
 								 GROUP BY o.id_order ORDER BY o.date_add DESC";
 
 			$results = Db::getInstance()->ExecuteS( $sql2 );
@@ -525,17 +523,15 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 			$sql = "SELECT o.id_order, o.total_paid, o.date_add, 
  (SELECT id_order_state FROM ps_order_history as oh 
  						 WHERE o.id_order=oh.id_order ORDER BY id_order DESC LIMIT 0,1) as name
- 						 FROM " . _DB_PREFIX_ . "order AS o 
+ 						 FROM " . _DB_PREFIX_ . "orders AS o 
 					
-					WHERE o.customer_id = " . $id . " AND   oh.id_order_state != 5
+					WHERE o.id_customer = " . $id . " AND   oh.id_order_state != 5
 					GROUP BY o.id_order ORDER BY o.date_add DESC";
 
-			$sql2 = "SELECT o.id_order, o.total_paid, o.date_add, 
- (SELECT id_order_state FROM ps_order_history as oh 
- 						 WHERE o.id_order=oh.id_order ORDER BY id_order DESC LIMIT 0,1) as name
- 						 FROM " . _DB_PREFIX_ . "order AS o 
-					
-					WHERE o.customer_id = " . $id . " AND  oh.id_order_state = 5 
+			$sql2 = "SELECT o.id_order, o.total_paid, o.date_add, oh.id_order_state
+ 						 FROM " . _DB_PREFIX_ . "orders AS o 
+					     INNER JOIN ps_order_history AS oh ON oh.id_order = o.id_order 
+					WHERE o.id_customer = " . $id . " AND  oh.id_order_state = 5 
 					GROUP BY o.id_order ORDER BY o.date_add DESC";
 
 			$results = Db::getInstance()->ExecuteS( $sql2 );

@@ -351,6 +351,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 			$products = $order->getProducts();
 
 			if (count($products) > 0) {
+                $id_lang = $this->context->language->id;
 				$data               = array();
 				$total_discount_sum = 0;
 				$shipping_price        = 0;
@@ -359,11 +360,13 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					/*echo '<pre>';
 						print_r($product);
 					echo '</pre>';*/
-
+					$productId = $product['id_product'];
+                    $productObj = new Product($productId, false, $id_lang);
 					$array = [];
 					if (!empty($product['image'])) {
 						$image = Image::getCover($product['product_id']);
-						$imagePath = Link::getImageLink($product->link_rewrite, $image['id_image'], 'home_default');
+                        $linkObj = new Link();
+						$imagePath = $linkObj->getImageLink($productObj->link_rewrite, $image['id_image'], 'home_default');
 						 $protocol = Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://'; 
 						$array['image'] = $protocol.$imagePath;
 					}else{
@@ -508,7 +511,8 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 		$id = trim( Tools::getValue( 'order_id' ) );
 		if (!empty($id)) {
 			$order = new Order($id);
-			$history = $order->getHistory();
+            $id_lang = $this->context->language->id;
+			$history = $order->getHistory($id_lang);
 			$data = array();
 			$response = [];
 			$statuses = $this->OrderStatusList();
@@ -761,6 +765,10 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
 				$data['shipping_address'] = '';
 				$data['payment_address'] = '';
+                $data['shipping_phone'] = '';
+                $data['payment_phone'] = '';
+                $data['payment_method'] = '';
+                $data['shipping_phone_mobile'] = '';
 
 				if (!empty($order->payment)) {
 					$data['payment_method'] = $order->payment;
@@ -894,7 +902,19 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 						$order = new Order($orderId);
 						$history = new OrderHistory($insert_id);
 						$templateVars = array();
-						$history->sendEmail($order, $templateVars);
+                        $version = _PS_VERSION_;
+                        $arr = explode('.', $version);
+                        if (count($arr) > 1) {
+                            $subversion = $arr[1];
+                            if ($subversion < 6) {
+                                $history->id_order = $orderId;
+                                $history->addWithemail();
+                            } else {
+                                $history->sendEmail($order, $templateVars);
+                            }
+                        } else {
+                            $history->sendEmail($order, $templateVars);
+                        }
 					}
 
 				}
@@ -1055,5 +1075,6 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
 		return $results;
 	}
+
 
 }
