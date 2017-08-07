@@ -17,8 +17,8 @@ class Apimodule extends Module
 	{
 		$this->name = 'apimodule';
 		$this->tab = 'administration';
-		$this->version = '1.0';
-		$this->author = 'Pinta';
+		$this->version = '2.0';
+		$this->author = 'PintaWebWare';
 		$this->need_instance = 0;
 		$this->bootstrap = true;
 
