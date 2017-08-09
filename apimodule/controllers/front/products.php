@@ -381,13 +381,15 @@ WHERE p.id_product = ".$product->id)['quantity'];
     private function getCategoriesByProduct($id)
     {
         $product = (int)$id;
+        $id_lang = $this->context->language->id;
+
         $sql = "SELECT c.id_category AS category_id, cl.name 
                     FROM " . _DB_PREFIX_ . "category_product AS cp 
                     INNER JOIN " . _DB_PREFIX_ . "category c ON cp.id_category = c.id_category 
                     INNER JOIN " . _DB_PREFIX_ . "category_lang cl ON c.id_category = cl.id_category 
                     WHERE cp.id_product =  $product 
-                    AND id_lang = 1 
-                    AND cp.id_category <> 1 
+                    AND id_lang = " . $id_lang .
+                    " AND cp.id_category <> 1 
                     AND cp.id_category <> 2" ;
         $results = Db::getInstance()->ExecuteS($sql);
         return $results;
@@ -395,10 +397,12 @@ WHERE p.id_product = ".$product->id)['quantity'];
 
     public function getProductsList ($page, $limit, $name = '')
     {
+        $id_lang = $this->context->language->id;
+
         $sql = "SELECT p.id_product, p.reference, p.quantity,  p.price, pl.name, p.id_category_default 
                     FROM " . _DB_PREFIX_ . "product AS p 
                     LEFT JOIN " . _DB_PREFIX_ . "product_lang pl ON p.id_product = pl.id_product 
-                    WHERE pl.id_lang = 1 " ;
+                    WHERE pl.id_lang = " . $id_lang ;
         if($name != ''){
             $sql .= " AND (pl.name LIKE '%" .$name. "%' OR p.reference LIKE '%" .$name. "%')";
         }
@@ -861,16 +865,19 @@ WHERE p.id_product = ".$product->id)['quantity'];
                 $tmp = [];
                 $tmp['category_id'] = $result['id_category'];
                 $tmp['name'] = $result['name'];
-                if ($id == -1)
-                    $tmp['parent'] = false;
+//                if ($id == -1)
+                $tmp['parent'] = false;
                 $output[$tmp['category_id']] = $tmp;
-                if ($id == -1) {
-                    if ($result['id_parent']) {
-                        if ($result['id_parent'] != 1 && $result['id_parent'] != 2) {
-                            $output[$result['id_parent']]['parent'] = true;
-                        }
-                    }
+                if (isset($result['child_count']) && $result['child_count']) {
+                    $output[$tmp['category_id']]['parent'] = true;
                 }
+//                if ($id == -1) {
+//                    if ($result['id_parent']) {
+//                        if ($result['id_parent'] != 1 && $result['id_parent'] != 2) {
+//                            $output[$result['id_parent']]['parent'] = true;
+//                        }
+//                    }
+//                }
             }
             $return['status'] = true;
             $return['version'] = $this->API_VERSION;
@@ -884,14 +891,17 @@ WHERE p.id_product = ".$product->id)['quantity'];
 
     private function getAllCategories()
     {
+        $id_lang = $this->context->language->id;
         $sql = "SELECT a.`id_category`, `name`, `description`, 
                 sa.`position` AS `position`, `id_parent`, 
-                `active` , sa.position position 
-                FROM `ps_category` a 
-                LEFT JOIN `ps_category_lang` b 
-                ON (b.`id_category` = a.`id_category` AND b.`id_lang` = 2 AND b.`id_shop` = 1) 
-                LEFT JOIN `ps_category_shop` sa 
+                `active` , sa.position position, 
+                 (SELECT COUNT(*) as parent FROM ps_category categ WHERE categ.id_parent = a.id_category) AS child_count
+                FROM `". _DB_PREFIX_ ."category` a 
+                LEFT JOIN `". _DB_PREFIX_ ."category_lang` b 
+                ON (b.`id_category` = a.`id_category` AND b.`id_lang` = ".$id_lang." AND b.`id_shop` = 1) 
+                LEFT JOIN `". _DB_PREFIX_ ."category_shop` sa 
                 ON (a.`id_category` = sa.`id_category` AND sa.id_shop = 1) 
+                WHERE (a.id_parent = 1 OR a.id_parent = 2)
                 ORDER BY sa.`position`";
 
         $results = Db::getInstance()->ExecuteS( $sql );
@@ -900,13 +910,16 @@ WHERE p.id_product = ".$product->id)['quantity'];
 
     private function getChildCategories($category)
     {
+        $id_lang = $this->context->language->id;
+
         $sql = "SELECT a.`id_category`, `name`, `description`, 
                 sa.`position` AS `position`, `id_parent`, 
-                `active` , sa.position position 
-                FROM `ps_category` a 
-                LEFT JOIN `ps_category_lang` b 
-                ON (b.`id_category` = a.`id_category` AND b.`id_lang` = 2 AND b.`id_shop` = 1) 
-                LEFT JOIN `ps_category_shop` sa 
+                `active` , sa.position position, 
+                (SELECT COUNT(*) as parent FROM ps_category categ WHERE categ.id_parent = a.id_category) AS child_count
+                FROM `". _DB_PREFIX_ ."category` a 
+                LEFT JOIN `". _DB_PREFIX_ ."category_lang` b 
+                ON (b.`id_category` = a.`id_category` AND b.`id_lang` = ".$id_lang." AND b.`id_shop` = 1) 
+                LEFT JOIN `". _DB_PREFIX_ ."category_shop` sa 
                 ON (a.`id_category` = sa.`id_category` AND sa.id_shop = 1) 
                 WHERE a.`id_parent` = $category 
                 ORDER BY sa.`position`";
