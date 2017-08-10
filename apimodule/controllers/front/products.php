@@ -317,7 +317,7 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
 //                $data['categories'] = $category->name;
             $data['categories'] = $categories;
 //                $data['subtract_stock'] = $product->available_now;
-            $data['description'] = $product->description;
+            $data['description'] = $product->description ? $product->description : "";
             $data['quantity'] =  Db::getInstance()->getRow(" SELECT p.id_product, sa.quantity FROM ps_product p
  
 INNER JOIN ps_stock_available sa ON p.id_product = sa.id_product AND id_product_attribute = 0
