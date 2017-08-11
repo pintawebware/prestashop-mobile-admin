@@ -725,14 +725,15 @@ WHERE p.id_product = ".$product->id)['quantity'];
             if ($image->id !== null) {
                 $cover =  Image::getCover($productId);
                 if ($cover) {
-                    $oldImage = new Image($cover['id_image']);
-                    $oldImage->cover = null;
-                    $oldImage->save();
+                    Image::deleteCover($productId);
+//                    $oldImage = new Image($cover['id_image']);
+//                    $oldImage->cover = null;
+//                    $oldImage->save();
                 }
                 $image->cover = 1;
-                $image->save();
-                $product->setCoverWs($imageId);
-                $product->save();
+                $image->update();
+//                $product->setCoverWs($imageId);
+//                $product->save();
 
 
                 $return['status'] = true;
