@@ -19,14 +19,14 @@ class Apimodule extends Module
 		$this->tab = 'administration';
 		$this->version = '2.0';
 		$this->author = 'PintaWebWare';
-		$this->need_instance = 0;
+		$this->need_instance = 1;
 		$this->bootstrap = true;
 
 		parent::__construct();
 
 		$this->displayName = $this->l('Api Module');
 		$this->description = $this->l('Api module for manager shop');
-		$this->ps_versions_compliancy = array('min' => '1.0', 'max' => '1.6.99.99');
+		$this->ps_versions_compliancy = array('min' => '1.0', 'max' => '1.8.99.99');
 	}
 
 
