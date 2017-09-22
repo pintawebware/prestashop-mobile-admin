@@ -159,9 +159,8 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
                 foreach ( $products as $product ) {
                     $data['product_id'] = $product['id_product'];
                     $data['vendor_code']      = $product['reference'];
-                    $data['quantity']   = Db::getInstance()->getRow( " SELECT p.id_product, sa.quantity FROM ps_product p
-    INNER JOIN ps_stock_available sa ON p.id_product = sa.id_product AND id_product_attribute = 0    
-    WHERE p.id_product = " . $product['id_product'] )['quantity'];
+                    $data['quantity']   = Db::getInstance()->getRow( "SELECT p.id_product, sa.quantity FROM 
+                        "._DB_PREFIX_."product p INNER JOIN "._DB_PREFIX_."stock_available sa ON p.id_product = sa.id_product AND id_product_attribute = 0 WHERE p.id_product = " . $product['id_product'] )['quantity'];
 
                     $idImage = Db::getInstance()->getRow( "SELECT id_image FROM ps_image WHERE cover = 1 AND id_product =  " . $product['id_product'] )['id_image'];
                     $imgPath = '';
