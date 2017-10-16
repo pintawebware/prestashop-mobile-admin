@@ -291,11 +291,22 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 			$data['orders']  = $orders_for_time;
 		}
 
-		$sale_total = $this->getTotalSales();
+		//$sale_total = $this->getTotalSales();
 
-		$data['total_sales'] = number_format( $sale_total, 2, '.', '' );
-		$sale_year_total     = $this->getTotalSales( array( 'this_year' => true ) );
+		//$data['total_sales'] = number_format( $sale_total, 2, '.', '' );
+		//$sale_year_total     = $this->getTotalSales( array( 'this_year' => true ) );
 
+		$total = $this->getOrders([
+            'total' => true
+        ]);
+        $totalQty = 0;
+        $totalSum = 0;
+        foreach ($total as $order) {
+            $totalQty++;
+            $totalSum += $order['total_paid'];
+        }
+        $data['total_sales'] = ''.$totalSum;
+		$sale_year_total = $totalSum;
 
 		$data['sale_year_total'] = number_format( $sale_year_total, 2, '.', '' );
 		$orders_total            = $this->getTotalOrders();
@@ -395,5 +406,68 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 		return $results['total'];
 
 	}
+
+	public function getOrders( $data = array() ) {
+
+        $sql = "SELECT o.id_order,o.date_add,o.total_paid, oh.id_order_state, c.firstname, c.lastname FROM " . _DB_PREFIX_ . "orders AS o 
+					INNER JOIN " . _DB_PREFIX_ . "order_history as oh ON o.id_order=oh.id_order 
+					INNER JOIN " . _DB_PREFIX_ . "customer as c ON c.id_customer=o.id_customer  ";
+        if (isset($data['filter'])) {
+            if (isset($data['filter']['order_status_id']) &&
+                (int)($data['filter']['order_status_id']) != 0 &&
+                $data['filter']['order_status_id'] != '') {
+                $sql .= " WHERE oh.id_order_state = " . (int)$data['filter']['order_status_id'];
+            } else {
+                $sql .= " WHERE oh.id_order_state != 0 ";
+            }
+            if (isset($data['filter']['fio']) && $data['filter']['fio'] != '') {
+                $params = [];
+                $newparam = explode(' ', $data['filter']['fio']);
+
+                foreach ($newparam as $key => $value) {
+                    if ($value == '') {
+                        unset($newparam[$key]);
+                    } else {
+                        $params[] = $value;
+                    }
+                }
+
+                $sql .= " AND ( c.firstname LIKE '%" . $params[0] . "%' OR c.lastname LIKE '%" . $params[0] . "%'";
+
+                foreach ($params as $param) {
+                    if ($param != $params[0]) {
+                        $sql .= " OR c.firstname LIKE '%" . $params[0] . "%' 
+									OR c.lastname LIKE '%" . $param . "%'";
+                    };
+                }
+                $sql .= " ) ";
+            }
+            if (!empty($data['filter']['min_price']) && !empty($data['filter']['max_price'])
+                && $data['filter']['max_price'] != 0  && $data['filter']['min_price'] != 0) {
+                $sql .= " AND o.total_paid > " . $data['filter']['min_price'] . " AND o.total_paid <= " . $data['filter']['max_price'];
+            }
+            if (!empty($data['filter']['date_min'])) {
+                $date_min = date('y-m-d', strtotime($data['filter']['date_min']));
+                $sql .= " AND DATE_FORMAT(o.date_add,'%y-%m-%d') > '" . $date_min . "'";
+            }
+            if (!empty($data['filter']['date_max'])) {
+                $date_max = date('y-m-d', strtotime($data['filter']['date_max']));
+                $sql .= " AND DATE_FORMAT(o.date_add,'%y-%m-%d') < '" . $date_max . "'";
+            }
+
+
+        } else {
+            $sql .= " WHERE oh.id_order_state != 0 ";
+        }
+        $sql .= " GROUP BY o.id_order ORDER BY o.id_order DESC";
+        if (!isset($data['total'])) {
+            $sql .= " LIMIT " . (int)$data['limit'] . " OFFSET " . (int)$data['page'];
+        }
+
+//echo $sql;
+        $results = Db::getInstance()->ExecuteS( $sql );
+
+        return $results;
+    }
 
 }

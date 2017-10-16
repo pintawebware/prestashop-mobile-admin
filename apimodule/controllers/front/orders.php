@@ -1015,9 +1015,11 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
 	public function getOrders( $data = array() ) {
 
-		$sql = "SELECT o.id_order,o.date_add,o.total_paid, oh.id_order_state, c.firstname, c.lastname FROM " . _DB_PREFIX_ . "orders AS o 
-					INNER JOIN " . _DB_PREFIX_ . "order_history as oh ON o.id_order=oh.id_order 
-					INNER JOIN " . _DB_PREFIX_ . "customer as c ON c.id_customer=o.id_customer  ";
+		// $sql = "SELECT o.id_order,o.date_add,o.total_paid, oh.id_order_state, c.firstname, c.lastname FROM " . _DB_PREFIX_ . "orders AS o 
+		// 			INNER JOIN " . _DB_PREFIX_ . "order_history as oh ON o.id_order=oh.id_order 
+		// 			INNER JOIN " . _DB_PREFIX_ . "customer as c ON c.id_customer=o.id_customer  ";
+		$sql = "SELECT o.id_order,o.date_add,o.total_paid, oh.id_order_state, c.firstname, c.lastname FROM " . _DB_PREFIX_ . "orders AS o  INNER JOIN " . _DB_PREFIX_ . "order_history as oh ON o.current_state=oh.id_order_state
+			INNER JOIN " . _DB_PREFIX_ . "customer as c ON c.id_customer=o.id_customer";
 		if (isset($data['filter'])) {
 			if (isset($data['filter']['order_status_id']) &&
 			            (int)($data['filter']['order_status_id']) != 0 &&
