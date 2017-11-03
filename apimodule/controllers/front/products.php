@@ -895,7 +895,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
         $sql = "SELECT a.`id_category`, `name`, `description`, 
                 sa.`position` AS `position`, `id_parent`, 
                 `active` , sa.position position, 
-                 (SELECT COUNT(*) as parent FROM ps_category categ WHERE categ.id_parent = a.id_category) AS child_count
+                 (SELECT COUNT(*) as parent FROM `". _DB_PREFIX_ ."category` categ WHERE categ.id_parent = a.id_category) AS child_count
                 FROM `". _DB_PREFIX_ ."category` a 
                 LEFT JOIN `". _DB_PREFIX_ ."category_lang` b 
                 ON (b.`id_category` = a.`id_category` AND b.`id_lang` = ".$id_lang." AND b.`id_shop` = 1) 
@@ -915,7 +915,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
         $sql = "SELECT a.`id_category`, `name`, `description`, 
                 sa.`position` AS `position`, `id_parent`, 
                 `active` , sa.position position, 
-                (SELECT COUNT(*) as parent FROM ps_category categ WHERE categ.id_parent = a.id_category) AS child_count
+                (SELECT COUNT(*) as parent FROM `". _DB_PREFIX_ ."category` categ WHERE categ.id_parent = a.id_category) AS child_count
                 FROM `". _DB_PREFIX_ ."category` a 
                 LEFT JOIN `". _DB_PREFIX_ ."category_lang` b 
                 ON (b.`id_category` = a.`id_category` AND b.`id_lang` = ".$id_lang." AND b.`id_shop` = 1) 
