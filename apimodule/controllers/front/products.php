@@ -251,6 +251,14 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      * @apiSuccess {String} description     Detail description of the product.
      * @apiSuccess {Array} images  Array of the images of the product.
      *
+     * @apiSuccess {Array[]}   response.products.options                   Array of of the product options.
+     * @apiSuccess {String}    response.products.options.option_id         Option id.
+     * @apiSuccess {String}    response.products.options.option_name       Option name.
+     * @apiSuccess {String}    response.products.options.option_value_id   Option value id.
+     * @apiSuccess {String}    response.products.options.option_value_name Option value name.
+     * @apiSuccess {String}    response.products.options.language_id       Language id of options and option values.
+     *
+
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
      * {
@@ -281,6 +289,27 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      *           "http://site-url/image/catalog/demo/htc_iPhone_2.jpg",
      *           "http://site-url/image/catalog/demo/htc_iPhone_3.jpg"
      *       ]
+     *       "options": [ 
+     *                      {
+     *                          "option_id": "11",
+     *                          "option_value_id": "46",
+     *                          "option_value_name": "Small",
+     *                          "option_name": "Size"
+     *                      },
+     *                      {
+     *                          "option_id": "11",
+     *                          "option_value_id": "47",
+     *                          "option_value_name": "Medium",
+     *                          "option_name": "Size"
+     *                      },
+     *                      {
+     *                          "option_id": "11",
+     *                          "option_value_id": "48",
+     *                          "option_value_name": "Large",
+     *                          "option_name": "Size"
+     *                      }
+     *                  ]
+     *                  
      *   },
      *   "Status" : true,
      *   "version": 1.0
