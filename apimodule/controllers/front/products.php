@@ -315,6 +315,8 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
             $categories = $this->getCategoriesByProduct($product_id);
 //                $data['categories'] = $category->name;
             $data['categories'] = $categories;
+            $options = $this->getOptionsByProduct($product_id);
+            $data['options'] = $options;
 //                $data['subtract_stock'] = $product->available_now;
             $data['description'] = $product->description ? $product->description : "";
             $data['quantity'] =  Db::getInstance()->getRow(" SELECT p.id_product, sa.quantity FROM "._DB_PREFIX_."product p
@@ -390,6 +392,31 @@ WHERE p.id_product = ".$product->id)['quantity'];
                     AND id_lang = " . $id_lang .
                     " AND cp.id_category <> 1 
                     AND cp.id_category <> 2" ;
+        $results = Db::getInstance()->ExecuteS($sql);
+        return $results;
+    }
+
+    private function getOptionsByProduct($id)
+    {
+        $product = (int)$id;
+        $id_lang = $this->context->language->id;
+        $sql = "SELECT 
+                  a.id_attribute option_value_id,
+                  a.id_attribute_group option_id,
+                  al.name option_value_name,
+                  agl.name option_name,
+                  al.id_lang language_id
+                FROM " . _DB_PREFIX_ . "product_attribute pa
+                INNER JOIN " . _DB_PREFIX_ . "attribute a 
+                INNER JOIN " . _DB_PREFIX_ . "attribute_group_lang agl
+                INNER JOIN " . _DB_PREFIX_ . "attribute_lang al
+                WHERE pa.id_product = $product
+                AND   a.id_attribute = pa.id_product_attribute
+                AND   al.id_attribute = a.id_attribute
+                AND   al.id_lang = $id_lang 
+                AND   agl.id_attribute_group = a.id_attribute_group 
+                AND   agl.id_lang = $id_lang
+        "; 
         $results = Db::getInstance()->ExecuteS($sql);
         return $results;
     }
@@ -563,18 +590,21 @@ WHERE p.id_product = ".$product->id)['quantity'];
                 'id_product = '.(int)$product->id
             );
 
-            if (isset($_FILES['image'])) {
+            if ( isset($_FILES['image']) ) {
                 $imagesCounter = 0;
                 $files = $_FILES['image'];
+
                 foreach ($_FILES['image']['name'] as $key => $name) {
                     $path = 'upload/' . $name;
                     $imageUrl = $_FILES['image']["tmp_name"][$key];
                     $type = exif_imagetype($imageUrl);
                     $validTypes = [1, 2, 3];
+
                     if (!in_array($type, $validTypes)) {
 //                            $return['error'] = "Image " . $file['name'] . " format not recognized, allowed formats are: .gif, .jpg, .png";
                         break;
                     }
+
                     $image = new Image();
                     $image->id_product = $product->id;
                     $image->position = Image::getHighestPosition($product->id) + 1;
