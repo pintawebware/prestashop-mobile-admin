@@ -251,12 +251,12 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      * @apiSuccess {String} description     Detail description of the product.
      * @apiSuccess {Array} images  Array of the images of the product.
      *
-     * @apiSuccess {Array[]}   response.products.options                   Array of of the product options.
-     * @apiSuccess {String}    response.products.options.option_id         Option id.
-     * @apiSuccess {String}    response.products.options.option_name       Option name.
-     * @apiSuccess {String}    response.products.options.option_value_id   Option value id.
-     * @apiSuccess {String}    response.products.options.option_value_name Option value name.
-     * @apiSuccess {String}    response.products.options.language_id       Language id of options and option values.
+     * @apiSuccess {Array[]}   options                   Array of the product options.
+     * @apiSuccess {String}    options.option_id         Option id.
+     * @apiSuccess {String}    options.option_name       Option name.
+     * @apiSuccess {String}    options.option_value_id   Option value id.
+     * @apiSuccess {String}    options.option_value_name Option value name.
+     * @apiSuccess {String}    options.language_id       Language id of options and option values.
      *
 
      * @apiSuccessExample Success-Response:
@@ -427,26 +427,42 @@ WHERE p.id_product = ".$product->id)['quantity'];
 
     private function getOptionsByProduct($id)
     {
-        $product = (int)$id;
+        $product_id = (int)$id;
         $id_lang = $this->context->language->id;
-        $sql = "SELECT 
-                  a.id_attribute option_value_id,
-                  a.id_attribute_group option_id,
-                  al.name option_value_name,
-                  agl.name option_name,
-                  al.id_lang language_id
-                FROM " . _DB_PREFIX_ . "product_attribute pa
-                INNER JOIN " . _DB_PREFIX_ . "attribute a 
-                INNER JOIN " . _DB_PREFIX_ . "attribute_group_lang agl
-                INNER JOIN " . _DB_PREFIX_ . "attribute_lang al
-                WHERE pa.id_product = $product
-                AND   a.id_attribute = pa.id_product_attribute
-                AND   al.id_attribute = a.id_attribute
-                AND   al.id_lang = $id_lang 
-                AND   agl.id_attribute_group = a.id_attribute_group 
-                AND   agl.id_lang = $id_lang
-        "; 
-        $results = Db::getInstance()->ExecuteS($sql);
+
+        $id_product_attribute_query = "SELECT pa.id_product_attribute 
+                                       FROM " . _DB_PREFIX_ . "product_attribute pa 
+                                       WHERE pa.id_product = $product_id";
+
+        $id_product_attribute_result = Db::getInstance()->ExecuteS($id_product_attribute_query);
+
+        $results = array();
+
+        foreach ($id_product_attribute_result as $row => $field) {
+
+            $id_product_attribute = $field['id_product_attribute'];
+
+            $id_attribute_query = "SELECT
+                                    a.id_attribute       option_value_id,
+                                    a.id_attribute_group option_id,
+                                    al.id_lang           language_id,
+                                    al.name              option_value_name,
+                                    agl.name             option_name
+                                   FROM       " . _DB_PREFIX_ . "product_attribute_combination pac
+                                   INNER JOIN " . _DB_PREFIX_ . "attribute                     a
+                                   INNER JOIN " . _DB_PREFIX_ . "attribute_group_lang          agl
+                                   INNER JOIN " . _DB_PREFIX_ . "attribute_lang                al
+                                   WHERE  pac.id_product_attribute = " . (int)$id_product_attribute . " 
+                                   AND    a.id_attribute = pac.id_attribute
+                                   AND    al.id_attribute = a.id_attribute
+                                   AND    al.id_lang = $id_lang 
+                                   AND    agl.id_attribute_group = a.id_attribute_group
+                                   AND    agl.id_lang = $id_lang";
+            $id_attribute_result = Db::getInstance()->ExecuteS($id_attribute_query);
+
+            $results[] = $id_attribute_result; 
+        }
+
         return $results;
     }
 
@@ -511,6 +527,8 @@ WHERE p.id_product = ".$product->id)['quantity'];
      * @apiParam {Number} categories  Array of categories of the product.
      * @apiParam {Number} status  Status of the product.
      * @apiParam {Array} images  Array of the images of the product.
+     * @apiParam {Array} options                   Array of the product options.
+     * @apiParam {Array} options.option_value_ids  Array of combination of option_value_ids.
      *
      * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {Number} product_id  ID of the product.
@@ -613,6 +631,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
                 die(Tools::jsonEncode($return));
             }
             $this->updateProductCategories($product->id, $categories);
+            $this->updateProductOptions($product->id, $options);
             Db::getInstance()->update('stock_available', [
                 'quantity' => (int)$quantity
             ],
@@ -739,6 +758,42 @@ WHERE p.id_product = ".$product->id)['quantity'];
         }
     }
 
+    public function updateProductOptions($productId, $options)
+    {
+        if ($productId) {
+            $product_id = (int) $productId;
+
+            $delete_query = "DELETE pac, pa
+                             FROM   " . _DB_PREFIX_ . "product_attribute pa
+                             LEFT JOIN   " . _DB_PREFIX_ . "product_attribute_combination pac 
+                               ON   pa.id_product_attribute = pac.id_product_attribute
+                             WHERE  id_product = $product_id";
+            $results = Db::getInstance()->execute($delete_query);
+
+            foreach ($options as $attribute_ids) {
+                
+                $id_product_attribute_query = "INSERT INTO " . _DB_PREFIX_ . "product_attribute (id_product) VALUES ($product_id)";
+                $id_product_attribute_result = Db::getInstance()->execute($id_product_attribute_query);
+                $product_attribute_id = Db::getInstance()->Insert_ID();
+
+                foreach ($attribute_ids as $attribute_id) {
+                  
+                    /*
+                     * Record the association of the attribute with the product in the database.
+                     */ 
+
+                    $product_attribute_combination_query = "INSERT INTO ". _DB_PREFIX_ . "product_attribute_combination (
+                          id_attribute,
+                          id_product_attribute
+                        ) VALUES ( " .
+                          "'" . (int)$attribute_id . "'," .
+                          "'" . (int)$product_attribute_id . "')";
+
+                    $result = Db::getInstance()->execute($product_attribute_combination_query);
+                }
+            }
+        }
+    }
 
     /**
      * @api {post} index.php?action=mainimage&fc=module&module=apimodule&controller=products  mainImage
