@@ -582,6 +582,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
         $descShort = trim(Tools::getValue('description_short'));
         $reference = trim(Tools::getValue('vendor_code'));
         $categories = isset($_REQUEST['categories']) ? $_REQUEST['categories'] : null;
+        $options = isset($_REQUEST['options']) ? $_REQUEST['options'] : null;
         $status = filter_var(trim(Tools::getValue('status')), FILTER_VALIDATE_BOOLEAN);
         $images = Tools::getValue('images');
 
@@ -763,11 +764,14 @@ WHERE p.id_product = ".$product->id)['quantity'];
         if ($productId) {
             $product_id = (int) $productId;
 
-            $delete_query = "DELETE pac, pa
+            $delete_query = "DELETE pac, pa, pas
                              FROM   " . _DB_PREFIX_ . "product_attribute pa
                              LEFT JOIN   " . _DB_PREFIX_ . "product_attribute_combination pac 
                                ON   pa.id_product_attribute = pac.id_product_attribute
-                             WHERE  id_product = $product_id";
+                             LEFT JOIN   " . _DB_PREFIX_ . "product_attribute_shop pas 
+                               ON   pas.id_product_attribute = pac.id_product_attribute
+                             WHERE  pa.id_product = $product_id
+                               AND  pas.id_product = $product_id";
             $results = Db::getInstance()->execute($delete_query);
 
             foreach ($options as $attribute_ids) {
@@ -775,6 +779,20 @@ WHERE p.id_product = ".$product->id)['quantity'];
                 $id_product_attribute_query = "INSERT INTO " . _DB_PREFIX_ . "product_attribute (id_product) VALUES ($product_id)";
                 $id_product_attribute_result = Db::getInstance()->execute($id_product_attribute_query);
                 $product_attribute_id = Db::getInstance()->Insert_ID();
+
+                /*
+                 * Record the association of the attribute with the product in the shop table.
+                 */ 
+                $product_attribute_shop_query = "INSERT INTO ". _DB_PREFIX_ . "product_attribute_shop (
+                      id_product,
+                      id_product_attribute,
+                      id_shop 
+                    ) VALUES ( " .
+                      "'" . (int)$product_id . "'," .
+                      "'" . (int)$product_attribute_id . "'," .
+                      "'1')";
+                $result = Db::getInstance()->execute($product_attribute_shop_query);
+
 
                 foreach ($attribute_ids as $attribute_id) {
                   
