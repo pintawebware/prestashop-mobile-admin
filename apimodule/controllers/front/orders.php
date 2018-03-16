@@ -295,6 +295,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	 * @apiSuccess {Number} shipping_price  Cost of the shipping.
 	 * @apiSuccess {Number} total  Total order sum.
 	 * @apiSuccess {Number} product_id  unique product id.
+	 * @apiSuccess {Array} options  Array of options selected for this product.
 	 *
 	 * @apiSuccessExample Success-Response:
 	 *     HTTP/1.1 200 OK
@@ -308,7 +309,23 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	 *                  "model" : "Product 1",
 	 *                  "quantity" : 3,
 	 *                  "price" : 100.00,
-	 *                  "product_id" : 90
+   *                  "product_id" : 90,
+   *                  "options" : [
+   *                       {
+   *                           "option_value_id": "1",
+   *                           "option_id": "1",
+   *                           "language_id": "1",
+   *                           "option_value_name": "S",
+   *                           "option_name": "Размер"
+   *                       },
+   *                       {
+   *                           "option_value_id": "14",
+   *                           "option_id": "3",
+   *                           "language_id": "1",
+   *                           "option_value_name": "Cиний",
+   *                           "option_name": "Цвет"
+   *                       }
+   *                  ]
 	 *              },
 	 *              {
 	 *                  "image" : "http://opencart/image/catalog/demo/iphone_1.jpg",
@@ -357,9 +374,6 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 				$shipping_price        = 0;
 				$total_price        = 0;
 				foreach ( $products as $product ):
-					/*echo '<pre>';
-						print_r($product);
-					echo '</pre>';*/
 					$productId = $product['id_product'];
                     $productObj = new Product($productId, false, $id_lang);
 					$array = [];
@@ -398,6 +412,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
 					$array['discount_price'] = $product['product_quantity_discount'];
 					$array['discount']       = $product['quantity_discount'];
+					$array['options']        = $this->getOptionsByProductAttributeId($product['product_attribute_id']);
 
 					$total_discount_sum += $product['product_quantity_discount'];
 
@@ -434,6 +449,35 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 		header('Content-Type: application/json');
 		die(Tools::jsonEncode($this->return));
 	}
+
+
+  private function getOptionsByProductAttributeId($id)
+  {
+      $id_product_attribute = (int)$id;
+      $id_lang = $this->context->language->id;
+    
+      $id_attribute_query = "SELECT
+                              a.id_attribute       option_value_id,
+                              a.id_attribute_group option_id,
+                              al.id_lang           language_id,
+                              al.name              option_value_name,
+                              agl.name             option_name
+                             FROM       " . _DB_PREFIX_ . "product_attribute_combination pac
+                             INNER JOIN " . _DB_PREFIX_ . "attribute                     a
+                             INNER JOIN " . _DB_PREFIX_ . "attribute_group_lang          agl
+                             INNER JOIN " . _DB_PREFIX_ . "attribute_lang                al
+                             WHERE  pac.id_product_attribute = " . (int)$id_product_attribute . " 
+                             AND    a.id_attribute = pac.id_attribute
+                             AND    al.id_attribute = a.id_attribute
+                             AND    al.id_lang = $id_lang 
+                             AND    agl.id_attribute_group = a.id_attribute_group
+                             AND    agl.id_lang = $id_lang";
+      $id_attribute_result = Db::getInstance()->ExecuteS($id_attribute_query);
+
+      return $id_attribute_result;
+  }
+
+
 
 	/**
 	 * @api {get} /index.php?action=history&fc=module&module=apimodule&controller=orders  getOrderHistory
