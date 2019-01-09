@@ -346,7 +346,6 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
             $data['categories'] = $categories;
             $options = $this->getOptionsByProduct($product_id);
             $data['options'] = $options;
-//                $data['subtract_stock'] = $product->available_now;
             $data['description'] = $product->description ? $product->description : "";
             $data['quantity'] =  Db::getInstance()->getRow(" SELECT p.id_product, sa.quantity FROM "._DB_PREFIX_."product p
  
@@ -1236,5 +1235,4 @@ WHERE p.id_product = ".$product->id)['quantity'];
         }
         return $path;
     }
-
 }
