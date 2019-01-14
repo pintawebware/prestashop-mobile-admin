@@ -90,94 +90,92 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	 * @api {get} /index.php?action=list&fc=module&module=apimodule&controller=orders  getOrders
 	 * @apiName GetOrders
 	 * @apiGroup Orders
+     *
+     * @apiParam {Token}     token your unique token.
+     * @apiParam {Number}    page number of the page.
+     * @apiParam {Number}    limit limit of the orders for the page.
+     * @apiParam {Array[]}   filter Array of the filters.
+     * @apiParam {String}    filter.fio full name of the client.
+     * @apiParam {Number}    filter.order_status_id unique id of the order.
+     * @apiParam {Number}    filter.min_price min price of order.
+     * @apiParam {Number}    filter.max_price max price of order.
+     * @apiParam {Date}      filter.date_min min date adding of the order.
+     * @apiParam {Date}      filter.date_max max date adding of the order.
 	 *
-	 * @apiParam {Token} token your unique token.
-	 * @apiParam {Number} page number of the page.
-	 * @apiParam {Number} limit limit of the orders for the page.
-	 * @apiParam {Array} filter array of the filter params.
-	 * @apiParam {String} filter[fio] full name of the client.
-	 * @apiParam {Number} filter[order_status_id] unique id of the order.
-	 * @apiParam {Number} filter[min_price] min price of order.
-	 * @apiParam {Number} filter[max_price] max price of order.
-	 * @apiParam {Date} filter[date_min] min date adding of the order.
-	 * @apiParam {Date} filter[date_max] max date adding of the order.
-	 *
-	 * @apiSuccess {Number} version  Current API version.
-	 * @apiSuccess {Array} orders  Array of the orders.
-	 * @apiSuccess {Array} statuses  Array of the order statuses.
-	 * @apiSuccess {Number} order_id  ID of the order.
-	 * @apiSuccess {Number} order_number  Number of the order.
-	 * @apiSuccess {String} fio     Client's FIO.
-	 * @apiSuccess {String} status  Status of the order.
-	 * @apiSuccess {String} currency_code  Default currency of the shop.
-	 * @apiSuccess {String} order[currency_code] currency of the order.
-	 * @apiSuccess {Number} total  Total sum of the order.
-	 * @apiSuccess {Date} date_added  Date added of the order.
-	 * @apiSuccess {Date} total_quantity  Total quantity of the orders.
-	 *
-	 *
+     * @apiSuccess {Number}  version                          Current API version.
+     * @apiSuccess {Bool}    status                           Response status.
+     * @apiSuccess {Array[]} response                         Array with content response.
+     * @apiSuccess {String}  response.total_quantity          Total quantity of the orders.
+     * @apiSuccess {String}  response.currency_code           Default currency of the shop.
+     * @apiSuccess {Number}  response.total_sum               Total amount of orders.
+     * @apiSuccess {String}  response.max_price               Maximum order amount.
+     * @apiSuccess {Number}  response.api_version             Current API version.
+     *
+     * @apiSuccess {Array[]} response.orders                  Array of the orders.
+     * @apiSuccess {Array[]} response.statuses                Array of the order statuses.
+
+     * @apiSuccess {String} response.orders.order_id          ID of the order.
+     * @apiSuccess {String} response.orders.order_number      Number of the order.
+     * @apiSuccess {String} response.orders.fio               Client's FIO.
+     * @apiSuccess {String} response.orders.status            Status of the order.
+     * @apiSuccess {String} response.orders.total             Total sum of the order.
+     * @apiSuccess {String} response.orders.date_added        Date added of the order.
+     * @apiSuccess {String} response.orders.currency_code     Currency of the order.
+     *
+     * @apiSuccess {String} response.statuses.name            Status Name.
+     * @apiSuccess {String} response.statuses.order_status_id Status id.
+     * @apiSuccess {String} response.statuses.language_id     Language id.
 	 *
 	 *
 	 * @apiSuccessExample Success-Response:
-	 *     HTTP/1.1 200 OK
-	 * {
-	 *   "Response"
-	 *   {
-	 *      "orders":
-	 *      {
-	 *            {
-	 *             "order_id" : "1",
-	 *             "order_number" : "1",
-	 *             "fio" : "Anton Kiselev",
-	 *             "status" : "Сделка завершена",
-	 *             "total" : "106.00",
-	 *             "date_added" : "2016-12-09 16:17:02",
-	 *             "currency_code": "RUB"
-	 *             },
-	 *            {
-	 *             "order_id" : "2",
-	 *             "order_number" : "2",
-	 *             "fio" : "Vlad Kochergin",
-	 *             "status" : "В обработке",
-	 *             "total" : "506.00",
-	 *             "date_added" : "2016-10-19 16:00:00",
-	 *             "currency_code": "RUB"
-	 *             }
-	 *       },
-	 *       "statuses" :
-	 *                  {
-	 *                         {
-	 *                             "name": "Отменено",
-	 *                             "id_order_state": "7",
-	 *                             "id_lang": "1"
-	 *                         },
-	 *                         {
-	 *                             "name": "Сделка завершена",
-	 *                             "id_order_state": "5",
-	 *                             "id_lang": "1"
-	 *                          },
-	 *                          {
-	 *                              "name": "Ожидание",
-	 *                              "id_order_state": "1",
-	 *                              "id_lang": "1"
-	 *                           }
-	 *                    }
-	 *       "currency_code": "RUB",
-	 *       "total_quantity": 50,
-	 *       "total_sum": "2026.00",
-	 *       "max_price": "1405.00"
-	 *   },
-	 *   "Status" : true,
-	 *   "version": 1.0
+	 * HTTP/1.1 200 OK {
+     *  "status": true,
+     *   "response": {
+     *       "total_quantity": 14,
+     *       "currency_code": "UAH",
+     *       "total_sum": "1257.76",
+     *       "orders": [
+     *           {
+     *               "order_number": "14",
+     *               "order_id": "14",
+     *               "fio": "тестовый  заказ",
+     *               "status": "Ожидается оплата чеком",
+     *               "total": "61.19",
+     *               "date_add": "2019-01-07 23:24:56",
+     *               "currency_code": "UAH"
+     *           },
+     *           {
+     *               "order_number": "4",
+     *               "order_id": "4",
+     *               "fio": "John DOE",
+     *               "status": "Ожидается оплата чеком",
+     *               "total": "89.89",
+     *               "date_add": "2018-01-04 09:10:54",
+     *               "currency_code": "UAH"
+     *           }
+     *       ],
+     *       "max_price": "367.19",
+     *       "statuses": [
+     *           {
+     *               "id_order_state": "1",
+     *               "id_lang": "1",
+     *               "name": "Ожидается оплата чеком"
+     *           },
+     *           {
+     *               "id_order_state": "2",
+     *               "id_lang": "1",
+     *               "name": "Платеж принят"
+     *           }
+     *       ],
+     *   },
+     *   "version": 1,
+     *  "error": ""
 	 * }
 	 * @apiErrorExample Error-Response:
-	 *
 	 * {
 	 *      "version": 1.0,
 	 *      "Status" : false
-	 *
 	 * }
-	 *
 	 *
 	 */
 	public function getOrdersList(){
@@ -284,72 +282,61 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	 * @apiParam {Token} token your unique token.
 	 * @apiParam {ID} order_id unique order id.
 	 *
-	 * @apiSuccess {Number} version  Current API version.
-	 * @apiSuccess {Url} image  Picture of the product.
-	 * @apiSuccess {Number} quantity  Quantity of the product.
-	 * @apiSuccess {String} name     Name of the product.
-	 * @apiSuccess {String} model  Model of the product.
-	 * @apiSuccess {Number} Price  Price of the product.
-	 * @apiSuccess {Number} total_order_price  Total sum of the order.
-	 * @apiSuccess {Number} total_price  Sum of product's prices.
-	 * @apiSuccess {Number} shipping_price  Cost of the shipping.
-	 * @apiSuccess {Number} total  Total order sum.
-	 * @apiSuccess {Number} product_id  unique product id.
-	 * @apiSuccess {Array} options  Array of options selected for this product.
+     *
+     * @apiSuccess {Array[]}   response                           Array with content response.
+     * @apiSuccess {Number}    version                            Current API version.
+     * @apiSuccess {Bool}      status                             Response status.
+     *
+     * @apiSuccess {Array[]}   response.products                  Array of products.
+     * @apiSuccess {String}    response.products.name             Name of the product.
+     * @apiSuccess {String}    response.products.image            Picture of the product.
+     * @apiSuccess {String}    response.products.model            Model of the product.
+     * @apiSuccess {String}    response.products.quantity         Quantity of the product.
+     * @apiSuccess {String}    response.products.price            Price of the product.
+     * @apiSuccess {String}    response.products.product_id       Unique product id.
+     * @apiSuccess {String}    response.products.discount         Percentage discount.
+     * @apiSuccess {String}    response.products.discount_price   Cost with discount.
+     *
+     * @apiSuccess {Array[]}   response.products.options                   Array of of the product options.
+     * @apiSuccess {String}    response.products.options.option_id         Option id.
+     * @apiSuccess {String}    response.products.options.option_name       Option name.
+     * @apiSuccess {String}    response.products.options.option_value_id   Option value id.
+     * @apiSuccess {String}    response.products.options.option_value_name Option value name.
+     * @apiSuccess {String}    response.products.options.language_id       Language id of options and option values.
+     *
+     * @apiSuccess {Array[]}   response.total_order_price                  The array with a list of prices.
+     * @apiSuccess {Number}    response.total_order_price.total_discount     The amount of the discount for the order.
+     * @apiSuccess {Number}    response.total_order_price.total_price        Sum of product's prices.
+     * @apiSuccess {Number}    response.total_order_price.shipping_price     Cost of the shipping.
+     * @apiSuccess {Number}    response.total_order_price.total              Total order sum.
+     * @apiSuccess {String}    response.total_order_price.currency_code      Currency of the order.
 	 *
 	 * @apiSuccessExample Success-Response:
-	 *     HTTP/1.1 200 OK
-	 * {
-	 *      "response":
-	 *          {
-	 *              "products": [
-	 *              {
-	 *                  "image" : "http://opencart/image/catalog/demo/htc_touch_hd_1.jpg",
-	 *                  "name" : "HTC Touch HD",
-	 *                  "model" : "Product 1",
-	 *                  "quantity" : 3,
-	 *                  "price" : 100.00,
-   *                  "product_id" : 90,
-   *                  "options" : [
-   *                       {
-   *                           "option_value_id": "1",
-   *                           "option_id": "1",
-   *                           "language_id": "1",
-   *                           "option_value_name": "S",
-   *                           "option_name": "Размер"
-   *                       },
-   *                       {
-   *                           "option_value_id": "14",
-   *                           "option_id": "3",
-   *                           "language_id": "1",
-   *                           "option_value_name": "Cиний",
-   *                           "option_name": "Цвет"
-   *                       }
-   *                  ]
-	 *              },
-	 *              {
-	 *                  "image" : "http://opencart/image/catalog/demo/iphone_1.jpg",
-	 *                  "name" : "iPhone",
-	 *                  "model" : "Product 11",
-	 *                  "quantity" : 1,
-	 *                  "price" : 500.00,
-	 *                  "product_id" : 97
-	 *               }
-	 *            ],
-	 *            "total_order_price":
-	 *              {
-	 *                   "total_discount": 0,
-	 *                   "total_price": 2250,
-	 *                   "shipping_price": 35,
-	 *                   "total": 2285
-	 *               }
-	 *
-	 *         },
-	 *      "status": true,
-	 *      "version": 1.0
+	 * HTTP/1.1 200 OK  {
+     *   "status": true,
+     *   "response": {
+     *       "products": [
+     *           {
+     *               "image": "http://prestashop1721.pixy.pro/1-home_default/.jpg",
+     *               "name": "Faded Short Sleeve T-shirts - Color : Orange, Size : S",
+     *               "model": "",
+     *               "quantity": 1,
+     *               "price": "16.51",
+     *               "product_id": "1",
+     *               "discount_price": "0.000000",
+     *               "discount": "0"
+     *           }
+     *       ],
+     *       "total_order_price": {
+     *           "total_discount": 47.38,
+     *           "total_price": "89.89",
+     *           "shipping_price": 2,
+     *           "total": "91.89",
+     *           "currency_code": "UAH"
+     *       }
+     *   },
+     *   "version": 1
 	 * }
-	 *
-	 *
 	 * @apiErrorExample Error-Response:
 	 *
 	 *     {
@@ -487,68 +474,59 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	 * @apiParam {Number} order_id unique order ID.
 	 * @apiParam {Token} token your unique token.
 	 *
-	 * @apiSuccess {Number} version  Current API version.
-	 * @apiSuccess {String} name     Status of the order.
-	 * @apiSuccess {Number} order_status_id  ID of the status of the order.
-	 * @apiSuccess {Date} date_added  Date of adding status of the order.
-	 * @apiSuccess {String} comment  Some comment added from manager.
-	 * @apiSuccess {Array} statuses  Statuses list for order.
+     * @apiSuccess {Number}    version                            Current API version.
+     * @apiSuccess {Bool}      status                             Response status.
+     *
+     * @apiSuccess {Array[]}   response                           Array with content response.
+     * @apiSuccess {Array[]}   response.orders                    An array with information about the order.
+     * @apiSuccess {String}    response.orders.name               Status of the order.
+     * @apiSuccess {String}    response.orders.order_status_id    ID of the status of the order.
+     * @apiSuccess {String}    response.orders.date_add           Date of adding status of the order.
+     * @apiSuccess {String}    response.orders.comment            Some comment added from manager.
+     * @apiSuccess {Array[]}   response.statuses                  Statuses list for order.
+     *
+     * @apiSuccess {String}    response.statuses.name             Status name.
+     * @apiSuccess {String}    response.statuses.id_lang          Language id.
+     * @apiSuccess {String}    response.statuses.id_order_state  Status id.
 	 *
 	 * @apiSuccessExample Success-Response:
-	 *     HTTP/1.1 200 OK
-	 *       {
-	 *           "response":
-	 *               {
-	 *                   "orders":
-	 *                      {
-	 *                          {
-	 *                              "name": "Отменено",
-	 *                              "order_status_id": "7",
-	 *                              "date_added": "2016-12-13 08:27:48.",
-	 *                              "comment": "Some text"
-	 *                          },
-	 *                          {
-	 *                              "name": "Сделка завершена",
-	 *                              "order_status_id": "5",
-	 *                              "date_added": "2016-12-25 09:30:10.",
-	 *                              "comment": "Some text"
-	 *                          },
-	 *                          {
-	 *                              "name": "Ожидание",
-	 *                              "order_status_id": "1",
-	 *                              "date_added": "2016-12-01 11:25:18.",
-	 *                              "comment": "Some text"
-	 *                           }
-	 *                       },
-	 *                   "statuses" :
-	 *                  {
-	 *                         {
-	 *                             "name": "Отменено",
-	 *                             "id_order_state": "7",
-	 *                             "id_lang": "1"
-	 *                         },
-	 *                         {
-	 *                             "name": "Сделка завершена",
-	 *                             "id_order_state": "5",
-	 *                             "id_lang": "1"
-	 *                          },
-	 *                          {
-	 *                              "name": "Ожидание",
-	 *                              "id_order_state": "1",
-	 *                              "id_lang": "1"
-	 *                           }
-	 *                    }
-	 *               },
-	 *           "status": true,
-	 *           "version": 1.0
-	 *       }
+	 * HTTP/1.1 200 OK {
+        "status": true,
+        "response": {
+            "orders": [
+                {
+                    "name": "Ожидается оплата чеком",
+                    "order_status_id": "1",
+                    "date_add": "2018-01-04 09:10:55",
+                    "comment": ""
+                }
+            ],
+            "statuses": [
+                {
+                    "id_order_state": "1",
+                    "id_lang": "1",
+                    "name": "Ожидается оплата чеком"
+                },
+                {
+                    "id_order_state": "2",
+                    "id_lang": "1",
+                    "name": "Платеж принят"
+                },
+                {
+                    "id_order_state": "3",
+                    "id_lang": "1",
+                    "name": "В обработке"
+                }
+            ]
+        },
+        "version": 1
+	 * }
 	 * @apiErrorExample Error-Response:
-	 *
-	 *     {
+	 * {
 	 *          "error": "Can not found any statuses for order with id = 5",
 	 *          "version": 1.0,
 	 *          "Status" : false
-	 *     }
+	 * }
 	 */
 
 	public function getOrdersHistory(){
@@ -600,54 +578,53 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	 * @apiName getOrderInfo
 	 * @apiGroup Orders
 	 *
-	 * @apiParam {Number} order_id unique order ID.
-	 * @apiParam {Token} token your unique token.
+     * @apiSuccess {Number}    version                            Current API version.
+     * @apiSuccess {Bool}      status                             Response status.
 	 *
-	 * @apiSuccess {Number} version  Current API version.
-	 * @apiSuccess {Number} order_number  Number of the order.
-	 * @apiSuccess {String} fio     Client's FIO.
-	 * @apiSuccess {String} status  Status of the order.
-	 * @apiSuccess {String} email  Client's email.
-	 * @apiSuccess {Number} phone  Client's phone.
-	 * @apiSuccess {Number} total  Total sum of the order.
-	 * @apiSuccess {currency_code} status  Default currency of the shop.
-	 * @apiSuccess {Date} date_added  Date added of the order.
-	 * @apiSuccess {Array} statuses  Statuses list for order.
+     * @apiSuccess {Number}    version                            Current API version.
+     * @apiSuccess {Bool}      status                             Response status.
+     * @apiSuccess {Array[]}   response                           Array with content response.
+     *
+     * @apiSuccess {String}    response.order_number              Number of the order.
+     * @apiSuccess {String}    response.fio                       Client's FIO.
+     * @apiSuccess {String}    response.status                    Status of the order.
+     * @apiSuccess {String}    response.email                     Client's email.
+     * @apiSuccess {String}    response.telephone                 Client's phone.
+     * @apiSuccess {String}    response.total                     Total sum of the order.
+     * @apiSuccess {String}    response.currency_code             Default currency of the shop.
+     * @apiSuccess {String}    response.date_add                  Date added of the order.
+     * @apiSuccess {Array[]}   response.statuses                  Statuses list for order.
+     *
+     * @apiSuccess {String}    response.statuses.id_lang          Language id
+     * @apiSuccess {String}    response.statuses.name             Status name
+     * @apiSuccess {String}    response.statuses.id_order_state   Status id
 	 *
 	 * @apiSuccessExample Success-Response:
-	 *     HTTP/1.1 200 OK
-	 * {
-	 *      "response" :
-	 *          {
-	 *              "order_number" : "6",
-	 *              "currency_code": "RUB",
-	 *              "fio" : "Anton Kiselev",
-	 *              "email" : "client@mail.ru",
-	 *              "telephone" : "056 000-11-22",
-	 *              "date_added" : "2016-12-24 12:30:46",
-	 *              "total" : "1405.00",
-	 *              "status" : "Сделка завершена",
-	 *              "statuses" :
-	 *                  {
-	 *                         {
-	 *                             "name": "Отменено",
-	 *                             "id_order_state": "7",
-	 *                             "id_lang": "1"
-	 *                         },
-	 *                         {
-	 *                             "name": "Сделка завершена",
-	 *                             "id_order_state": "5",
-	 *                             "id_lang": "1"
-	 *                          },
-	 *                          {
-	 *                              "name": "Ожидание",
-	 *                              "id_order_state": "1",
-	 *                              "id_lang": "1"
-	 *                           }
-	 *                    }
-	 *          },
-	 *      "status" : true,
-	 *      "version": 1.0
+	 * HTTP/1.1 200 OK {
+     *   "status": true,
+     *   "response": {
+     *       "order_number": 4,
+     *       "fio": "John DOE",
+     *       "email": "pub@prestashop.com",
+     *       "telephone": "0102030405",
+     *       "date_add": "2018-01-04 09:10:54",
+     *       "total": "89.89",
+     *       "status": "Ожидается оплата чеком",
+     *       "statuses": [
+     *           {
+     *               "id_order_state": "1",
+     *               "id_lang": "1",
+     *               "name": "Ожидается оплата чеком"
+     *           },
+     *           {
+     *               "id_order_state": "2",
+     *               "id_lang": "1",
+     *               "name": "Платеж принят"
+     *           }
+     *       ],
+     *       "currency_code": "UAH"
+     *   },
+     *   "version": 1
 	 * }
 	 *
 	 * @apiErrorExample Error-Response:
@@ -739,34 +716,30 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	 * @apiParam {Number} order_id unique order ID.
 	 * @apiParam {Token} token your unique token.
 	 *
-	 * @apiSuccess {Number} version  Current API version.
-	 * @apiSuccess {String} payment_method     Payment method.
-	 * @apiSuccess {String} shipping_method  Shipping method.
-	 * @apiSuccess {String} shipping_address  Shipping address.
-	 * @apiSuccess {String} shipping_phone  Shipping phone.
-	 * @apiSuccess {String} shipping_phone_mobile  Shipping phone mobile.
-	 * @apiSuccess {String} payment_address  Payment address.
-	 * @apiSuccess {String} payment_phone  Payment phone.
-	 * @apiSuccess {String} payment_phone_mobile  Payment mobile phone.
+     * @apiSuccess {Number}    version                            Current API version.
+     * @apiSuccess {Bool}      status                             Response status.
+
+     * @apiSuccess {Array[]}   response                           Array with content response.
+     * @apiSuccess {String}    response.payment_method            Payment method.
+     * @apiSuccess {String}    response.shipping_method           Shipping method.
+     * @apiSuccess {String}    response.shipping_address          Shipping address.
+     * @apiSuccess {String}    response.shipping_phone            Shipping phone.
+     * @apiSuccess {String}    response.payment_phone             Payment phone.
+     * @apiSuccess {String}    response.payment_address           Payment address.
 	 *
 	 * @apiSuccessExample Success-Response:
-	 *     HTTP/1.1 200 OK
-	 *
-	 *      {
-	 *          "response":
-	 *              {
-	 *                  "payment_method" : "Оплата при доставке",
-	 *                  "shipping_method" : "Доставка с фиксированной стоимостью доставки",
-	 *                  "shipping_address" : "проспект Карла Маркса 1, Днепропетровск, Днепропетровская область, Украина."
-	 *                  "shipping_phone" : "123-123-123."
-	 *                  "shipping_phone_mobile" : "132-123-123"
-	 *                  "payment_address" : "проспект Карла Маркса 1, Днепропетровск, Днепропетровская область, Украина."
-	 *                  "payment_phone" : "132-123-123"
-	 *                  "payment_phone_mobile" : "132-123-123"
-	 *              },
-	 *          "status": true,
-	 *          "version": 1.0
-	 *      }
+	 * HTTP/1.1 200 OK {
+     *   "status": true,
+     *   "response": {
+     *       "shipping_address": "TEst address Dnepr ",
+     *       "payment_method": "Payment by check",
+     *       "shipping_method": "Доставка завтра!"
+     *       "shipping_phone": "0102030405",
+     *       "payment_phone": "0102030405",
+     *       "payment_address": "TEst address Dnepr ",
+     *   },
+     *   "version": 1
+	 * }
 	 * @apiErrorExample Error-Response:
 	 *
 	 *    {
@@ -790,13 +763,6 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 			foreach ($carriers->delay as $one):
 				$shipping_method = $one;
 			endforeach;
-//			echo "<pre>";
-//			print_r($order);
-//			print_r($carriers);
-//			print_r($address_delivery);
-//			print_r($address_payment);
-//			echo "</pre>";
-//			die();
 			$data = array();
 			$statuses = $this->OrderStatusList();
 			$statusArray = [];
@@ -820,21 +786,9 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 				if (!empty($shipping_method)) {
 					$data['shipping_method'] = $shipping_method;
 				}
-				/*if (!empty($address_delivery->country)) {
-					$data['shipping_address'] .= $address_delivery->country." ";
-				}
-				if (!empty($address_delivery->alias)) {
-					$data['shipping_address'] .= $address_delivery->alias." ";
-				}*/
 				if (!empty($address_delivery->address1)) {
 					$data['shipping_address'] .= $address_delivery->address1." ";
 				}
-				/*if (!empty($address_delivery->address2)) {
-					$data['shipping_address'] .= $address_delivery->address2." ";
-				}
-				if (!empty($address_delivery->postcode)) {
-					$data['shipping_address'] .= $address_delivery->postcode." ";
-				}*/
 				if (!empty($address_delivery->city)) {
 					$data['shipping_address'] .= $address_delivery->city." ";
 				}
@@ -845,21 +799,9 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					$data['shipping_phone_mobile'] .= $address_delivery->phone_mobile;
 				}
 
-			/*	if (!empty($address_payment->country)) {
-					$data['payment_address'] .= $address_payment->country." ";
-				}
-				if (!empty($address_payment->alias)) {
-					$data['payment_address'] .= $address_payment->alias." ";
-				}*/
 				if (!empty($address_payment->address1)) {
 					$data['payment_address'] .= $address_payment->address1." ";
 				}
-				/*if (!empty($address_payment->address2)) {
-					$data['payment_address'] .= $address_payment->address2." ";
-				}
-				if (!empty($address_payment->postcode)) {
-					$data['payment_address'] .= $address_payment->postcode." ";
-				}*/
 				if (!empty($address_payment->city)) {
 					$data['payment_address'] .= $address_payment->city." ";
 				}
@@ -890,20 +832,25 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 	 * @apiName update Order Status
 	 * @apiGroup Orders
 	 *
-	 * @apiParam {Number} order_id unique order ID.
+	 * @apiParam {Number} order_id  unique order ID.
+	 * @apiParam {Number} status_id unique status ID.
 	 * @apiParam {Token} token your unique token.
-	 *
-	 * @apiSuccess {Number} version  Current API version.
-	 * @apiSuccess {String} status_id    Status id.
-	 * @apiSuccess {String} order_id   Order id.
-	 * @apiSuccess {String} inform    Inform.
+     *
+     * @apiSuccess {Number}    version                            Current API version.
+     * @apiSuccess {Bool}      status                             Response status.
+
+     * @apiSuccess {Array[]}   response                           Array with content response.
+     * @apiSuccess {String}    response.name                      Status name.
+     * @apiSuccess {String}    response.date_add                  Date of change.
 	 * @apiSuccessExample Success-Response:
-	 *     HTTP/1.1 200 OK
-	 *
-	 *      {
-	 *          "status": true,
-	 *          "version": 1.0
-	 *      }
+	 * HTTP/1.1 200 OK {
+     *  "status": true,
+     *   "response": {
+     *       "name": "Платеж принят",
+     *       "date_add": "2019-01-14 13:21:02"
+     *   },
+     *   "version": 1
+	 * }
 	 * @apiErrorExample Error-Response:
 	 *
 	 *    {

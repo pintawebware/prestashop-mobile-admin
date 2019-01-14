@@ -83,19 +83,21 @@ class ApimoduleStatisticModuleFrontController extends ModuleFrontController {
 	 * @apiParam {String} filter Period for filter(day/week/month/year).
 	 * @apiParam {Token} token your unique token.
 	 *
-	 * @apiSuccess {Number} version  Current API version.
-	 * @apiSuccess {Array} xAxis Period of the selected filter.
-	 * @apiSuccess {Array} Clients Clients for the selected period.
-	 * @apiSuccess {Array} Orders Orders for the selected period.
-	 * @apiSuccess {String} currency_code  Default currency of the shop.
-	 * @apiSuccess {Number} total_sales  Sum of sales of the shop.
-	 * @apiSuccess {Number} sale_year_total  Sum of sales of the current year.
-	 * @apiSuccess {Number} orders_total  Total orders of the shop.
-	 * @apiSuccess {Number} clients_total  Total clients of the shop.
+     * @apiSuccess {Array[]}   response                           Array with content response.
+     * @apiSuccess {Number}    version                            Current API version.
+     * @apiSuccess {Bool}      status                             Response status.
+
+     * @apiSuccess {Array[]}   response.xAxis               Period of the selected filter.
+     * @apiSuccess {Array[]}   response.clients             Clients for the selected period.
+     * @apiSuccess {Array[]}   response.orders              Orders for the selected period.
+     * @apiSuccess {String}    response.currency_code       Default currency of the shop.
+     * @apiSuccess {Number}    response.total_sales         Sum of sales of the shop.
+     * @apiSuccess {String}    response.sale_year_total     Sum of sales of the current year.
+     * @apiSuccess {String}    response.orders_total        Total orders of the shop.
+     * @apiSuccess {String}    response.clients_total       Total clients of the shop.
 	 *
 	 * @apiSuccessExample Success-Response:
-	 *     HTTP/1.1 200 OK
-	 *   {
+	 * HTTP/1.1 200 OK {
 	 *           "response": {
 	 *               "xAxis": [
 	 *                  1,

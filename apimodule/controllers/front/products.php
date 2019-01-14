@@ -85,45 +85,49 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      * @apiParam {Number} limit limit of the orders for the page.
      * @apiParam {String} name name of the product for search.
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Number} product_id  ID of the product.
-     * @apiSuccess {String} vendor_code     Vendor code of the product.
-     * @apiSuccess {String} name  Name of the product.
-     * @apiSuccess {String} currency_code  Default currency of the shop.
-     * @apiSuccess {Number} price  Price of the product.
-     * @apiSuccess {Number} quantity  Actual quantity of the product.
-     * @apiSuccess {Url} image  Url to the product image.
+     * @apiSuccess {Array[]}   response                              Array with content response.
+     * @apiSuccess {Number}    version                               Current API version.
+     * @apiSuccess {Bool}      status                                Response status.
      *
+     * @apiSuccess {Array[]}   response.products                     Array of products.
+     * @apiSuccess {String}    response.products.product_id          ID of the product.
+     * @apiSuccess {String}    response.products.vendor_code         Vendor code of the product.
+     * @apiSuccess {String}    response.products.name                Name of the product.
+     * @apiSuccess {String}    response.products.currency_code       Default currency of the shop.
+     * @apiSuccess {String}    response.products.price               Price of the product.
+     * @apiSuccess {String}    response.products.quantity            Actual quantity of the product.
+     * @apiSuccess {String}    response.products.image               Url to the product image.
+     * @apiSuccess {String}    response.products.category            The category to which the product belongs.
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     * {
-     *   "Response":
-     *   {
-     *      "products":
-     *      {
+     * HTTP/1.1 200 OK {
+     *   "status": true,
+     *   "errors": [],
+     *   "response": {
+     *       "products": [
      *           {
-     *             "product_id" : "1",
-     *             "vendor_code" : "12423",
-     *             "name" : "HTC Touch HD",
-     *             "price" : "100.00",
-     *             "currency_code": "UAH",
-     *             "quantity" : "83",
-     *             "image" : "http://site-url/image/catalog/demo/htc_touch_hd_1.jpg"
+     *               "product_id": "9",
+     *               "vendor_code": "demo_3",
+     *               "quantity": "3333",
+     *               "image": "",
+     *               "price": "255.00",
+     *               "name": "Printed%20Dress",
+     *               "category": "Главная",
+     *               "currency_code": "UAH"
      *           },
      *           {
-     *             "product_id" : "2",
-     *             "vendor_code" : "45632",
-     *             "name" : "iPhone",
-     *             "price" : "300.00",
-     *             "currency_code": "UAH",
-     *             "quantity" : "30",
-     *             "image" : "http://site-url/image/catalog/demo/iphone_1.jpg"
+     *               "product_id": "7",
+     *               "vendor_code": "",
+     *               "quantity": "12",
+     *               "image": "http://prestashop1721.pixy.pro/img/p/2/0/20.jpg",
+     *               "price": "123.00",
+     *               "name": "quantity",
+     *               "category": "Summer Dresses",
+     *               "currency_code": "UAH"
      *           }
-     *      }
+     *       ]
      *   },
-     *   "Status" : true,
-     *   "version": 1.0
+     *   "version": 2
      * }
      * @apiErrorExample Error-Response:
      * {
@@ -239,80 +243,110 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      * @apiParam {Token} token your unique token.
      * @apiParam {Number} product_id unique product ID.
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Number} product_id  ID of the product.
-     * @apiSuccess {String} vendor_code     Vendor code of the product.
-     * @apiSuccess {Boolean} status_name      Status of the product.
-     * @apiSuccess {String} categories   Product categories
-     * @apiSuccess {String} name  Name of the product.
-     * @apiSuccess {Number} price  Price of the product.
-     * @apiSuccess {String} currency_code  Default currency of the shop.
-     * @apiSuccess {Number} quantity  Actual quantity of the product.
-     * @apiSuccess {String} description     Detail description of the product.
-     * @apiSuccess {Array} images  Array of the images of the product.
+     * @apiSuccess {Array[]}  response                          Array with content response.
+     * @apiSuccess {Number}   version                           Current API version.
+     * @apiSuccess {Bool}     status                            Response status.
      *
-     * @apiSuccess {Array[]}   options                   Array of the product options.
-     * @apiSuccess {String}    options.option_id         Option id.
-     * @apiSuccess {String}    options.option_name       Option name.
-     * @apiSuccess {String}    options.option_value_id   Option value id.
-     * @apiSuccess {String}    options.option_value_name Option value name.
-     * @apiSuccess {String}    options.language_id       Language id of options and option values.
+     * @apiSuccess {Array[]}  response                          Array with content response.
+     * @apiSuccess {Number}   version                           Current API version.
+     * @apiSuccess {Bool}     status                            Response status.
      *
-
+     * @apiSuccess {String}   response.product_id               ID of the product.
+     * @apiSuccess {String}   response.quantity                 Actual quantity of the product.
+     * @apiSuccess {String}   response.name                     Name of the product.
+     * @apiSuccess {String}   response.description              Detail description of the product.
+     * @apiSuccess {String}   response.status_name              Status name ( Enabled / Disabled )
+     * @apiSuccess {String}   response.vendor_code              Vendor code of the product.
+     * @apiSuccess {String}   response.currency_code            Default currency of the shop.
+     * @apiSuccess {String}   response.price                    Price of the product.
+     *
+     * @apiSuccess {Array[]}  response.categories               Array of the categories of the product.
+     * @apiSuccess {String}   response.categories.name          Category name.
+     * @apiSuccess {String}   response.categories.category_id   Category id.
+     *
+     * @apiSuccess {Array[]}  response.options                  Array of the options of the product.
+     * @apiSuccess {String}   response.options.option_id        Option id.
+     * @apiSuccess {String}   response.options.option_name      Option name.
+     * @apiSuccess {String}   response.options.option_value_id  Option value id.
+     * @apiSuccess {String}   response.options.option_value_name Option value name.
+     * @apiSuccess {String}   response.options.language_id      Language id of options and option values.
+     *
+     * @apiSuccess {Array[]}  response.images                   Array of the images of the product.
+     * @apiSuccess {String}   response.images.image             Image Link.
+     * @apiSuccess {Number}   response.images.image_id          Image id. If the image is set as the main thing then its id (-1)
+     *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     * {
-     *   "Response":
-     *   {
-     *       "product_id" : "1",
-     *       "vendor_code" : "Black",
-     *       "name" : "HTC Touch HD",
-     *       "price" : "100.00",
-     *       "status_name" : "Enabled",
-     *       "categories" : [
-     *              {
-     *                  "id_category":"7",
-     *                   "name":"Blouses"
-     *              },
-     *              {
-     *                   "id_category":"5",
-     *                   "name":"T-shirts"
-     *              }
-     *         ]
+     *  HTTP/1.1 200 OK  {
+     *   "status": true,
+     *   "response": {
+     *       "images": [
+     *           {
+     *               "image": "http://prestashop1721.pixy.pro/43-home_default/printed-chiffon-dress.jpg",
+     *               "image_id": -1
+     *           },
+     *           {
+     *               "image": "http://prestashop1721.pixy.pro/23-home_default/printed-chiffon-dress.jpg",
+     *               "image_id": "23"
+     *           }
+     *       ],
+     *       "product_id": "7",
+     *       "vendor_code": "",
+     *       "status_name": "Enabled",
+     *       "categories": [
+     *           {
+     *               "category_id": "3",
+     *               "name": "Women"
+     *           },
+     *           {
+     *               "category_id": "8",
+     *               "name": "Dresses"
+     *           },
+     *           {
+     *               "category_id": "11",
+     *               "name": "Summer Dresses"
+     *           }
+     *       ],
+     *       "options": [
+     *           [
+     *               {
+     *                   "option_value_id": "1",
+     *                   "option_id": "1",
+     *                   "language_id": "1",
+     *                   "option_value_name": "S",
+     *                   "option_name": "Размер"
+     *               },
+     *               {
+     *                   "option_value_id": "16",
+     *                   "option_id": "3",
+     *                   "language_id": "1",
+     *                   "option_value_name": "Жёлтый",
+     *                   "option_name": "Цвет"
+     *               }
+     *           ],
+     *           [
+     *               {
+     *                   "option_value_id": "2",
+     *                   "option_id": "1",
+     *                   "language_id": "1",
+     *                   "option_value_name": "M",
+     *                   "option_name": "Размер"
+     *               },
+     *               {
+     *                   "option_value_id": "16",
+     *                   "option_id": "3",
+     *                   "language_id": "1",
+     *                   "option_value_name": "Жёлтый",
+     *                   "option_name": "Цвет"
+     *               }
+     *           ]
+     *       ],
+     *       "description": "qwerty",
+     *       "quantity": "12",
+     *       "price": "123.00",
+     *       "name": "quantity",
      *       "currency_code": "UAH"
-     *       "quantity" : "83",
-     *       "main_image" : "http://site-url/image/catalog/demo/htc_iPhone_1.jpg",
-     *       "description" : "Revolutionary multi-touch interface.↵ iPod touch features the same multi-touch screen technology as iPhone.",
-     *       "images" :
-     *       [
-     *           "http://site-url/image/catalog/demo/htc_iPhone_1.jpg",
-     *           "http://site-url/image/catalog/demo/htc_iPhone_2.jpg",
-     *           "http://site-url/image/catalog/demo/htc_iPhone_3.jpg"
-     *       ]
-     *       "options": [ 
-     *                      {
-     *                          "option_id": "11",
-     *                          "option_value_id": "46",
-     *                          "option_value_name": "Small",
-     *                          "option_name": "Size"
-     *                      },
-     *                      {
-     *                          "option_id": "11",
-     *                          "option_value_id": "47",
-     *                          "option_value_name": "Medium",
-     *                          "option_name": "Size"
-     *                      },
-     *                      {
-     *                          "option_id": "11",
-     *                          "option_value_id": "48",
-     *                          "option_value_name": "Large",
-     *                          "option_name": "Size"
-     *                      }
-     *                  ]
-     *                  
      *   },
-     *   "Status" : true,
-     *   "version": 1.0
+     *   "version": 2
      * }
      * @apiErrorExample Error-Response:
      * {
@@ -320,8 +354,6 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      *      "version": 1.0,
      *      "Status" : false
      * }
-     *
-     *
      */
 
 
@@ -515,23 +547,29 @@ WHERE p.id_product = ".$product->id)['quantity'];
      * @apiName updateProduct
      * @apiGroup All
      *
-     * @apiParam {Token} token your unique token.
-     * @apiParam {Number} product_id  ID of the product.
-     * @apiParam {String} vendor_code     Vendor code of the product.
-     * @apiParam {String} name  Name of the product.
-     * @apiParam {Number} quantity  Actual quantity of the product.
-     * @apiParam {Number} price  Price of the product.
-     * @apiParam {String} description     Detail description of the product.
-     * @apiParam {String} description_short     Short description of the product.
-     * @apiParam {Number} categories  Array of categories of the product.
-     * @apiParam {Number} status  Status of the product.
-     * @apiParam {Array} images  Array of the images of the product.
-     * @apiParam {Array} options                   Array of the product options.
-     * @apiParam {Array} options.option_value_ids  Array of combination of option_value_ids.
+     * @apiParam {Token}  token                          Your unique token.
+     * @apiParam {Number} product_id                     ID of the product.
+     * @apiParam {String} vendor_code                    Vendor code of the product.
+     * @apiParam {String} name                           Name of the product.
+     * @apiParam {Number} quantity                       Actual quantity of the product.
+     * @apiParam {Number} price                          Price of the product.
+     * @apiParam {String} description                    Detail description of the product.
+     * @apiParam {String} description_short              Short description of the product.
+     * @apiParam {Number} categories                     Array of categories of the product.
+     * @apiParam {Number} status                         Status of the product.
+     * @apiParam {Array[File]}  images                         Array of the images of the product.
+     * @apiParam {Array}  options                        Array of the product options.
+     * @apiParam {Array}  options.option_value_ids       Array of combination of option_value_ids.
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Number} product_id  ID of the product.
-     * @apiSuccess {Array} images Product images.
+     * @apiSuccess {Array[]}  response                   Array with content response.
+     * @apiSuccess {Number}   version                    Current API version.
+     * @apiSuccess {Bool}     status                     Response status.
+     *
+     * @apiSuccess {String}   response.product_id        Unique product ID.
+     *
+     * @apiSuccess {Array[]}  response.images            Array images of the product.
+     * @apiSuccess {String}   response.images.image      Link image.
+     * @apiSuccess {Number}   response.images.image_id   Image id.
      *
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
@@ -941,33 +979,66 @@ WHERE p.id_product = ".$product->id)['quantity'];
      * @apiParam {Token} token your unique token.
      * @apiParam {Number} category_id unique category ID.
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Number} category_id  ID of the category.
-     * @apiSuccess {String} name  Name of the category.
-     * @apiSuccess {Boolean} parent  Specifies whether this category has child categories.
+     * @apiSuccess {Array[]}  response                           Array with content response.
+     * @apiSuccess {Number}   version                            Current API version.
+     * @apiSuccess {Bool}     status                             Response status.
+     *
+     * @apiSuccess {Array[]}  response.categories                Array of categories.
+     * @apiSuccess {string}   response.categories.name           Category name.
+     * @apiSuccess {string}   response.categories.parent         Is there a parent category ?
+     * @apiSuccess {string}   response.categories.category_id    Category id.
      *
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     * {
-     *   "Response":
-     *   {
-     *      "categories":
-     *      {
-     *          "3" : {
-     *             "category_id" : "1",
-     *             "name" : "Computers",
-     *             "parent" : "true",
-     *           },
-     *          "4" : {
-     *             "category_id" : "1",
-     *             "name" : "Notebooks",
-     *             "parent" : "false"
-     *           }
-     *      }
-     *   },
-     *   "Status" : true,
-     *   "version": 1.0
+     *  HTTP/1.1 200 OK {
+     *       "status": true,
+     *       "response": {
+     *       "images": [
+     *       {
+     *       "image_id": -1,
+     *       "image": ""
+     *       },
+     *       {
+     *       "image": "http://prestashop1721.pixy.pro/36-home_default/erttre.jpg",
+     *       "image_id": "36"
+     *       },
+     *       {
+     *       "image": "http://prestashop1721.pixy.pro/37-home_default/erttre.jpg",
+     *       "image_id": "37"
+     *       },
+     *       {
+     *       "image": "http://prestashop1721.pixy.pro/38-home_default/erttre.jpg",
+     *       "image_id": "38"
+     *       },
+     *       {
+     *       "image": "http://prestashop1721.pixy.pro/39-home_default/erttre.jpg",
+     *       "image_id": "39"
+     *       },
+     *       {
+     *       "image": "http://prestashop1721.pixy.pro/40-home_default/erttre.jpg",
+     *       "image_id": "40"
+     *       },
+     *       {
+     *       "image": "http://prestashop1721.pixy.pro/41-home_default/erttre.jpg",
+     *       "image_id": "41"
+     *       },
+     *       {
+     *       "image": "http://prestashop1721.pixy.pro/42-home_default/erttre.jpg",
+     *       "image_id": "42"
+     *       }
+     *       ],
+            "product_id": "9",
+            "vendor_code": "demo_3",
+            "status_name": "Enabled",
+            "categories": [],
+            "options": [],
+            "description": "\u2028",
+            "quantity": "3333",
+            "price": "255.00",
+            "name": "Printed%20Dress",
+            "currency_code": "UAH"
+            },
+            "version": 2
      * }
      * @apiErrorExample Error-Response:
      * {

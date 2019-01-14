@@ -80,27 +80,29 @@ class ApimoduleAuthModuleFrontController extends ModuleFrontController
 	 * @apiParam {String} device_token User's device's token for firebase notifications.
 	 * @apiParam {String} os_type android|ios
 	 *
-	 * @apiSuccess {Number} version  Current API version.
-	 * @apiSuccess {String} token  Token.
+     * @apiSuccess {Array[]}   response                           Array with content response.
+     * @apiSuccess {Number}    version                            Current API version.
+     * @apiSuccess {Bool}      status                             Response status.
+     * @apiSuccess {String}    error                              Description error.
+     *
+     * @apiSuccess {String}    response.token                     Token.
 	 *
 	 * @apiSuccessExample Success-Response:
 	 *     HTTP/1.1 200 OK
 	 *   {
-	 *       "response":
-	 *       {
-	 *          "token": "e9cf23a55429aa79c3c1651fe698ed7b",
-	 *          "version": 1.0,
-	 *          "status": true
-	 *       }
+	 *      "error": "",
+     *       "version": 1,
+     *       "response": {
+     *          "token": "eb3d0b776b33638a5a34b0ed63b882b5"
+     *       },
+     *       "status": true
 	 *   }
 	 *
 	 * @apiErrorExample Error-Response:
 	 *
-	 *     {
-	 *       "error": "Incorrect username or password",
-	 *       "version": 1.0,
-	 *       "Status" : false
-	 *     }
+     *   {
+     *      "error": "The password field is blank."
+     *   }
 	 *
 	 */
 

@@ -91,38 +91,38 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 	 * @apiParam {String} fio full name of the client.
 	 * @apiParam {String} sort param for sorting clients(sum/quantity/date_add).
 	 *
-	 * @apiSuccess {Number} version  Current API version.
-	 * @apiSuccess {Number} client_id  ID of the client.
-	 * @apiSuccess {String} fio     Client's FIO.
-	 * @apiSuccess {Number} total  Total sum of client's orders.
-	 * @apiSuccess {String} currency_code  Default currency of the shop.
-	 * @apiSuccess {Number} quantity  Total quantity of client's orders.
-	 *
+     * @apiSuccess {Array[]}   response                           Array with content response.
+     * @apiSuccess {Number}    version                            Current API version.
+     * @apiSuccess {Bool}      status                             Response status.
+
+     * @apiSuccess {String} response.client_id                    ID of the client.
+     * @apiSuccess {String} response.fio                          Client's FIO.
+     * @apiSuccess {Number} response.total                        Total sum of client's orders.
+     * @apiSuccess {String} response.currency_code                Default currency of the shop.
+     * @apiSuccess {String} response.quantity                     Total quantity of client's orders.
+     *
 	 * @apiSuccessExample Success-Response:
-	 *     HTTP/1.1 200 OK
-	 * {
-	 *   "Response"
-	 *   {
-	 *     "clients"
-	 *      {
-	 *          {
-	 *              "client_id" : "88",
-	 *              "fio" : "Anton Kiselev",
-	 *              "total" : "1006.00",
-	 *              "currency_code": "UAH",
-	 *              "quantity" : "5"
-	 *          },
-	 *          {
-	 *              "client_id" : "10",
-	 *              "fio" : "Vlad Kochergin",
-	 *              "currency_code": "UAH",
-	 *              "total" : "555.00",
-	 *              "quantity" : "1"
-	 *          }
-	 *      }
-	 *    },
-	 *    "Status" : true,
-	 *    "version": 1.0
+	 * HTTP/1.1 200 OK {
+     *   "status": true,
+     *   "response": {
+     *       "clients": [
+     *           {
+     *               "client_id": "9",
+     *               "fio": "тестовый  заказ",
+     *               "total": "351.89",
+     *               "quantity": "2",
+     *               "currency_code": "UAH"
+     *           },
+     *           {
+     *               "client_id": "8",
+     *               "fio": "тестовый  заказ",
+     *               "total": "36.60",
+     *               "quantity": "1",
+     *               "currency_code": "UAH"
+     *           }
+     *       ]
+     *   },
+     *   "version": 1
 	 * }
 	 * @apiErrorExample Error-Response:
 	 * {
@@ -187,35 +187,38 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 	 * @apiName getClientInfo
 	 * @apiGroup Clients
 	 *
-	 * @apiParam {Token} token your unique token.
-	 * @apiParam {Number} client_id unique client ID.
+	 * @apiParam {Token}  token                                   Your unique token.
+	 * @apiParam {Number} client_id                               Unique client ID.
+     *
+     * @apiSuccess {Array[]}  response                            Array with content response.
+     * @apiSuccess {Number}   version                             Current API version.
+     * @apiSuccess {Bool}     status                              Response status.
 	 *
-	 * @apiSuccess {Number} version  Current API version.
-	 * @apiSuccess {Number} client_id  ID of the client.
-	 * @apiSuccess {String} fio     Client's FIO.
-	 * @apiSuccess {Number} total  Total sum of client's orders.
-	 * @apiSuccess {Number} quantity  Total quantity of client's orders.
-	 * @apiSuccess {String} email  Client's email.
-	 * @apiSuccess {String} telephone  Client's telephone.
-	 * @apiSuccess {Number} cancelled  Total quantity of cancelled orders.
-	 * @apiSuccess {Number} completed  Total quantity of completed orders.
+     * @apiSuccess {String}  response.client_id                    ID of the client.
+     * @apiSuccess {String}  response.fio                          Client's FIO.
+     * @apiSuccess {String}  response.total                        Total sum of client's orders.
+     * @apiSuccess {String}  response.quantity                     Total quantity of client's orders.
+     * @apiSuccess {String}  response.email                        Client's email.
+     * @apiSuccess {String}  response.telephone                    Client's telephone.
+     * @apiSuccess {String}  response.currency_code                Default currency of the shop.
+     * @apiSuccess {Integer} response.cancelled                    Total quantity of cancelled orders.
+     * @apiSuccess {Integer} response.completed                    Total quantity of completed orders.
 	 *
 	 * @apiSuccessExample Success-Response:
-	 *     HTTP/1.1 200 OK
-	 * {
-	 *   "Response"
-	 *   {
-	 *         "client_id" : "88",
-	 *         "fio" : "Anton Kiselev",
-	 *         "total" : "1006.00",
-	 *         "quantity" : "5",
-	 *         "cancelled" : "1",
-	 *         "completed" : "2",
-	 *         "email" : "client@mail.ru",
-	 *         "telephone" : "13456789"
-	 *   },
-	 *   "Status" : true,
-	 *   "version": 1.0
+	 * HTTP/1.1 200 OK {
+     *   "status": true,
+     *   "response": {
+     *       "client_id": "2",
+     *       "fio": "Test Tests",
+     *       "email": "y.haidai@pinta.com.ua",
+     *       "telephone": [],
+     *       "total": "32.39",
+     *       "quantity": "1",
+     *       "completed": 0,
+     *       "cancelled": 0,
+     *       "currency_code": "UAH"
+     *   },
+     *   "version": 1
 	 * }
 	 * @apiErrorExample Error-Response:
 	 * {
@@ -283,61 +286,60 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 	 * @apiName getClientOrders
 	 * @apiGroup Clients
 	 *
-	 * @apiParam {Token} token your unique token.
-	 * @apiParam {Number} client_id unique client ID.
-	 * @apiParam {String} sort param for sorting orders(total/date_add/completed/cancelled).
+	 * @apiParam {Token} token                                    Your unique token.
+	 * @apiParam {Number} client_id                               Unique client ID.
+	 * @apiParam {String} sort                                    Param for sorting orders(total/date_add/completed/cancelled).
 	 *
-	 * @apiSuccess {Number} version  Current API version.
-	 * @apiSuccess {Number} id_order  ID of the order.
-	 * @apiSuccess {Number} order_number  Number of the order.
-	 * @apiSuccess {String} status  Status of the order.
-	 * @apiSuccess {String} currency_code  Default currency of the shop.
-	 * @apiSuccess {Number} total  Total sum of the order.
-	 * @apiSuccess {Date} date_add  Date added of the order.
+     * @apiSuccess {Array[]} response                             Array with content response.
+     * @apiSuccess {Number}  version                              Current API version.
+     * @apiSuccess {Bool}    status                               Response status.
 	 *
+     * @apiSuccess {Array[]} response.orders                      Array of sales orders.
+     * @apiSuccess {String}  response.orders.order_id             ID of the order.
+     * @apiSuccess {String}  response.orders.order_number         Number of the order.
+     * @apiSuccess {String}  response.orders.status               Status of the order.
+     * @apiSuccess {String}  response.orders.currency_code        Default currency of the shop.
+     * @apiSuccess {String}  response.orders.total                Total sum of the order.
+     * @apiSuccess {String}  response.orders.date_add             Date added of the order.
+     *
+     * @apiSuccess {Array[]} response.statuses                    Array of statuses orders.
+     * @apiSuccess {Array[]} response.statuses.id_order_state     ID of the status.
+     * @apiSuccess {Array[]} response.statuses.id_lang            Status language id.
+     * @apiSuccess {Array[]} response.statuses.name               Status name.
+     *
 	 * @apiSuccessExample Success-Response:
-	 *     HTTP/1.1 200 OK
-	 * {
-	 *   "Response"
-	 *   {
-	 *       "orders":
-	 *          {
-	 *             "order_id" : "1",
-	 *             "order_number" : "1",
-	 *             "status" : 1,
-	 *             "currency_code": "UAH",
-	 *             "total" : "106.00",
-	 *             "date_add" : "2016-12-09 16:17:02"
-	 *          },
-	 *          {
-	 *             "order_id" : "2",
-	 *             "currency_code": "UAH",
-	 *             "order_number" : "2",
-	 *             "status" : 2,
-	 *             "total" : "506.00",
-	 *             "date_add" : "2016-10-19 16:00:00"
-	 *          }
-	 *          "statuses" :
-	 *                  {
-	 *                         {
-	 *                             "name": "Отменено",
-	 *                             "id_order_state": "7",
-	 *                             "id_lang": "1"
-	 *                         },
-	 *                         {
-	 *                             "name": "Сделка завершена",
-	 *                             "id_order_state": "5",
-	 *                             "id_lang": "1"
-	 *                          },
-	 *                          {
-	 *                              "name": "Ожидание",
-	 *                              "id_order_state": "1",
-	 *                              "id_lang": "1"
-	 *                           }
-	 *                    }
-	 *    },
-	 *    "Status" : true,
-	 *    "version": 1.0
+	 * HTTP/1.1 200 OK {
+        "status": true,
+        "response": {
+            "orders": [
+                {
+                    "order_id": "6",
+                    "order_number": "6",
+                    "total": "32.39",
+                    "date_add": "2018-01-04 09:22:22",
+                    "currency_code": "UAH",
+                    "status": "5"
+                }
+            ],
+            "statuses": [
+                {
+                    "id_order_state": "1",
+                    "id_lang": "1",
+                    "name": "Ожидается оплата чеком"
+                },
+                {
+                    "id_order_state": "2",
+                    "id_lang": "1",
+                    "name": "Платеж принят"
+                },
+                {
+                    "id_order_state": "3",
+                    "id_lang": "1",
+                    "name": "В обработке"
+                }
+            ]
+        },
+        "version": 1
 	 * }
 	 * @apiErrorExample Error-Response:
 	 * {
