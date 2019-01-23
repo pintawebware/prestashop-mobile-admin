@@ -378,6 +378,8 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
             $data['categories'] = $categories;
             $options = $this->getOptionsByProduct($product_id);
             $data['options'] = $options;
+            $features = $this->getFeaturesByProduct($product_id);
+            $data['features'] = $features;
             $data['description'] = $product->description ? $product->description : "";
             $data['quantity'] =  Db::getInstance()->getRow(" SELECT p.id_product, sa.quantity FROM "._DB_PREFIX_."product p
  
@@ -495,6 +497,46 @@ WHERE p.id_product = ".$product->id)['quantity'];
         }
 
         return $results;
+    }
+
+    private function getFeaturesByProduct($id){
+        $product_id = (int)$id;
+        $id_lang = $this->context->language->id;
+
+        $id_product_feature_query = "SELECT pf.id_feature
+                                       FROM " . _DB_PREFIX_ . "feature_product pf 
+                                       WHERE pf.id_product = $product_id";
+
+        $id_product_feature_result = Db::getInstance()->ExecuteS($id_product_feature_query);
+
+        $result = array();
+
+        foreach($id_product_feature_result as $row => $field){
+            $id_product_feature = $field['id_feature'];
+
+            $id_feature_query = "SELECT " . _DB_PREFIX_ . "feature.id_feature feature_id,
+                                " . _DB_PREFIX_ . "feature_lang.id_lang language_id ,
+                                " . _DB_PREFIX_ . "feature_lang.name feature_name,
+                                " . _DB_PREFIX_ . "feature_value_lang.id_feature_value feature_value_id,
+                                " . _DB_PREFIX_ . "feature_value_lang.value feature_value_name
+
+                                FROM " . _DB_PREFIX_ . "feature, " . _DB_PREFIX_ . "feature_lang, " . _DB_PREFIX_ . "feature_product," . _DB_PREFIX_ . "feature_value, " . _DB_PREFIX_ . "feature_value_lang
+
+                                WHERE 
+                                " . _DB_PREFIX_ . "feature.id_feature = " . _DB_PREFIX_ . "feature_lang.id_feature
+                                AND " . _DB_PREFIX_ . "feature.id_feature = " . _DB_PREFIX_ . "feature_product.id_feature
+                                AND " . _DB_PREFIX_ . "feature.id_feature = " . _DB_PREFIX_ . "feature_value.id_feature
+                                AND " . _DB_PREFIX_ . "feature_value.id_feature_value = " . _DB_PREFIX_ . "feature_value_lang.id_feature_value
+                                AND " . _DB_PREFIX_ . "feature_product.id_feature_value = " . _DB_PREFIX_ . "feature_value.id_feature_value
+                                AND " . _DB_PREFIX_ . "feature_lang.id_lang = ".$id_lang."
+                                AND " . _DB_PREFIX_ . "feature_value_lang.id_lang = ".$id_lang."
+                                AND " . _DB_PREFIX_ . "feature_product.id_product = ".(int)$id_product_feature;
+            $id_feature_result = Db::getInstance()->ExecuteS($id_feature_query);
+
+            $result[] = $id_feature_result;
+        }
+
+        return $result;
     }
 
     public function getProductsList ($page, $limit, $name = '')
