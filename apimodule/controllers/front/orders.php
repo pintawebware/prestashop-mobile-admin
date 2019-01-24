@@ -400,7 +400,8 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					$array['discount_price'] = $product['product_quantity_discount'];
 					$array['discount']       = $product['quantity_discount'];
 					$array['options']        = $this->getOptionsByProductAttributeId($product['product_attribute_id']);
-
+					$array['features'] =  $this->getFeatureByProductAttributeId($product['product_id']);
+                    //var_dump($product);die();
 					$total_discount_sum += $product['product_quantity_discount'];
 
 					$shipping_price += $product['additional_shipping_cost'];
@@ -463,6 +464,32 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
       return $id_attribute_result;
   }
+
+    private function getFeatureByProductAttributeId($id){
+        $id_product_feature = (int)$id;
+        $id_lang = $this->context->language->id;
+
+        $id_feature_query = "SELECT " . _DB_PREFIX_ . "feature.id_feature feature_id,
+                                " . _DB_PREFIX_ . "feature_lang.id_lang language_id ,
+                                " . _DB_PREFIX_ . "feature_lang.name feature_name,
+                                " . _DB_PREFIX_ . "feature_value_lang.id_feature_value feature_value_id,
+                                " . _DB_PREFIX_ . "feature_value_lang.value feature_value_name
+
+                                FROM " . _DB_PREFIX_ . "feature, " . _DB_PREFIX_ . "feature_lang, " . _DB_PREFIX_ . "feature_product," . _DB_PREFIX_ . "feature_value, " . _DB_PREFIX_ . "feature_value_lang
+
+                                WHERE 
+                                " . _DB_PREFIX_ . "feature.id_feature = " . _DB_PREFIX_ . "feature_lang.id_feature
+                                AND " . _DB_PREFIX_ . "feature.id_feature = " . _DB_PREFIX_ . "feature_product.id_feature
+                                AND " . _DB_PREFIX_ . "feature.id_feature = " . _DB_PREFIX_ . "feature_value.id_feature
+                                AND " . _DB_PREFIX_ . "feature_value.id_feature_value = " . _DB_PREFIX_ . "feature_value_lang.id_feature_value
+                                AND " . _DB_PREFIX_ . "feature_product.id_feature_value = " . _DB_PREFIX_ . "feature_value.id_feature_value
+                                AND " . _DB_PREFIX_ . "feature_lang.id_lang = ".$id_lang."
+                                AND " . _DB_PREFIX_ . "feature_value_lang.id_lang = ".$id_lang."
+                                AND " . _DB_PREFIX_ . "feature_product.id_product =".(int)$id_product_feature;
+        $id_feature_result = Db::getInstance()->ExecuteS($id_feature_query);
+
+        return $id_feature_result;
+    }
 
 
 

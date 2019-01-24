@@ -367,6 +367,7 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
         $product = new Product($product_id,false, $id_lang);
 
         if ($product->id !== null) {
+
             $data['images'] = [];
             $data['product_id'] = strval($product->id);
             $data['vendor_code'] = $product->reference;
