@@ -1,16 +1,14 @@
 define({
-  "name": "Prestashop Mobile Admin",
-  "version": "1.0.0",
-  "description": "Apidoc for mobile app",
-  "title": "Prestashop Mobile Admin - Pinta Webware",
-  "url": "",
+  "name": "",
+  "version": "0.0.0",
+  "description": "",
   "sampleUrl": false,
   "defaultVersion": "0.0.0",
   "apidoc": "0.3.0",
   "generator": {
     "name": "apidoc",
-    "time": "2019-01-14T11:28:37.287Z",
+    "time": "2019-01-24T21:20:25.251Z",
     "url": "http://apidocjs.com",
-    "version": "0.17.6"
+    "version": "0.17.7"
   }
 });

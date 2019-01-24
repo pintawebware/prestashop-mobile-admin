@@ -32,15 +32,16 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
     public $ssl = true;
     public $display_column_left = false;
     public $header = false;
-    public $errors =[];
+    public $errors = [];
     public $API_VERSION = 2.0;
+
     /**
      * @see FrontController::initContent()
      */
     public function initContent()
     {
         $this->return['status'] = false;
-        if(isset($_GET['action']) && $this->valid()){
+        if (isset($_GET['action']) && $this->valid()) {
 
             $action = $_GET['action'];
             switch ($action) {
@@ -71,8 +72,8 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
             }
         }
         $this->return['error'] = "No action";
-        header( 'Content-Type: application/json' );
-        die( Tools::jsonEncode( $this->return ) );
+        header('Content-Type: application/json');
+        die(Tools::jsonEncode($this->return));
     }
 
     /**
@@ -139,14 +140,15 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      *
      */
 
-    public function products(){
+    public function products()
+    {
 
         $return['status'] = false;
         $return['errors'] = [];
         $page = trim(Tools::getValue('page'));
         $limit = trim(Tools::getValue('limit'));
         $name = trim(Tools::getValue('name'));
-        if(!empty($page) && !empty($limit)){
+        if (!empty($page) && !empty($limit)) {
             $page = ($page - 1) * $limit;
             $limit = $_REQUEST['limit'];
         } else {
@@ -155,21 +157,21 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
         }
         $to_response = [];
         $id_lang = $this->context->language->id;
-        if(empty($name)) {
-            $productObj  = new Product();
-            $products    = $productObj->getProducts( $id_lang, $page, $limit, 'id_product', 'DESC' );
+        if (empty($name)) {
+            $productObj = new Product();
+            $products = $productObj->getProducts($id_lang, $page, $limit, 'id_product', 'DESC');
 
-            if ( count( $products ) > 0 ) {
-                foreach ( $products as $product ) {
+            if (count($products) > 0) {
+                foreach ($products as $product) {
                     $data['product_id'] = $product['id_product'];
-                    $data['vendor_code']      = $product['reference'];
-                    $data['quantity']   = Db::getInstance()->getRow( "SELECT p.id_product, sa.quantity FROM 
-                        "._DB_PREFIX_."product p INNER JOIN "._DB_PREFIX_."stock_available sa ON p.id_product = sa.id_product AND id_product_attribute = 0 WHERE p.id_product = " . $product['id_product'] )['quantity'];
+                    $data['vendor_code'] = $product['reference'];
+                    $data['quantity'] = Db::getInstance()->getRow("SELECT p.id_product, sa.quantity FROM 
+                        " . _DB_PREFIX_ . "product p INNER JOIN " . _DB_PREFIX_ . "stock_available sa ON p.id_product = sa.id_product AND id_product_attribute = 0 WHERE p.id_product = " . $product['id_product'])['quantity'];
 
-                    $idImage = Db::getInstance()->getRow( "SELECT id_image FROM ps_image WHERE cover = 1 AND id_product =  " . $product['id_product'] )['id_image'];
+                    $idImage = Db::getInstance()->getRow("SELECT id_image FROM ps_image WHERE cover = 1 AND id_product =  " . $product['id_product'])['id_image'];
                     $imgPath = '';
-                    for ( $i = 0; $i < strlen( $idImage ); $i ++ ) {
-                        $imgPath .= $idImage[ $i ] . '/';
+                    for ($i = 0; $i < strlen($idImage); $i++) {
+                        $imgPath .= $idImage[$i] . '/';
                     }
                     if ($idImage) {
                         $imgPath .= $idImage . '.jpg';
@@ -178,8 +180,8 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
                         $data['image'] = '';
                     }
 
-                    $data['price'] = number_format( $product['price'], 2, '.', '' );
-                    $data['name']  = $product['name'];
+                    $data['price'] = number_format($product['price'], 2, '.', '');
+                    $data['name'] = $product['name'];
                     $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
                     if ($category->name) {
                         $data['category'] = $category->name;
@@ -194,36 +196,36 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
 
                     global $currency;
                     $data['currency_code'] = $currency->iso_code;
-                    $to_response[]         = $data;
+                    $to_response[] = $data;
                 }
             }
-        }else{
+        } else {
             $products = $this->getProductsList($page, $limit, $name);
-            foreach ( $products as $product ) {
+            foreach ($products as $product) {
                 $data['product_id'] = $product['id_product'];
-                $data['vendor_code']      = $product['reference'];
-                $data['quantity']   = $product['quantity'];
+                $data['vendor_code'] = $product['reference'];
+                $data['quantity'] = $product['quantity'];
 
                 $p = new Product($product['id_product']);
-                $image = Image::getCover( $p->id );
+                $image = Image::getCover($p->id);
 
                 $linkObj = new Link();
                 $imagePath = $linkObj->getImageLink($p->link_rewrite, $image['id_image'], 'home_default');
 
                 $protocol = Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://';
-                $data['image'] = $protocol.$imagePath;
+                $data['image'] = $protocol . $imagePath;
 
-                $data['price'] = number_format( $product['price'], 2, '.', '' );
-                $data['name']  = $product['name'];
+                $data['price'] = number_format($product['price'], 2, '.', '');
+                $data['name'] = $product['name'];
                 $category = new Category((int)$product['id_category_default'], (int)$this->context->language->id);
                 $data['category'] = $category->name;
 
                 global $currency;
                 $data['currency_code'] = $currency->iso_code;
-                $to_response[]         = $data;
+                $to_response[] = $data;
             }
         }
-        if(!count($return['errors'])){
+        if (!count($return['errors'])) {
             $return['status'] = true;
             $return['response']['products'] = $to_response;
         }
@@ -270,6 +272,15 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      * @apiSuccess {String}   response.options.option_value_id  Option value id.
      * @apiSuccess {String}   response.options.option_value_name Option value name.
      * @apiSuccess {String}   response.options.language_id      Language id of options and option values.
+     *
+     * @apiSuccess {Array[]} response.features  Array of the features of the product
+     * @apiSuccess {String} response.features.feature_id    Feature id.
+     * @apiSuccess {String} response.features.language_id   Language id of options and option values.
+     * @apiSuccess {String} response.features.feature_name  Feature name.
+     * @apiSuccess {String} response.features.feature_value_id  Feature value id.
+     * @apiSuccess {String} response.features.feature_value_name    Feature value name
+     *
+     *
      *
      * @apiSuccess {Array[]}  response.images                   Array of the images of the product.
      * @apiSuccess {String}   response.images.image             Image Link.
@@ -340,12 +351,28 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      *               }
      *           ]
      *       ],
-     *       "description": "qwerty",
-     *       "quantity": "12",
-     *       "price": "123.00",
-     *       "name": "quantity",
-     *       "currency_code": "UAH"
-     *   },
+     *       "features": [
+     *          {
+     *              "feature_id": "6",
+     *              "language_id": "1",
+     *              "feature_name": "Weight",
+     *              "feature_value_id": "18",
+     *              "feature_value_name": "1"
+     *          },
+     *          {
+     *              "feature_id": "7",
+     *              "language_id": "1",
+     *              "feature_name": "Volume",
+     *              "feature_value_id": "23",
+     *              "feature_value_name": "2"
+     *           }
+     *        ],
+     *              "description": "qwerty",
+     *              "quantity": "12",
+     *              "price": "123.00",
+     *              "name": "quantity",
+     *              "currency_code": "UAH"
+     *          },
      *   "version": 2
      * }
      * @apiErrorExample Error-Response:
@@ -357,14 +384,15 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
      */
 
 
-    public function getProductById() {
+    public function getProductById()
+    {
 
         $return['status'] = false;
         $return['error'] = [];
         $product_id = trim(Tools::getValue('product_id'));
 
         $id_lang = $this->context->language->id;
-        $product = new Product($product_id,false, $id_lang);
+        $product = new Product($product_id, false, $id_lang);
 
         if ($product->id !== null) {
 
@@ -382,19 +410,19 @@ class ApimoduleProductsModuleFrontController extends ModuleFrontController
             $features = $this->getFeaturesByProduct($product_id);
             $data['features'] = $features;
             $data['description'] = $product->description ? $product->description : "";
-            $data['quantity'] =  Db::getInstance()->getRow(" SELECT p.id_product, sa.quantity FROM "._DB_PREFIX_."product p
+            $data['quantity'] = Db::getInstance()->getRow(" SELECT p.id_product, sa.quantity FROM " . _DB_PREFIX_ . "product p
  
-INNER JOIN "._DB_PREFIX_."stock_available sa ON p.id_product = sa.id_product AND id_product_attribute = 0
+INNER JOIN " . _DB_PREFIX_ . "stock_available sa ON p.id_product = sa.id_product AND id_product_attribute = 0
  
-WHERE p.id_product = ".$product->id)['quantity'];
+WHERE p.id_product = " . $product->id)['quantity'];
             $images = $product->getImages($id_lang);
-            if(count($images) > 0){
+            if (count($images) > 0) {
                 foreach ($images as $image) {
                     $tmp = [];
                     $protocol = Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://';
                     $linkObj = new Link();
                     $link = $linkObj->getImageLink($product->link_rewrite, $image['id_image'], 'home_default');
-                    $tmp['image'] = $protocol.$link;
+                    $tmp['image'] = $protocol . $link;
                     if ($image['cover']) {
                         $tmp['image_id'] = -1;
                     } else {
@@ -406,7 +434,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
                         $data['images'][] = $tmp;
                     }
                 }
-                $cover =  Image::getCover($product_id);
+                $cover = Image::getCover($product_id);
                 if (!$cover) {
                     $tmp = [];
                     $tmp['image_id'] = -1;
@@ -426,11 +454,11 @@ WHERE p.id_product = ".$product->id)['quantity'];
             $data['currency_code'] = $currency->iso_code;
 
 
-        }else{
-            $return['error'] = 'Can non fid product with id = '.$product_id;
+        } else {
+            $return['error'] = 'Can non fid product with id = ' . $product_id;
         }
 
-        if(!count($return['error'])){
+        if (!count($return['error'])) {
             unset($return['error']);
             $return['status'] = true;
             $return['response'] = $data;
@@ -453,8 +481,8 @@ WHERE p.id_product = ".$product->id)['quantity'];
                     INNER JOIN " . _DB_PREFIX_ . "category_lang cl ON c.id_category = cl.id_category 
                     WHERE cp.id_product =  $product 
                     AND id_lang = " . $id_lang .
-                    " AND cp.id_category <> 1 
-                    AND cp.id_category <> 2" ;
+            " AND cp.id_category <> 1 
+                    AND cp.id_category <> 2";
         $results = Db::getInstance()->ExecuteS($sql);
         return $results;
     }
@@ -494,13 +522,14 @@ WHERE p.id_product = ".$product->id)['quantity'];
                                    AND    agl.id_lang = $id_lang";
             $id_attribute_result = Db::getInstance()->ExecuteS($id_attribute_query);
 
-            $results[] = $id_attribute_result; 
+            $results[] = $id_attribute_result;
         }
 
         return $results;
     }
 
-    private function getFeaturesByProduct($id){
+    private function getFeaturesByProduct($id)
+    {
         $product_id = (int)$id;
         $id_lang = $this->context->language->id;
 
@@ -512,7 +541,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
 
         $result = array();
 
-        foreach($id_product_feature_result as $row => $field){
+        foreach ($id_product_feature_result as $row => $field) {
             $id_product_feature = $field['id_feature'];
 
             $id_feature_query = "SELECT " . _DB_PREFIX_ . "feature.id_feature feature_id,
@@ -529,9 +558,9 @@ WHERE p.id_product = ".$product->id)['quantity'];
                                 AND " . _DB_PREFIX_ . "feature.id_feature = " . _DB_PREFIX_ . "feature_value.id_feature
                                 AND " . _DB_PREFIX_ . "feature_value.id_feature_value = " . _DB_PREFIX_ . "feature_value_lang.id_feature_value
                                 AND " . _DB_PREFIX_ . "feature_product.id_feature_value = " . _DB_PREFIX_ . "feature_value.id_feature_value
-                                AND " . _DB_PREFIX_ . "feature_lang.id_lang = ".$id_lang."
-                                AND " . _DB_PREFIX_ . "feature_value_lang.id_lang = ".$id_lang."
-                                AND " . _DB_PREFIX_ . "feature_product.id_product = ".(int)$id_product_feature;
+                                AND " . _DB_PREFIX_ . "feature_lang.id_lang = " . $id_lang . "
+                                AND " . _DB_PREFIX_ . "feature_value_lang.id_lang = " . $id_lang . "
+                                AND " . _DB_PREFIX_ . "feature_product.id_product = " . (int)$id_product_feature;
             $id_feature_result = Db::getInstance()->ExecuteS($id_feature_query);
 
             $result[] = $id_feature_result;
@@ -540,46 +569,48 @@ WHERE p.id_product = ".$product->id)['quantity'];
         return $result;
     }
 
-    public function getProductsList ($page, $limit, $name = '')
+    public function getProductsList($page, $limit, $name = '')
     {
         $id_lang = $this->context->language->id;
 
         $sql = "SELECT p.id_product, p.reference, p.quantity,  p.price, pl.name, p.id_category_default 
                     FROM " . _DB_PREFIX_ . "product AS p 
                     LEFT JOIN " . _DB_PREFIX_ . "product_lang pl ON p.id_product = pl.id_product 
-                    WHERE pl.id_lang = " . $id_lang ;
-        if($name != ''){
-            $sql .= " AND (pl.name LIKE '%" .$name. "%' OR p.reference LIKE '%" .$name. "%')";
+                    WHERE pl.id_lang = " . $id_lang;
+        if ($name != '') {
+            $sql .= " AND (pl.name LIKE '%" . $name . "%' OR p.reference LIKE '%" . $name . "%')";
         }
         $sql .= " LIMIT " . (int)$limit . " OFFSET " . (int)$page;
 
-        $results = Db::getInstance()->ExecuteS( $sql );
+        $results = Db::getInstance()->ExecuteS($sql);
 
         return $results;
     }
 
-    private function valid() {
-        $token = trim( Tools::getValue( 'token' ) );
-        if ( empty( $token ) ) {
+    private function valid()
+    {
+        $token = trim(Tools::getValue('token'));
+        if (empty($token)) {
             $this->errors[] = 'You need to be logged!';
             return false;
         } else {
-            $results = $this->getTokens( $token );
-            if (!$results ) {
+            $results = $this->getTokens($token);
+            if (!$results) {
                 $this->errors = 'Your token is no longer relevant!';
                 return false;
             }
         }
         return true;
     }
-    public function getTokens($token){
-        $sql = "SELECT * FROM " . _DB_PREFIX_ . "apimodule_user_token
-                WHERE token = '".$token."'";
 
-        if ($row = Db::getInstance()->getRow($sql)){
+    public function getTokens($token)
+    {
+        $sql = "SELECT * FROM " . _DB_PREFIX_ . "apimodule_user_token
+                WHERE token = '" . $token . "'";
+
+        if ($row = Db::getInstance()->getRow($sql)) {
             return $row;
-        }
-        else{
+        } else {
             return false;
         }
     }
@@ -677,8 +708,8 @@ WHERE p.id_product = ".$product->id)['quantity'];
 
 //            }
             if ($productId == 0) {
-                $languages=Language::getLanguages();
-                foreach($languages as $lang){
+                $languages = Language::getLanguages();
+                foreach ($languages as $lang) {
                     $product->name[$lang['id_lang']] = $name;
                     $product->link_rewrite[$lang['id_lang']] = Tools::link_rewrite($name);
                     $product->description[$lang['id_lang']] = $desc;
@@ -702,9 +733,9 @@ WHERE p.id_product = ".$product->id)['quantity'];
 
 //            $product->id_category_default = $categoryId;
             $product->active = $status;
-            try{
+            try {
                 $product->save();
-            } catch (PrestaShopException $e){
+            } catch (PrestaShopException $e) {
                 $return['error'] = 'Could not save product';
                 $return['version'] = $this->API_VERSION;
                 $return['status'] = false;
@@ -716,10 +747,10 @@ WHERE p.id_product = ".$product->id)['quantity'];
             Db::getInstance()->update('stock_available', [
                 'quantity' => (int)$quantity
             ],
-                'id_product = '.(int)$product->id
+                'id_product = ' . (int)$product->id
             );
 
-            if ( isset($_FILES['image']) ) {
+            if (isset($_FILES['image'])) {
                 $imagesCounter = 0;
                 $files = $_FILES['image'];
 
@@ -738,8 +769,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
                     $image->id_product = $product->id;
                     $image->position = Image::getHighestPosition($product->id) + 1;
 
-                    if (($image->validateFields(false, true)) === true && ($image->validateFieldsLang(false, true)) === true && $image->add())
-                    {
+                    if (($image->validateFields(false, true)) === true && ($image->validateFieldsLang(false, true)) === true && $image->add()) {
                         $version = _PS_VERSION_;
                         $arr = explode('.', $version);
                         if (count($arr) > 1) {
@@ -753,8 +783,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
                             $copy = self::copyImg($product->id, $image->id, $imageUrl, 'products', true);
                         }
 
-                        if (!$copy)
-                        {
+                        if (!$copy) {
                             $image->delete();
                         }
                     }
@@ -771,13 +800,13 @@ WHERE p.id_product = ".$product->id)['quantity'];
             $data = [];
             $images = $product->getImages($id_lang);
             $data['images'] = [];
-            if(count($images) > 0){
+            if (count($images) > 0) {
                 foreach ($images as $image) {
                     $tmp = [];
                     $protocol = Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://';
                     $linkObj = new Link();
                     $link = $linkObj->getImageLink($product->link_rewrite, $image['id_image'], 'home_default');
-                    $tmp['image'] = $protocol.$link;
+                    $tmp['image'] = $protocol . $link;
                     if ($image['cover']) {
                         $tmp['image_id'] = -1;
                     } else {
@@ -789,7 +818,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
                         $data['images'][] = $tmp;
                     }
                 }
-                $cover =  Image::getCover($product->id);
+                $cover = Image::getCover($product->id);
                 if (!$cover) {
                     $tmp = [];
                     $tmp['image_id'] = -1;
@@ -815,7 +844,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
     public function updateProductCategories($productId, $categories)
     {
         if ($productId) {
-            $id = (int) $productId;
+            $id = (int)$productId;
             if (is_array($categories)) {
 
                 $delete = "DELETE FROM `ps_category_product` "
@@ -842,7 +871,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
     public function updateProductOptions($productId, $options)
     {
         if ($productId) {
-            $product_id = (int) $productId;
+            $product_id = (int)$productId;
 
             $delete_query = "DELETE pac, pa, pas
                              FROM   " . _DB_PREFIX_ . "product_attribute pa
@@ -855,37 +884,37 @@ WHERE p.id_product = ".$product->id)['quantity'];
             $results = Db::getInstance()->execute($delete_query);
 
             foreach ($options as $attribute_ids) {
-                
+
                 $id_product_attribute_query = "INSERT INTO " . _DB_PREFIX_ . "product_attribute (id_product) VALUES ($product_id)";
                 $id_product_attribute_result = Db::getInstance()->execute($id_product_attribute_query);
                 $product_attribute_id = Db::getInstance()->Insert_ID();
 
                 /*
                  * Record the association of the attribute with the product in the shop table.
-                 */ 
-                $product_attribute_shop_query = "INSERT INTO ". _DB_PREFIX_ . "product_attribute_shop (
+                 */
+                $product_attribute_shop_query = "INSERT INTO " . _DB_PREFIX_ . "product_attribute_shop (
                       id_product,
                       id_product_attribute,
                       id_shop 
                     ) VALUES ( " .
-                      "'" . (int)$product_id . "'," .
-                      "'" . (int)$product_attribute_id . "'," .
-                      "'1')";
+                    "'" . (int)$product_id . "'," .
+                    "'" . (int)$product_attribute_id . "'," .
+                    "'1')";
                 $result = Db::getInstance()->execute($product_attribute_shop_query);
 
 
                 foreach ($attribute_ids as $attribute_id) {
-                  
+
                     /*
                      * Record the association of the attribute with the product in the database.
-                     */ 
+                     */
 
-                    $product_attribute_combination_query = "INSERT INTO ". _DB_PREFIX_ . "product_attribute_combination (
+                    $product_attribute_combination_query = "INSERT INTO " . _DB_PREFIX_ . "product_attribute_combination (
                           id_attribute,
                           id_product_attribute
                         ) VALUES ( " .
-                          "'" . (int)$attribute_id . "'," .
-                          "'" . (int)$product_attribute_id . "')";
+                        "'" . (int)$attribute_id . "'," .
+                        "'" . (int)$product_attribute_id . "')";
 
                     $result = Db::getInstance()->execute($product_attribute_combination_query);
                 }
@@ -934,7 +963,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
                 $product = new Product($productId, false, $id_lang);
             }
             if ($image->id !== null) {
-                $cover =  Image::getCover($productId);
+                $cover = Image::getCover($productId);
                 if ($cover) {
                     Image::deleteCover($productId);
 //                    $oldImage = new Image($cover['id_image']);
@@ -950,7 +979,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
                 $return['status'] = true;
                 $return['version'] = $this->API_VERSION;
             } else {
-                $return['error'] = 'Could not find image with id = '.$imageId;
+                $return['error'] = 'Could not find image with id = ' . $imageId;
             }
 
         }
@@ -996,7 +1025,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
             $return['version'] = $this->API_VERSION;
         } else if ($imageId == -1) {
             $product_id = trim(Tools::getValue('product_id'));
-            $cover =  Image::getCover($product_id);
+            $cover = Image::getCover($product_id);
             if ($cover) {
                 $oldImage = new Image($cover['id_image']);
                 $oldImage->cover = null;
@@ -1070,18 +1099,18 @@ WHERE p.id_product = ".$product->id)['quantity'];
      *       "image_id": "42"
      *       }
      *       ],
-            "product_id": "9",
-            "vendor_code": "demo_3",
-            "status_name": "Enabled",
-            "categories": [],
-            "options": [],
-            "description": "\u2028",
-            "quantity": "3333",
-            "price": "255.00",
-            "name": "Printed%20Dress",
-            "currency_code": "UAH"
-            },
-            "version": 2
+     * "product_id": "9",
+     * "vendor_code": "demo_3",
+     * "status_name": "Enabled",
+     * "categories": [],
+     * "options": [],
+     * "description": "\u2028",
+     * "quantity": "3333",
+     * "price": "255.00",
+     * "name": "Printed%20Dress",
+     * "currency_code": "UAH"
+     * },
+     * "version": 2
      * }
      * @apiErrorExample Error-Response:
      * {
@@ -1140,16 +1169,16 @@ WHERE p.id_product = ".$product->id)['quantity'];
         $sql = "SELECT a.`id_category`, `name`, `description`, 
                 sa.`position` AS `position`, `id_parent`, 
                 `active` , sa.position position, 
-                 (SELECT COUNT(*) as parent FROM `". _DB_PREFIX_ ."category` categ WHERE categ.id_parent = a.id_category) AS child_count
-                FROM `". _DB_PREFIX_ ."category` a 
-                LEFT JOIN `". _DB_PREFIX_ ."category_lang` b 
-                ON (b.`id_category` = a.`id_category` AND b.`id_lang` = ".$id_lang." AND b.`id_shop` = 1) 
-                LEFT JOIN `". _DB_PREFIX_ ."category_shop` sa 
+                 (SELECT COUNT(*) as parent FROM `" . _DB_PREFIX_ . "category` categ WHERE categ.id_parent = a.id_category) AS child_count
+                FROM `" . _DB_PREFIX_ . "category` a 
+                LEFT JOIN `" . _DB_PREFIX_ . "category_lang` b 
+                ON (b.`id_category` = a.`id_category` AND b.`id_lang` = " . $id_lang . " AND b.`id_shop` = 1) 
+                LEFT JOIN `" . _DB_PREFIX_ . "category_shop` sa 
                 ON (a.`id_category` = sa.`id_category` AND sa.id_shop = 1) 
                 WHERE (a.id_parent = 1 OR a.id_parent = 2)
                 ORDER BY sa.`position`";
 
-        $results = Db::getInstance()->ExecuteS( $sql );
+        $results = Db::getInstance()->ExecuteS($sql);
         return $results;
     }
 
@@ -1160,15 +1189,15 @@ WHERE p.id_product = ".$product->id)['quantity'];
         $sql = "SELECT a.`id_category`, `name`, `description`, 
                 sa.`position` AS `position`, `id_parent`, 
                 `active` , sa.position position, 
-                (SELECT COUNT(*) as parent FROM `". _DB_PREFIX_ ."category` categ WHERE categ.id_parent = a.id_category) AS child_count
-                FROM `". _DB_PREFIX_ ."category` a 
-                LEFT JOIN `". _DB_PREFIX_ ."category_lang` b 
-                ON (b.`id_category` = a.`id_category` AND b.`id_lang` = ".$id_lang." AND b.`id_shop` = 1) 
-                LEFT JOIN `". _DB_PREFIX_ ."category_shop` sa 
+                (SELECT COUNT(*) as parent FROM `" . _DB_PREFIX_ . "category` categ WHERE categ.id_parent = a.id_category) AS child_count
+                FROM `" . _DB_PREFIX_ . "category` a 
+                LEFT JOIN `" . _DB_PREFIX_ . "category_lang` b 
+                ON (b.`id_category` = a.`id_category` AND b.`id_lang` = " . $id_lang . " AND b.`id_shop` = 1) 
+                LEFT JOIN `" . _DB_PREFIX_ . "category_shop` sa 
                 ON (a.`id_category` = sa.`id_category` AND sa.id_shop = 1) 
                 WHERE a.`id_parent` = $category 
                 ORDER BY sa.`position`";
-        $results = Db::getInstance()->ExecuteS( $sql );
+        $results = Db::getInstance()->ExecuteS($sql);
         return $results;
     }
 
@@ -1196,13 +1225,13 @@ WHERE p.id_product = ".$product->id)['quantity'];
                 $path = $image_obj->getPathForCreation();
                 break;
             case 'categories':
-                $path = _PS_CAT_IMG_DIR_.(int)$id_entity;
+                $path = _PS_CAT_IMG_DIR_ . (int)$id_entity;
                 break;
             case 'manufacturers':
-                $path = _PS_MANU_IMG_DIR_.(int)$id_entity;
+                $path = _PS_MANU_IMG_DIR_ . (int)$id_entity;
                 break;
             case 'suppliers':
-                $path = _PS_SUPP_IMG_DIR_.(int)$id_entity;
+                $path = _PS_SUPP_IMG_DIR_ . (int)$id_entity;
                 break;
         }
 
@@ -1216,7 +1245,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
                 $part = rawurlencode($part);
             }
             unset($part);
-            $parced_url['path'] = '/'.implode('/', $parts);
+            $parced_url['path'] = '/' . implode('/', $parts);
         }
 
         if (isset($parced_url['query'])) {
@@ -1226,7 +1255,7 @@ WHERE p.id_product = ".$product->id)['quantity'];
         }
 
         if (!function_exists('http_build_url')) {
-            require_once(_PS_TOOL_DIR_.'http_build_url/http_build_url.php');
+            require_once(_PS_TOOL_DIR_ . 'http_build_url/http_build_url.php');
         }
 
         $url = http_build_url('', $parced_url);
@@ -1243,30 +1272,30 @@ WHERE p.id_product = ".$product->id)['quantity'];
             $tgt_width = $tgt_height = 0;
             $src_width = $src_height = 0;
             $error = 0;
-            ImageManager::resize($tmpfile, $path.'.jpg', null, null, 'jpg', false, $error, $tgt_width, $tgt_height, 5,
+            ImageManager::resize($tmpfile, $path . '.jpg', null, null, 'jpg', false, $error, $tgt_width, $tgt_height, 5,
                 $src_width, $src_height);
             $images_types = ImageType::getImagesTypes($entity, true);
 
             if ($regenerate) {
                 $previous_path = null;
                 $path_infos = array();
-                $path_infos[] = array($tgt_width, $tgt_height, $path.'.jpg');
+                $path_infos[] = array($tgt_width, $tgt_height, $path . '.jpg');
                 foreach ($images_types as $image_type) {
                     $tmpfile = self::get_best_path($image_type['width'], $image_type['height'], $path_infos);
 
-                    if (ImageManager::resize($tmpfile, $path.'-'.stripslashes($image_type['name']).'.jpg', $image_type['width'],
+                    if (ImageManager::resize($tmpfile, $path . '-' . stripslashes($image_type['name']) . '.jpg', $image_type['width'],
                         $image_type['height'], 'jpg', false, $error, $tgt_width, $tgt_height, 5,
                         $src_width, $src_height)) {
                         // the last image should not be added in the candidate list if it's bigger than the original image
                         if ($tgt_width <= $src_width && $tgt_height <= $src_height) {
-                            $path_infos[] = array($tgt_width, $tgt_height, $path.'-'.stripslashes($image_type['name']).'.jpg');
+                            $path_infos[] = array($tgt_width, $tgt_height, $path . '-' . stripslashes($image_type['name']) . '.jpg');
                         }
                         if ($entity == 'products') {
-                            if (is_file(_PS_TMP_IMG_DIR_.'product_mini_'.(int)$id_entity.'.jpg')) {
-                                unlink(_PS_TMP_IMG_DIR_.'product_mini_'.(int)$id_entity.'.jpg');
+                            if (is_file(_PS_TMP_IMG_DIR_ . 'product_mini_' . (int)$id_entity . '.jpg')) {
+                                unlink(_PS_TMP_IMG_DIR_ . 'product_mini_' . (int)$id_entity . '.jpg');
                             }
-                            if (is_file(_PS_TMP_IMG_DIR_.'product_mini_'.(int)$id_entity.'_'.(int)Context::getContext()->shop->id.'.jpg')) {
-                                unlink(_PS_TMP_IMG_DIR_.'product_mini_'.(int)$id_entity.'_'.(int)Context::getContext()->shop->id.'.jpg');
+                            if (is_file(_PS_TMP_IMG_DIR_ . 'product_mini_' . (int)$id_entity . '_' . (int)Context::getContext()->shop->id . '.jpg')) {
+                                unlink(_PS_TMP_IMG_DIR_ . 'product_mini_' . (int)$id_entity . '_' . (int)Context::getContext()->shop->id . '.jpg');
                             }
                         }
                     }
@@ -1299,15 +1328,14 @@ WHERE p.id_product = ".$product->id)['quantity'];
         $tmpfile = tempnam(_PS_TMP_IMG_DIR_, 'ps_import');
         $watermark_types = explode(',', Configuration::get('WATERMARK_TYPES'));
 
-        switch ($entity)
-        {
+        switch ($entity) {
             default:
             case 'products':
                 $image_obj = new Image($id_image);
                 $path = $image_obj->getPathForCreation();
                 break;
             case 'categories':
-                $path = _PS_CAT_IMG_DIR_.(int)$id_entity;
+                $path = _PS_CAT_IMG_DIR_ . (int)$id_entity;
                 break;
         }
         $url = str_replace(' ', '%20', trim($url));
@@ -1318,18 +1346,15 @@ WHERE p.id_product = ".$product->id)['quantity'];
 
         // 'file_exists' doesn't work on distant file, and getimagesize make the import slower.
         // Just hide the warning, the traitment will be the same.
-        if (@copy($url, $tmpfile))
-        {
-            ImageManager::resize($tmpfile, $path.'.jpg');
+        if (@copy($url, $tmpfile)) {
+            ImageManager::resize($tmpfile, $path . '.jpg');
             $images_types = ImageType::getImagesTypes($entity);
             foreach ($images_types as $image_type)
-                ImageManager::resize($tmpfile, $path.'-'.stripslashes($image_type['name']).'.jpg', $image_type['width'], $image_type['height']);
+                ImageManager::resize($tmpfile, $path . '-' . stripslashes($image_type['name']) . '.jpg', $image_type['width'], $image_type['height']);
 
             if (in_array($image_type['id_image_type'], $watermark_types))
                 Hook::exec('actionWatermark', array('id_image' => $id_image, 'id_product' => $id_entity));
-        }
-        else
-        {
+        } else {
             unlink($tmpfile);
             return false;
         }

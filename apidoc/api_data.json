@@ -62,7 +62,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/products.php",
+    "filename": "apimodule/controllers/front/products.php",
     "groupTitle": "All"
   },
   {
@@ -148,7 +148,7 @@
       "examples": [
         {
           "title": "Success-Response:",
-          "content": " HTTP/1.1 200 OK {\n      \"status\": true,\n      \"response\": {\n      \"images\": [\n      {\n      \"image_id\": -1,\n      \"image\": \"\"\n      },\n      {\n      \"image\": \"http://prestashop1721.pixy.pro/36-home_default/erttre.jpg\",\n      \"image_id\": \"36\"\n      },\n      {\n      \"image\": \"http://prestashop1721.pixy.pro/37-home_default/erttre.jpg\",\n      \"image_id\": \"37\"\n      },\n      {\n      \"image\": \"http://prestashop1721.pixy.pro/38-home_default/erttre.jpg\",\n      \"image_id\": \"38\"\n      },\n      {\n      \"image\": \"http://prestashop1721.pixy.pro/39-home_default/erttre.jpg\",\n      \"image_id\": \"39\"\n      },\n      {\n      \"image\": \"http://prestashop1721.pixy.pro/40-home_default/erttre.jpg\",\n      \"image_id\": \"40\"\n      },\n      {\n      \"image\": \"http://prestashop1721.pixy.pro/41-home_default/erttre.jpg\",\n      \"image_id\": \"41\"\n      },\n      {\n      \"image\": \"http://prestashop1721.pixy.pro/42-home_default/erttre.jpg\",\n      \"image_id\": \"42\"\n      }\n      ],\n            \"product_id\": \"9\",\n            \"vendor_code\": \"demo_3\",\n            \"status_name\": \"Enabled\",\n            \"categories\": [],\n            \"options\": [],\n            \"description\": \"\\u2028\",\n            \"quantity\": \"3333\",\n            \"price\": \"255.00\",\n            \"name\": \"Printed%20Dress\",\n            \"currency_code\": \"UAH\"\n            },\n            \"version\": 2\n}",
+          "content": " HTTP/1.1 200 OK {\n      \"status\": true,\n      \"response\": {\n      \"images\": [\n      {\n      \"image_id\": -1,\n      \"image\": \"\"\n      },\n      {\n      \"image\": \"http://prestashop1721.pixy.pro/36-home_default/erttre.jpg\",\n      \"image_id\": \"36\"\n      },\n      {\n      \"image\": \"http://prestashop1721.pixy.pro/37-home_default/erttre.jpg\",\n      \"image_id\": \"37\"\n      },\n      {\n      \"image\": \"http://prestashop1721.pixy.pro/38-home_default/erttre.jpg\",\n      \"image_id\": \"38\"\n      },\n      {\n      \"image\": \"http://prestashop1721.pixy.pro/39-home_default/erttre.jpg\",\n      \"image_id\": \"39\"\n      },\n      {\n      \"image\": \"http://prestashop1721.pixy.pro/40-home_default/erttre.jpg\",\n      \"image_id\": \"40\"\n      },\n      {\n      \"image\": \"http://prestashop1721.pixy.pro/41-home_default/erttre.jpg\",\n      \"image_id\": \"41\"\n      },\n      {\n      \"image\": \"http://prestashop1721.pixy.pro/42-home_default/erttre.jpg\",\n      \"image_id\": \"42\"\n      }\n      ],\n\"product_id\": \"9\",\n\"vendor_code\": \"demo_3\",\n\"status_name\": \"Enabled\",\n\"categories\": [],\n\"options\": [],\n\"description\": \"\\u2028\",\n\"quantity\": \"3333\",\n\"price\": \"255.00\",\n\"name\": \"Printed%20Dress\",\n\"currency_code\": \"UAH\"\n},\n\"version\": 2\n}",
           "type": "json"
         }
       ]
@@ -163,7 +163,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/products.php",
+    "filename": "apimodule/controllers/front/products.php",
     "groupTitle": "All"
   },
   {
@@ -339,6 +339,48 @@
             "group": "Success 200",
             "type": "Array[]",
             "optional": false,
+            "field": "response.features",
+            "description": "<p>Array of the features of the product</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "response.features.feature_id",
+            "description": "<p>Feature id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "response.features.language_id",
+            "description": "<p>Language id of options and option values.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "response.features.feature_name",
+            "description": "<p>Feature name.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "response.features.feature_value_id",
+            "description": "<p>Feature value id.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "response.features.feature_value_name",
+            "description": "<p>Feature value name</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array[]",
+            "optional": false,
             "field": "response.images",
             "description": "<p>Array of the images of the product.</p>"
           },
@@ -361,7 +403,7 @@
       "examples": [
         {
           "title": "Success-Response:",
-          "content": " HTTP/1.1 200 OK  {\n  \"status\": true,\n  \"response\": {\n      \"images\": [\n          {\n              \"image\": \"http://prestashop1721.pixy.pro/43-home_default/printed-chiffon-dress.jpg\",\n              \"image_id\": -1\n          },\n          {\n              \"image\": \"http://prestashop1721.pixy.pro/23-home_default/printed-chiffon-dress.jpg\",\n              \"image_id\": \"23\"\n          }\n      ],\n      \"product_id\": \"7\",\n      \"vendor_code\": \"\",\n      \"status_name\": \"Enabled\",\n      \"categories\": [\n          {\n              \"category_id\": \"3\",\n              \"name\": \"Women\"\n          },\n          {\n              \"category_id\": \"8\",\n              \"name\": \"Dresses\"\n          },\n          {\n              \"category_id\": \"11\",\n              \"name\": \"Summer Dresses\"\n          }\n      ],\n      \"options\": [\n          [\n              {\n                  \"option_value_id\": \"1\",\n                  \"option_id\": \"1\",\n                  \"language_id\": \"1\",\n                  \"option_value_name\": \"S\",\n                  \"option_name\": \"Размер\"\n              },\n              {\n                  \"option_value_id\": \"16\",\n                  \"option_id\": \"3\",\n                  \"language_id\": \"1\",\n                  \"option_value_name\": \"Жёлтый\",\n                  \"option_name\": \"Цвет\"\n              }\n          ],\n          [\n              {\n                  \"option_value_id\": \"2\",\n                  \"option_id\": \"1\",\n                  \"language_id\": \"1\",\n                  \"option_value_name\": \"M\",\n                  \"option_name\": \"Размер\"\n              },\n              {\n                  \"option_value_id\": \"16\",\n                  \"option_id\": \"3\",\n                  \"language_id\": \"1\",\n                  \"option_value_name\": \"Жёлтый\",\n                  \"option_name\": \"Цвет\"\n              }\n          ]\n      ],\n      \"description\": \"qwerty\",\n      \"quantity\": \"12\",\n      \"price\": \"123.00\",\n      \"name\": \"quantity\",\n      \"currency_code\": \"UAH\"\n  },\n  \"version\": 2\n}",
+          "content": " HTTP/1.1 200 OK  {\n  \"status\": true,\n  \"response\": {\n      \"images\": [\n          {\n              \"image\": \"http://prestashop1721.pixy.pro/43-home_default/printed-chiffon-dress.jpg\",\n              \"image_id\": -1\n          },\n          {\n              \"image\": \"http://prestashop1721.pixy.pro/23-home_default/printed-chiffon-dress.jpg\",\n              \"image_id\": \"23\"\n          }\n      ],\n      \"product_id\": \"7\",\n      \"vendor_code\": \"\",\n      \"status_name\": \"Enabled\",\n      \"categories\": [\n          {\n              \"category_id\": \"3\",\n              \"name\": \"Women\"\n          },\n          {\n              \"category_id\": \"8\",\n              \"name\": \"Dresses\"\n          },\n          {\n              \"category_id\": \"11\",\n              \"name\": \"Summer Dresses\"\n          }\n      ],\n      \"options\": [\n          [\n              {\n                  \"option_value_id\": \"1\",\n                  \"option_id\": \"1\",\n                  \"language_id\": \"1\",\n                  \"option_value_name\": \"S\",\n                  \"option_name\": \"Размер\"\n              },\n              {\n                  \"option_value_id\": \"16\",\n                  \"option_id\": \"3\",\n                  \"language_id\": \"1\",\n                  \"option_value_name\": \"Жёлтый\",\n                  \"option_name\": \"Цвет\"\n              }\n          ],\n          [\n              {\n                  \"option_value_id\": \"2\",\n                  \"option_id\": \"1\",\n                  \"language_id\": \"1\",\n                  \"option_value_name\": \"M\",\n                  \"option_name\": \"Размер\"\n              },\n              {\n                  \"option_value_id\": \"16\",\n                  \"option_id\": \"3\",\n                  \"language_id\": \"1\",\n                  \"option_value_name\": \"Жёлтый\",\n                  \"option_name\": \"Цвет\"\n              }\n          ]\n      ],\n      \"features\": [\n         {\n             \"feature_id\": \"6\",\n             \"language_id\": \"1\",\n             \"feature_name\": \"Weight\",\n             \"feature_value_id\": \"18\",\n             \"feature_value_name\": \"1\"\n         },\n         {\n             \"feature_id\": \"7\",\n             \"language_id\": \"1\",\n             \"feature_name\": \"Volume\",\n             \"feature_value_id\": \"23\",\n             \"feature_value_name\": \"2\"\n          }\n       ],\n             \"description\": \"qwerty\",\n             \"quantity\": \"12\",\n             \"price\": \"123.00\",\n             \"name\": \"quantity\",\n             \"currency_code\": \"UAH\"\n         },\n  \"version\": 2\n}",
           "type": "json"
         }
       ]
@@ -376,7 +418,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/products.php",
+    "filename": "apimodule/controllers/front/products.php",
     "groupTitle": "All"
   },
   {
@@ -526,7 +568,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/products.php",
+    "filename": "apimodule/controllers/front/products.php",
     "groupTitle": "All"
   },
   {
@@ -585,7 +627,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/products.php",
+    "filename": "apimodule/controllers/front/products.php",
     "groupTitle": "All"
   },
   {
@@ -763,7 +805,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/products.php",
+    "filename": "apimodule/controllers/front/products.php",
     "groupTitle": "All"
   },
   {
@@ -864,7 +906,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/auth.php",
+    "filename": "apimodule/controllers/front/auth.php",
     "groupTitle": "Auth"
   },
   {
@@ -923,7 +965,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/auth.php",
+    "filename": "apimodule/controllers/front/auth.php",
     "groupTitle": "Auth"
   },
   {
@@ -989,7 +1031,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/auth.php",
+    "filename": "apimodule/controllers/front/auth.php",
     "groupTitle": "Auth"
   },
   {
@@ -1118,7 +1160,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/clients.php",
+    "filename": "apimodule/controllers/front/clients.php",
     "groupTitle": "Clients"
   },
   {
@@ -1254,7 +1296,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/clients.php",
+    "filename": "apimodule/controllers/front/clients.php",
     "groupTitle": "Clients"
   },
   {
@@ -1411,7 +1453,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/clients.php",
+    "filename": "apimodule/controllers/front/clients.php",
     "groupTitle": "Clients"
   },
   {
@@ -1659,7 +1701,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/orders.php",
+    "filename": "apimodule/controllers/front/orders.php",
     "groupTitle": "Orders"
   },
   {
@@ -1795,7 +1837,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/orders.php",
+    "filename": "apimodule/controllers/front/orders.php",
     "groupTitle": "Orders"
   },
   {
@@ -1932,7 +1974,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/orders.php",
+    "filename": "apimodule/controllers/front/orders.php",
     "groupTitle": "Orders"
   },
   {
@@ -2047,7 +2089,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/orders.php",
+    "filename": "apimodule/controllers/front/orders.php",
     "groupTitle": "Orders"
   },
   {
@@ -2267,7 +2309,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/orders.php",
+    "filename": "apimodule/controllers/front/orders.php",
     "groupTitle": "Orders"
   },
   {
@@ -2347,7 +2389,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/orders.php",
+    "filename": "apimodule/controllers/front/orders.php",
     "groupTitle": "Orders"
   },
   {
@@ -2441,7 +2483,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/orders.php",
+    "filename": "apimodule/controllers/front/orders.php",
     "groupTitle": "Orders"
   },
   {
@@ -2570,7 +2612,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "../apimodule/controllers/front/statistic.php",
+    "filename": "apimodule/controllers/front/statistic.php",
     "groupTitle": "Statistic"
   }
 ]
