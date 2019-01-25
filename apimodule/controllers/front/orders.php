@@ -304,6 +304,14 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
      * @apiSuccess {String}    response.products.options.option_value_name Option value name.
      * @apiSuccess {String}    response.products.options.language_id       Language id of options and option values.
      *
+     * @apiSuccess {Array[]} response.features  Array of the features of the product
+     * @apiSuccess {String} response.features.feature_id    Feature id.
+     * @apiSuccess {String} response.features.language_id   Language id of options and option values.
+     * @apiSuccess {String} response.features.feature_name  Feature name.
+     * @apiSuccess {String} response.features.feature_value_id  Feature value id.
+     * @apiSuccess {String} response.features.feature_value_name    Feature value name
+     *
+     *
      * @apiSuccess {Array[]}   response.total_order_price                  The array with a list of prices.
      * @apiSuccess {Number}    response.total_order_price.total_discount     The amount of the discount for the order.
      * @apiSuccess {Number}    response.total_order_price.total_price        Sum of product's prices.
@@ -401,7 +409,6 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					$array['discount']       = $product['quantity_discount'];
 					$array['options']        = $this->getOptionsByProductAttributeId($product['product_attribute_id']);
 					$array['features'] =  $this->getFeatureByProductAttributeId($product['product_id']);
-                    //var_dump($product);die();
 					$total_discount_sum += $product['product_quantity_discount'];
 
 					$shipping_price += $product['additional_shipping_cost'];
@@ -466,7 +473,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
   }
 
     private function getFeatureByProductAttributeId($id){
-        $id_product_feature = (int)$id;
+        $id_product = (int)$id;
         $id_lang = $this->context->language->id;
 
         $id_feature_query = "SELECT " . _DB_PREFIX_ . "feature.id_feature feature_id,
@@ -485,7 +492,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
                                 AND " . _DB_PREFIX_ . "feature_product.id_feature_value = " . _DB_PREFIX_ . "feature_value.id_feature_value
                                 AND " . _DB_PREFIX_ . "feature_lang.id_lang = ".$id_lang."
                                 AND " . _DB_PREFIX_ . "feature_value_lang.id_lang = ".$id_lang."
-                                AND " . _DB_PREFIX_ . "feature_product.id_product =".(int)$id_product_feature;
+                                AND " . _DB_PREFIX_ . "feature_product.id_product =".(int)$id_product;
         $id_feature_result = Db::getInstance()->ExecuteS($id_feature_query);
 
         return $id_feature_result;

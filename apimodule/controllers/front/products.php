@@ -631,9 +631,10 @@ WHERE p.id_product = " . $product->id)['quantity'];
      * @apiParam {String} description_short              Short description of the product.
      * @apiParam {Number} categories                     Array of categories of the product.
      * @apiParam {Number} status                         Status of the product.
-     * @apiParam {Array[File]}  images                         Array of the images of the product.
+     * @apiParam {Array[File]}  images                   Array of the images of the product.
      * @apiParam {Array}  options                        Array of the product options.
      * @apiParam {Array}  options.option_value_ids       Array of combination of option_value_ids.
+     * @apiParam {Array}  features                       Array of combination id_feature id_feature_value (key => value)
      *
      * @apiSuccess {Array[]}  response                   Array with content response.
      * @apiSuccess {Number}   version                    Current API version.
@@ -694,6 +695,7 @@ WHERE p.id_product = " . $product->id)['quantity'];
         $reference = trim(Tools::getValue('vendor_code'));
         $categories = isset($_REQUEST['categories']) ? $_REQUEST['categories'] : null;
         $options = isset($_REQUEST['options']) ? $_REQUEST['options'] : null;
+        $features = isset($_REQUEST['features']) ? $_REQUEST['features'] : null;
         $status = filter_var(trim(Tools::getValue('status')), FILTER_VALIDATE_BOOLEAN);
         $images = Tools::getValue('images');
 
@@ -744,6 +746,7 @@ WHERE p.id_product = " . $product->id)['quantity'];
             }
             $this->updateProductCategories($product->id, $categories);
             $this->updateProductOptions($product->id, $options);
+            $this->updateProductFeatures($product->id, $features);
             Db::getInstance()->update('stock_available', [
                 'quantity' => (int)$quantity
             ],
@@ -921,7 +924,23 @@ WHERE p.id_product = " . $product->id)['quantity'];
             }
         }
     }
+    public function updateProductFeatures($productId, $features){
+        //var_dump($features); var_dump($_REQUEST); die();
 
+        if($productId){
+
+            Db::getInstance()->execute('DELETE FROM '._DB_PREFIX_.'feature_product WHERE id_product='.(int)$productId);
+            //TODO: Add id_feature is exists in DB
+            foreach ($features as $feature=>$value){
+                $result = Db::getInstance()->execute('SELECT * FROM '._DB_PREFIX_.' WHERE id_feature='.(int)$feature);
+                if(count($result)>0){
+                    $sql = 'INSERT INTO '._DB_PREFIX_.'feature_product (id_feature, id_product, id_feature_value) VALUES ("'.$feature.'", "'.$productId.'", "'.$value.'")';
+                    Db::getInstance()->execute($sql);
+                }
+            }
+        }
+
+    }
     /**
      * @api {post} index.php?action=mainimage&fc=module&module=apimodule&controller=products  mainImage
      * @apiName mainImage
