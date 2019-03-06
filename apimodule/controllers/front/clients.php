@@ -274,8 +274,8 @@ class ApimoduleClientsModuleFrontController extends ModuleFrontController {
 			if(!in_array($item['phone'],$phones)) {
 				$trim = trim($item['phone']);
 				if(!empty($trim)){
-					// $phones[] = str_replace(' ','-',$trim);
-					$phones = str_replace(' ','-',$trim);
+					$phones[] = str_replace(' ','-',$trim);
+					// $phones = str_replace(' ','-',$trim);
 				}
 			}
 		}
