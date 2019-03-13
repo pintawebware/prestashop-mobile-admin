@@ -243,7 +243,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 
 			$data['total'] = number_format($order['total_paid'], 2, '.', '');
 			$data['date_add'] = $order['date_add'];
-			$data['currency_code'] = Context::getContext()->currency->iso_code;
+            $data['currency_code'] = $order['currency'];
 			$orders_to_response[] = $data;
 
 		}
@@ -425,7 +425,7 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 					'total_price' => number_format($total_price, 2, '.', ''),
 					'shipping_price' => +number_format($order->total_shipping, 2, '.', ''),
 					'total' => number_format($total, 2, '.', ''),
-					'currency_code' => Context::getContext()->currency->iso_code
+					'currency_code' => Currency::getCurrencyInstance($order->id_currency)->iso_code
 				);
 
 				$this->return['response'] = $data;
@@ -1043,8 +1043,8 @@ class ApimoduleOrdersModuleFrontController extends ModuleFrontController {
 		// $sql = "SELECT o.id_order,o.date_add,o.total_paid, oh.id_order_state, c.firstname, c.lastname FROM " . _DB_PREFIX_ . "orders AS o 
 		// 			INNER JOIN " . _DB_PREFIX_ . "order_history as oh ON o.id_order=oh.id_order 
 		// 			INNER JOIN " . _DB_PREFIX_ . "customer as c ON c.id_customer=o.id_customer  ";
-		$sql = "SELECT o.id_order,o.date_add,o.total_paid, oh.id_order_state, c.firstname, c.lastname FROM " . _DB_PREFIX_ . "orders AS o  INNER JOIN " . _DB_PREFIX_ . "order_history as oh ON o.current_state=oh.id_order_state
-			INNER JOIN " . _DB_PREFIX_ . "customer as c ON c.id_customer=o.id_customer";
+        $sql = "SELECT o.id_order,o.date_add,o.total_paid, o.id_currency, oh.id_order_state, cur.iso_code as currency, c.firstname, c.lastname FROM " . _DB_PREFIX_ . "orders AS o  INNER JOIN " . _DB_PREFIX_ . "order_history as oh ON o.current_state=oh.id_order_state
+			INNER JOIN " . _DB_PREFIX_ . "customer as c ON c.id_customer=o.id_customer INNER JOIN " . _DB_PREFIX_ . "currency as cur ON cur.id_currency=o.id_currency";
 		if (isset($data['filter'])) {
 			if (isset($data['filter']['order_status_id']) &&
 			            (int)($data['filter']['order_status_id']) != 0 &&
